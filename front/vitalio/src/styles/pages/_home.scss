@@ -1,0 +1,99 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.home-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: radial-gradient(circle at top left, #f1f5f9, #e2e8f0);
+
+    .hero-section {
+        margin-bottom: 3rem;
+        text-align: center;
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(to right, $primary, $secondary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: $dark-light-20;
+        }
+
+        .hint {
+            font-size: 0.875rem;
+            color: $dark-light-40;
+            margin-top: 0.5rem;
+        }
+    }
+
+    .persona-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        max-width: 72rem;
+        width: 100%;
+
+        @media (min-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (min-width: 1024px) {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+}
+
+.persona-card {
+    @include glass;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: $transition;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: $shadow-glow;
+    }
+
+    .icon-wrapper {
+        padding: 1rem;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: $shadow-sm;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $dark;
+    }
+
+    .persona-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $dark-light-30;
+    }
+
+    .persona-desc {
+        font-size: 0.875rem;
+        color: $dark-light-40;
+    }
+}

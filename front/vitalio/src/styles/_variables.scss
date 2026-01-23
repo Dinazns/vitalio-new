@@ -1,0 +1,52 @@
+// Colors
+$primary: #3b82f6;
+$secondary: #8b5cf6;
+$accent: #f43f5e;
+$success: #10b981;
+$warning: #f59e0b;
+$danger: #ef4444;
+$dark: #1e293b;
+$light: #f8fafc;
+
+// Derived colors (pre-calculated instead of using lighten())
+$dark-light-20: #4a5568;
+$dark-light-30: #64748b;
+$dark-light-40: #94a3b8;
+
+// Backgrounds
+$bg-app: #f0f4f8;
+$bg-card: #ffffff;
+$bg-glass: rgba(255, 255, 255, 0.7);
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+$shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+$shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+$shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+$shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+
+// Animation
+$transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Root CSS Variables for runtime usage if needed
+:root {
+    --primary: #{$primary};
+    --secondary: #{$secondary};
+    --accent: #{$accent};
+    --success: #{$success};
+    --warning: #{$warning};
+    --danger: #{$danger};
+    --dark: #{$dark};
+    --light: #{$light};
+
+    --bg-app: #{$bg-app};
+    --bg-card: #{$bg-card};
+    --bg-glass: #{$bg-glass};
+
+    --shadow-sm: #{$shadow-sm};
+    --shadow-md: #{$shadow-md};
+    --shadow-lg: #{$shadow-lg};
+    --shadow-glow: #{$shadow-glow};
+
+    --transition: #{$transition};
+}

@@ -1,0 +1,39 @@
+@use 'variables' as *;
+
+// Glassmorphism Mixin
+@mixin glass($opacity: 0.7, $blur: 12px) {
+    background: rgba(255, 255, 255, $opacity);
+    backdrop-filter: blur($blur);
+    -webkit-backdrop-filter: blur($blur);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: $shadow-lg;
+}
+
+@mixin glass-dark($opacity: 0.8, $blur: 12px) {
+    background: rgba(30, 41, 59, $opacity);
+    backdrop-filter: blur($blur);
+    -webkit-backdrop-filter: blur($blur);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+// Scrollbar Mixin
+@mixin custom-scrollbar {
+    &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+
+        &:hover {
+            background: #94a3b8;
+        }
+    }
+}

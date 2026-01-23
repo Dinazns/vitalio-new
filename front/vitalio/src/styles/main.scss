@@ -1,0 +1,20 @@
+// Main SCSS entry point - using @use for modern Sass module system
+// Note: @use must come before any other rules
+
+// Core partials (order matters - variables first, then mixins)
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// Base styles
+@use 'base';
+@use 'utilities';
+@use 'animations';
+@use 'themes';
+
+// Page-specific styles
+@use 'pages/login';
+@use 'pages/home';
+@use 'pages/patient';
+@use 'pages/family';
+@use 'pages/admin';
+@use 'pages/doctor';

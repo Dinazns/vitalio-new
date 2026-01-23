@@ -1,0 +1,22 @@
+@use 'variables' as *;
+
+// Use nesting map or just classes
+.patient-theme {
+    --primary-color: #{$success}; // Calming Green
+    --bg-gradient: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+}
+
+.doctor-theme {
+    --primary-color: #{$primary}; // Clinical Blue
+    --bg-gradient: linear-gradient(to right, #f8fafc, #e2e8f0);
+}
+
+.family-theme {
+    --primary-color: #{$secondary}; // Reassuring Purple
+    --bg-gradient: linear-gradient(135deg, #f3e8ff 0%, #d8b4fe 100%);
+}
+
+.admin-theme {
+    --primary-color: #475569; // Tech Grey
+    --bg-gradient: linear-gradient(to bottom right, #f1f5f9, #cbd5e1);
+}
