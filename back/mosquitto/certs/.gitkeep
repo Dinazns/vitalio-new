@@ -1,0 +1,2 @@
+# This file ensures the certs directory is tracked in git
+# Actual certificate files (*.key, *.crt) are in .gitignore for security
