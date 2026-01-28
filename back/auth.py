@@ -71,7 +71,7 @@ def requires_auth(f):
             token,
             rsa_key,
             algorithms=ALGORITHMS,
-            audience=API_AUDIENCE,
+            audience=auth,
             issuer=f"https://{AUTH0_DOMAIN}/"
         )
 

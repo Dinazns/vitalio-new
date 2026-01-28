@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 import {
     Users, Activity, Bell, Settings, LogOut,
     Search, Filter, ChevronRight
@@ -28,6 +29,12 @@ const StatCard = ({ title, value, trend, good }) => (
 
 export default function DoctorView() {
     const navigate = useNavigate();
+    const { logout } = useAuth0();
+
+    const handleLogout = () => {
+        localStorage.removeItem('vitalio_user');
+        logout({ logoutParams: { returnTo: window.location.origin } });
+    };
 
     return (
         <div className="doctor-container doctor-theme">
@@ -54,7 +61,9 @@ export default function DoctorView() {
                         <p className="name">Dr. Sophie</p>
                         <p className="role">Cardiologue</p>
                     </div>
-                    <LogOut size={16} className="logout-btn" onClick={() => navigate('/')} />
+                    <button type="button" className="logout-btn" onClick={handleLogout} aria-label="Déconnexion">
+                        <LogOut size={16} />
+                    </button>
                 </div>
             </div>
 

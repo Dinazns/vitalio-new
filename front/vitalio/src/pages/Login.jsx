@@ -1,74 +1,62 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { LogIn, AlertCircle } from 'lucide-react';
 import vitalioLogo from '../assets/vitalio-logo.png';
-import { getPatientData } from '../services/api';
+import { ROLES_CLAIM } from '../utils/auth';
 
-// Route mapping based on role
-const ROLE_ROUTES = {
-    patient: '/patient',
-    medecin: '/doctor',
-    aidant: '/family',
-    admin: '/admin',
-};
+const AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE || 'auth';
+const DOCTOR_ROLE = 'Superuser';
 
 export default function Login() {
     const navigate = useNavigate();
-    const { 
-        isAuthenticated, 
-        isLoading, 
-        loginWithRedirect, 
-        user, 
-        getAccessTokenSilently,
-        error: auth0Error 
+    const hasRedirectedRef = useRef(false);
+    const {
+        isAuthenticated,
+        isLoading,
+        loginWithRedirect,
+        user,
+        getIdTokenClaims,
+        error: auth0Error,
     } = useAuth0();
 
-    // Redirect authenticated users to appropriate route
     useEffect(() => {
-        if (isAuthenticated && user) {
-            handleAuthenticatedUser();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (!isAuthenticated || !user || hasRedirectedRef.current) return;
+        handleAuthenticatedUser();
     }, [isAuthenticated, user]);
 
-    const handleAuthenticatedUser = async () => {
+    async function handleAuthenticatedUser() {
         try {
-            // Get user role from Auth0 user metadata or app_metadata
-            const role = user['https://vitalio.app/role'] || 
-                        user.app_metadata?.role || 
-                        user.user_metadata?.role ||
-                        'patient'; // Default role
+            const idClaims = await getIdTokenClaims();
+            const roles = Array.isArray(idClaims?.[ROLES_CLAIM]) ? idClaims[ROLES_CLAIM] : [];
+            const isDoctor = roles.includes(DOCTOR_ROLE);
 
-            // Store user info in localStorage for session persistence
             localStorage.setItem('vitalio_user', JSON.stringify({
                 email: user.email,
                 name: user.name || user.email,
-                role: role,
-                picture: user.picture
+                role: isDoctor ? 'doctor' : 'patient',
+                picture: user.picture,
             }));
 
-            // Try to fetch patient data to verify API connection
-            try {
-                const token = await getAccessTokenSilently();
-                await getPatientData(token);
-            } catch (apiError) {
-                console.warn('Could not fetch patient data:', apiError);
-                // Continue anyway - API might not be available or user might not have data yet
-            }
-
-            // Redirect based on role
-            const route = ROLE_ROUTES[role] || '/patient';
-            navigate(route);
-        } catch (error) {
-            console.error('Error handling authenticated user:', error);
+            doRedirect(isDoctor ? '/doctor' : '/patient');
+        } catch (e) {
+            console.error('[Login] Redirect error:', e);
+            doRedirect('/patient');
         }
-    };
+    }
+
+    function doRedirect(route) {
+        if (hasRedirectedRef.current) return;
+        hasRedirectedRef.current = true;
+        navigate(route, { replace: true });
+    }
 
     const handleLogin = () => {
         loginWithRedirect({
             authorizationParams: {
                 screen_hint: 'login',
+                audience: AUDIENCE,
+                scope: 'openid profile email',
             },
         });
     };
@@ -123,20 +111,11 @@ export default function Login() {
                         className="login-button"
                     >
                         <LogIn size={20} />
-                        <span>Se connecter avec Auth0</span>
+                        <span>Se connecter</span>
                     </button>
 
                     <p className="login-hint">
-                        Vous serez redirigé vers la page de connexion Auth0 pour vous authentifier.
-                    </p>
-                </div>
-
-                {/* Info Section */}
-                <div className="demo-accounts">
-                    <p className="demo-title">Authentification sécurisée</p>
-                    <p className="demo-hint">
-                        Cette application utilise Auth0 pour une authentification sécurisée.
-                        Connectez-vous avec vos identifiants Auth0 pour accéder à la plateforme.
+                        Vous serez redirigé vers la page de connexion pour vous authentifier.
                     </p>
                 </div>
             </div>

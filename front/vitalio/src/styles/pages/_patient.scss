@@ -63,11 +63,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         gap: 2rem;
-        max-width: 28rem;
+        max-width: 100%;
         margin: 0 auto;
         width: 100%;
+        padding-bottom: 2rem;
+        overflow-y: auto;
     }
 
     .patient-header {
@@ -123,6 +125,21 @@
             font-size: 0.875rem;
             margin-top: 0.5rem;
             opacity: 0.8;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+            overflow-wrap: break-word;
+            text-align: center;
+            line-height: 1.4;
+            // Allow wrapping when text exceeds ~12 characters
+            // Using ch unit for character-based width (approximately 12-13 characters)
+            max-width: 13ch;
+            margin-left: auto;
+            margin-right: auto;
+            // Ensure text wraps to multiple lines
+            display: block;
+            // Force wrapping for long text
+            hyphens: auto;
         }
     }
 
@@ -221,6 +238,229 @@
             font-size: 0.875rem;
             font-weight: 500;
             margin-top: 0.25rem;
+        }
+    }
+
+    .measurement-history-section {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: $shadow-md;
+
+        .measurement-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .measurement-history-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: $dark;
+            margin: 0;
+        }
+
+        .measurement-count {
+            font-size: 0.875rem;
+            color: #64748b; // slate-500
+            font-weight: 500;
+        }
+
+        .measurement-history-loading,
+        .measurement-history-error,
+        .measurement-history-empty {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b; // slate-500
+            font-size: 1rem;
+        }
+
+        .measurement-history-error {
+            color: #dc2626; // red-600
+        }
+
+        .measurement-history-table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .measurement-history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+
+            thead {
+                background-color: #f1f5f9; // slate-100
+                
+                th {
+                    padding: 1rem 0.75rem;
+                    text-align: left;
+                    font-weight: 600;
+                    color: $dark;
+                    border-bottom: 2px solid #e2e8f0; // slate-200
+                    white-space: nowrap;
+                    font-size: 0.8125rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+            }
+
+            tbody {
+                tr {
+                    border-bottom: 1px solid #e2e8f0; // slate-200
+                    transition: background-color 0.2s;
+
+                    &:hover {
+                        background-color: #f8fafc; // slate-50
+                    }
+
+                    &:last-child {
+                        border-bottom: none;
+                    }
+
+                    // Medical status color coding
+                    &.measurement-row-normal {
+                        background-color: #f0fdf4; // green-50
+                        
+                        &:hover {
+                            background-color: #dcfce7; // green-100
+                        }
+                    }
+
+                    &.measurement-row-warning {
+                        background-color: #fff7ed; // orange-50
+                        border-left: 3px solid #fb923c; // orange-400
+                        
+                        &:hover {
+                            background-color: #ffedd5; // orange-100
+                        }
+                    }
+
+                    &.measurement-row-critical {
+                        background-color: #fef2f2; // red-50
+                        border-left: 3px solid #ef4444; // red-500
+                        
+                        &:hover {
+                            background-color: #fee2e2; // red-100
+                        }
+                    }
+                }
+
+                td {
+                    padding: 1rem 0.75rem;
+                    color: #334155; // slate-700
+                }
+
+                .measurement-time {
+                    color: #64748b; // slate-500
+                    font-size: 0.8125rem;
+                    white-space: nowrap;
+                }
+
+                .measurement-value {
+                    .value-with-unit {
+                        display: inline-flex;
+                        align-items: baseline;
+                        gap: 0.25rem;
+
+                        .value {
+                            font-weight: 600;
+                            font-size: 1rem;
+                            color: #1e293b; // slate-800
+                        }
+
+                        .unit {
+                            font-size: 0.75rem;
+                            color: #64748b; // slate-500
+                            font-weight: 400;
+                        }
+                    }
+
+                    .no-value {
+                        color: #cbd5e1; // slate-300
+                        font-style: italic;
+                    }
+                }
+            }
+        }
+
+        .measurement-history-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0; // slate-200
+
+            .show-more-button {
+                background: transparent;
+                border: 1px solid #cbd5e1; // slate-300
+                color: #475569; // slate-600
+                padding: 0.5rem 1.5rem;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:hover {
+                    background-color: #f1f5f9; // slate-100
+                    border-color: #94a3b8; // slate-400
+                    color: #334155; // slate-700
+                }
+
+                &:active {
+                    transform: scale(0.98);
+                }
+            }
+        }
+    }
+
+    // Responsive adjustments for smaller screens
+    @media (max-width: 768px) {
+        .content-wrapper {
+            max-width: 100%;
+            padding: 0 0.5rem;
+        }
+
+        .measurement-history-section {
+            padding: 1rem;
+            margin-top: 1rem;
+
+            .measurement-history-title {
+                font-size: 1.25rem;
+            }
+
+            .measurement-history-table {
+                font-size: 0.75rem;
+
+                thead th {
+                    padding: 0.75rem 0.5rem;
+                    font-size: 0.6875rem;
+                }
+
+                tbody td {
+                    padding: 0.75rem 0.5rem;
+                }
+
+                .measurement-time {
+                    font-size: 0.6875rem;
+                }
+
+                .measurement-value .value-with-unit .value {
+                    font-size: 0.875rem;
+                }
+            }
+
+            .measurement-history-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     }
 }

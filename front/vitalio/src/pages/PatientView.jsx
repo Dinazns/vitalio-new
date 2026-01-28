@@ -1,15 +1,164 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Phone, Activity, ArrowLeft, AlertCircle, LogOut } from 'lucide-react';
+import { Activity, ArrowLeft, AlertCircle, LogOut } from 'lucide-react';
 import { CURRENT_PATIENT } from '../data/mockData';
+import { supabase } from '../services/supabase';
 
 export default function PatientView() {
     const navigate = useNavigate();
-    const { logout } = useAuth0();
+    const { logout, user, isAuthenticated } = useAuth0();
     const [sosActive, setSosActive] = useState(false);
     const [sosTimer, setSosTimer] = useState(0);
     const [measuring, setMeasuring] = useState(false);
+    
+    // Measurement History state
+    const [measurements, setMeasurements] = useState([]);
+    const [measurementsLoading, setMeasurementsLoading] = useState(true);
+    const [measurementsError, setMeasurementsError] = useState(null);
+    const [showAllMeasurements, setShowAllMeasurements] = useState(false);
+    
+    // Current time state
+    const [currentTime, setCurrentTime] = useState(new Date());
+    
+    // Format date/time in a user-friendly way using timestamp column
+    const formatDateTime = (dateString) => {
+        if (!dateString) return 'N/A';
+        
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        // Format: "Aujourd'hui à 14:30" or "il y a 2 heures" or "27 jan 2026 à 14:30"
+        const timeStr = date.toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+        
+        if (diffMins < 1) {
+            return `À l'instant (${timeStr})`;
+        } else if (diffMins < 60) {
+            return `Il y a ${diffMins} min (${timeStr})`;
+        } else if (diffHours < 24) {
+            return `Il y a ${diffHours} ${diffHours === 1 ? 'heure' : 'heures'} (${timeStr})`;
+        } else if (diffDays === 1) {
+            return `Hier à ${timeStr}`;
+        } else if (diffDays < 7) {
+            return `Il y a ${diffDays} ${diffDays === 1 ? 'jour' : 'jours'} (${date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' })} ${timeStr})`;
+        } else {
+            return date.toLocaleDateString('fr-FR', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            }) + ` à ${timeStr}`;
+        }
+    };
+    
+    // Determine medical status: 'normal' (green), 'warning' (orange), 'critical' (red)
+    const getMedicalStatus = (measurement) => {
+        let hasCritical = false;
+        let hasWarning = false;
+        
+        // Heart Rate: Normal 60-100 bpm
+        if (measurement.heart_rate != null) {
+            const hr = measurement.heart_rate;
+            if (hr < 50 || hr > 120) {
+                hasCritical = true;
+            } else if (hr < 60 || hr > 100) {
+                hasWarning = true;
+            }
+        }
+        
+        // Temperature: Normal 36.1-37.2°C
+        if (measurement.temperature != null) {
+            const temp = Number(measurement.temperature);
+            if (temp < 35.5 || temp > 38.0) {
+                hasCritical = true;
+            } else if (temp < 36.1 || temp > 37.2) {
+                hasWarning = true;
+            }
+        }
+        
+        // SpO2: Normal 95-100%
+        if (measurement.spo2 != null) {
+            const spo2 = measurement.spo2;
+            if (spo2 < 90) {
+                hasCritical = true;
+            } else if (spo2 < 95) {
+                hasWarning = true;
+            }
+        }
+        
+        if (hasCritical) return 'critical';
+        if (hasWarning) return 'warning';
+        return 'normal';
+    };
+    
+    // Filter measurements (show last 20 by default, or all if showAllMeasurements is true)
+    const displayedMeasurements = showAllMeasurements 
+        ? measurements 
+        : measurements.slice(0, 20);
+    
+    // Get user's display name - prefer username, fallback to nickname, then extract from email
+    const getUserName = () => {
+        if (user?.username) return user.username;
+        if (user?.nickname) return user.nickname;
+        // Extract username from email (part before @)
+        if (user?.email) {
+            const emailParts = user.email.split('@');
+            return emailParts[0];
+        }
+        return 'Patient';
+    };
+    const userName = getUserName();
+    
+    // Get last measurement time for "Dernière maj"
+    const getLastUpdateText = () => {
+        if (measurements.length === 0) {
+            return 'Aucune mesure';
+        }
+        
+        const lastMeasurement = measurements[0]; // Already sorted by timestamp DESC
+        if (!lastMeasurement?.timestamp) {
+            return 'Aucune mesure';
+        }
+        
+        const lastTime = new Date(lastMeasurement.timestamp);
+        const now = new Date();
+        const diffMs = now - lastTime;
+        const diffHours = Math.floor(diffMs / 3600000);
+        
+        // If less than 24 hours, show relative time
+        if (diffHours < 24) {
+            return formatDateTime(lastMeasurement.timestamp);
+        } else {
+            // If more than 24 hours, show date
+            return lastTime.toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    };
+    
+    // Update current time every minute
+    useEffect(() => {
+        // Set initial time
+        setCurrentTime(new Date());
+        
+        // Update every minute
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60000); // Update every minute
+        
+        return () => clearInterval(timer);
+    }, []);
 
     const handleDisconnect = () => {
         logout({
@@ -45,6 +194,82 @@ export default function PatientView() {
         }
     }, [sosTimer]);
 
+    // Fetch Measurement History
+    useEffect(() => {
+        const fetchMeasurements = async () => {
+            // Wait for authentication
+            if (!isAuthenticated || !user) {
+                setMeasurementsLoading(false);
+                setMeasurementsError('Veuillez vous connecter pour voir les mesures');
+                return;
+            }
+            
+            setMeasurementsLoading(true);
+            setMeasurementsError(null);
+            
+            try {
+                // Step 1: Get Auth0 user ID (sub claim)
+                const auth0UserId = user.sub;
+                
+                if (!auth0UserId) {
+                    throw new Error('Impossible de récupérer l\'ID utilisateur depuis Auth0');
+                }
+                
+                // Step 2: Get user's UUID from users table using Auth0 ID
+                // This maps Auth0 user to Supabase user
+                const { data: userRecord, error: userError } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('auth0_sub', auth0UserId)
+                    .single();
+                
+                if (userError || !userRecord) {
+                    throw new Error('Utilisateur introuvable dans la base de données. Veuillez contacter le support.');
+                }
+                
+                const userId = userRecord.id;
+                
+                // Step 3: Query measurements using JOIN through user_devices
+                // This ensures we only get measurements from devices owned by the user
+                // JOIN: measurements.device_uuid = user_devices.device_id
+                // WHERE: user_devices.user_id = userId
+                // Limit to last 100 measurements for performance
+                const { data, error } = await supabase
+                    .from('measurements')
+                    .select(`
+                        *,
+                        user_devices!inner(
+                            user_id,
+                            device_id
+                        )
+                    `)
+                    .eq('user_devices.user_id', userId)
+                    .order('timestamp', { ascending: false })
+                    .limit(100);
+                
+                if (error) {
+                    throw new Error(`Échec du chargement des mesures : ${error.message}`);
+                }
+                
+                // Extract just the measurement data (remove the join data)
+                const measurementsData = data ? data.map(item => {
+                    const { user_devices, ...measurement } = item;
+                    return measurement;
+                }) : [];
+                
+                setMeasurements(measurementsData);
+            } catch (err) {
+                console.error('Error fetching measurements:', err);
+                setMeasurementsError(err instanceof Error ? err.message : 'Échec du chargement des mesures');
+                setMeasurements([]);
+            } finally {
+                setMeasurementsLoading(false);
+            }
+        };
+        
+        fetchMeasurements();
+    }, [isAuthenticated, user]);
+
     const handleMeasure = () => {
         setMeasuring(true);
         setTimeout(() => {
@@ -76,15 +301,21 @@ export default function PatientView() {
 
                 {/* Header Patient */}
                 <div className="patient-header">
-                    <h1>Bonjour,</h1>
-                    <p className="time-display">Il est 14:30</p>
+                    <h1>Bonjour, {userName}</h1>
+                    <p className="time-display">
+                        {currentTime.toLocaleTimeString('fr-FR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        })}
+                    </p>
                 </div>
 
                 {/* Status Indicator Giant */}
                 <div className={`status-indicator ${CURRENT_PATIENT.status === 'stable' ? 'status-stable' : 'status-warning'}`}>
                     <Activity size={64} className="mb-4 animate-pulse" />
                     <span className="main-text">{CURRENT_PATIENT.status === 'stable' ? 'TOUT VA BIEN' : 'ATTENTION'}</span>
-                    <span className="sub-text">Dernière maj: {CURRENT_PATIENT.lastUpdate}</span>
+                    <span className="sub-text">Dernière maj: {getLastUpdateText()}</span>
                 </div>
 
                 {/* Actions Grid */}
@@ -126,6 +357,102 @@ export default function PatientView() {
                         </div>
                     </button>
 
+                </div>
+
+                {/* Measurement History Section */}
+                <div className="measurement-history-section">
+                    <div className="measurement-history-header">
+                        <h2 className="measurement-history-title">Historique des Mesures</h2>
+                        {measurements.length > 0 && (
+                            <span className="measurement-count">
+                                {measurements.length} {measurements.length === 1 ? 'mesure' : 'mesures'}
+                            </span>
+                        )}
+                    </div>
+                    
+                    {measurementsLoading ? (
+                        <div className="measurement-history-loading">
+                            <p>Chargement des mesures...</p>
+                        </div>
+                    ) : measurementsError ? (
+                        <div className="measurement-history-error">
+                            <p>Erreur : {measurementsError}</p>
+                        </div>
+                    ) : measurements.length === 0 ? (
+                        <div className="measurement-history-empty">
+                            <p>Aucune mesure disponible</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="measurement-history-table-container">
+                                <table className="measurement-history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date et Heure</th>
+                                            <th>Température</th>
+                                            <th>Fréquence Cardiaque</th>
+                                            <th>SpO₂</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {displayedMeasurements.map((measurement) => {
+                                            const status = getMedicalStatus(measurement);
+                                            return (
+                                                <tr key={measurement.id} className={`measurement-row measurement-row-${status}`}>
+                                                    <td className="measurement-time">
+                                                        {formatDateTime(measurement.timestamp)}
+                                                    </td>
+                                                    <td className="measurement-value">
+                                                        {measurement.temperature != null 
+                                                            ? (
+                                                                <span className="value-with-unit">
+                                                                    <span className="value">{Number(measurement.temperature).toFixed(1)}</span>
+                                                                    <span className="unit">°C</span>
+                                                                </span>
+                                                            )
+                                                            : <span className="no-value">—</span>}
+                                                    </td>
+                                                    <td className="measurement-value">
+                                                        {measurement.heart_rate != null 
+                                                            ? (
+                                                                <span className="value-with-unit">
+                                                                    <span className="value">{measurement.heart_rate}</span>
+                                                                    <span className="unit"> bpm</span>
+                                                                </span>
+                                                            )
+                                                            : <span className="no-value">—</span>}
+                                                    </td>
+                                                    <td className="measurement-value">
+                                                        {measurement.spo2 != null 
+                                                            ? (
+                                                                <span className="value-with-unit">
+                                                                    <span className="value">{measurement.spo2}</span>
+                                                                    <span className="unit">%</span>
+                                                                </span>
+                                                            )
+                                                            : <span className="no-value">—</span>}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            {measurements.length > 20 && (
+                                <div className="measurement-history-footer">
+                                    <button
+                                        onClick={() => setShowAllMeasurements(!showAllMeasurements)}
+                                        className="show-more-button"
+                                    >
+                                        {showAllMeasurements 
+                                            ? `Afficher moins` 
+                                            : `Afficher toutes les ${measurements.length} mesures`}
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
         </div>
