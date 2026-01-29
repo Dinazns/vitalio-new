@@ -25,23 +25,39 @@ load_dotenv(env_path)
 BROKER_ADDRESS = os.getenv("MQTT_BROKER", "localhost")
 PORT = int(os.getenv("MQTT_PORT", "8883"))  # TLS port (8883), not unencrypted (1883)
 
-# Authentication (required - anonymous access disabled)
-MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
-MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
+# Authentication
+# In production, you should enforce username/password authentication.
+# For local development, our Mosquitto broker is configured with
+# `allow_anonymous true`, so we do NOT require credentials here.
+# MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
+# MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
 
 # TLS Certificate (CA certificate for broker verification)
 CA_CERT_PATH = os.getenv("MQTT_CA_CERT", "./mosquitto/certs/ca.crt")
 
 # Device Configuration
-U_ID = os.getenv("DEVICE_ID", "SIM-ESP32-001")
-TOPIC = f"vitalio/dev/{U_ID}/measurements"
+# The DEVICE_ID (serial_number) MUST be provided by the environment and must
+# match the value stored in the database (devices.serial_number). This keeps
+# MQTT fully agnostic of the user while still allowing user ↔ device linkage
+# through the user_devices pivot table.
+DEVICE_ID = "SIM-ESP32-003"
+if not DEVICE_ID:
+    print("ERROR: DEVICE_ID is not set.")
+    print("  Please set the environment variable DEVICE_ID to the serial number")
+    print("  entered by the patient (e.g. SIM-ESP32-001) before starting data.py:")
+    print("     On Windows PowerShell:")
+    print("         $env:DEVICE_ID = 'SIM-ESP32-001'")
+    print("         python .\\data.py")
+    sys.exit(1)
+
+TOPIC = f"vitalio/dev/{DEVICE_ID}/measurements"
 
 # =========================
 # Simulation
 # =========================
 def demarrer_simulation():
     print("--- Simulateur IoT : Capteurs vers MQTT ---")
-    print(f"u_id utilisé : {U_ID}")
+    print(f"Numéro de capteur utilisé (DEVICE_ID) : {DEVICE_ID}")
 
     # ========================================================================
     # Healthcare-Grade MQTT Client Configuration (TLS)
@@ -51,7 +67,7 @@ def demarrer_simulation():
     print("Healthcare-Grade MQTT Publisher (TLS-Encrypted)")
     print(f"{'='*60}")
     print(f"Broker: {BROKER_ADDRESS}:{PORT} (TLS)")
-    print(f"Device ID: {U_ID}")
+    print(f"Device serial_number (DEVICE_ID): {DEVICE_ID}")
     print(f"Topic: {TOPIC}")
     print(f"{'='*60}\n")
     
@@ -61,17 +77,15 @@ def demarrer_simulation():
         print("   Please generate certificates using: mosquitto/generate_certificates.ps1")
         sys.exit(1)
     
-    # Verify authentication credentials
-    if not MQTT_USERNAME or not MQTT_PASSWORD:
-        print("ERROR: MQTT_USERNAME and MQTT_PASSWORD must be set")
-        print("   Anonymous connections are disabled for security.")
-        sys.exit(1)
+    # NOTE:
+    # The test broker allows anonymous connections (see mosquitto.conf),
+    # so we intentionally do not enforce MQTT_USERNAME / MQTT_PASSWORD here.
     
     # Create MQTT client
     print(f"Creating secure MQTT client...")
     client = mqtt.Client(
         mqtt.CallbackAPIVersion.VERSION2,
-        client_id=U_ID
+        client_id=DEVICE_ID
     )
     
     # ========================================================================
@@ -93,8 +107,8 @@ def demarrer_simulation():
         print(f"TLS configured (CA: {CA_CERT_PATH})")
         
         # Username/password authentication
-        client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
-        print(f"Authentication configured (Username: {MQTT_USERNAME})")
+        # client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+        # print(f"Authentication configured (Username: {MQTT_USERNAME})")
         
         # Connect to broker
         print(f"\nConnecting to broker {BROKER_ADDRESS}:{PORT} via TLS...")
@@ -167,7 +181,7 @@ def demarrer_simulation():
             # Feedback console
             # =========================
             print("-" * 50)
-            print(f"Données envoyées ({U_ID}) à {timestamp}")
+            print(f"Données envoyées ({DEVICE_ID}) à {timestamp}")
             print(payload_json)
             print("-" * 50)
 

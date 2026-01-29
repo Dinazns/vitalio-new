@@ -5,6 +5,10 @@ export const PERMISSIONS_CLAIM = 'permissions';
 /** Auth0 role "Superuser" (Médecin). Match exact casing from Auth0. */
 export const DOCTOR_ROLE = 'Superuser';
 export const DOCTOR_PERMISSION = 'read:medical_data';
+/** Auth0 role "admin" for platform administrators. */
+export const ADMIN_ROLE = 'admin';
+/** Auth0 permission required for user management. */
+export const ADMIN_ADD_USERS_PERMISSION = 'add_users';
 
 /**
  * Extract roles array from Auth0 user / token claims.
@@ -75,6 +79,18 @@ export function hasAnyRole(source, roles = []) {
 export function isDoctor(rolesSource, permSource) {
   const p = permSource ?? rolesSource;
   return hasRole(rolesSource, DOCTOR_ROLE) && hasPermission(p, DOCTOR_PERMISSION);
+}
+
+/**
+ * Admin with explicit add_users permission.
+ * Can be used with either ID token claims or access token payload.
+ * @param {object} rolesSource - User or decoded ID token (for roles)
+ * @param {object|null} permSource - User or decoded access token (for permissions)
+ * @returns {boolean}
+ */
+export function isAdminWithAddUsers(rolesSource, permSource) {
+  const p = permSource ?? rolesSource;
+  return hasRole(rolesSource, ADMIN_ROLE) && hasPermission(p, ADMIN_ADD_USERS_PERMISSION);
 }
 
 /**

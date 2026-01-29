@@ -7,6 +7,7 @@ import PatientView from './pages/PatientView';
 import DoctorView from './pages/DoctorView';
 import FamilyView from './pages/FamilyView';
 import AdminView from './pages/AdminView';
+import Consent from './pages/Consent';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function AppRoutes() {
@@ -15,6 +16,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/consent" element={<Consent />} />
       <Route 
         path="/home" 
         element={

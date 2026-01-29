@@ -4,7 +4,7 @@ import threading
 from urllib.request import urlopen
 from functools import wraps
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 from jose import jwt, JWTError
@@ -12,6 +12,13 @@ from jose.constants import ALGORITHMS
 from dotenv import load_dotenv
 from supabase import create_client, Client
 import paho.mqtt.client as mqtt
+from uuid import UUID
+
+from physio_validation import (
+    MeasurementInput,
+    PhysioValidationConfig,
+    validate_measurement,
+)
 
 env_path = '.env'
 if not os.path.exists(env_path):
@@ -21,13 +28,11 @@ load_dotenv(env_path)
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
-CORS(app, resources={
-    r"/api/*": {
-        "origins": ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
+CORS(
+    app,
+    supports_credentials=True,
+    resources={r"/api/*": {"origins": "*"}},
+)
 
 # ============================================================================
 # CONFIGURATION
@@ -43,8 +48,8 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "8883"))  # TLS port (8883), not unencrypted (1883)
 MQTT_TOPIC = os.getenv("MQTT_TOPIC", "vitalio/dev/+/measurements")
-MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")  # Required for authentication
-MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")  # Required for authentication
+# MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")  # Required for authentication
+# MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")  # Required for authentication
 MQTT_CA_CERT = os.getenv("MQTT_CA_CERT", "./mosquitto/certs/ca.crt")  # CA certificate for TLS verification
 
 _supabase_client: Optional[Client] = None
@@ -507,6 +512,82 @@ def requires_permission(*required_permissions: str):
 # DATABASE ACCESS LAYER
 # ============================================================================
 
+def get_user_record(user_id: str) -> Dict[str, Any]:
+    """
+    Load a user row from public.users for authorization / display.
+
+    - Ne touche jamais au schéma d'auth Supabase (auth.users)
+    - Utilise uniquement la table applicative public.users
+    """
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError(
+            {
+                "code": "database_not_configured",
+                "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file",
+            },
+            500,
+        )
+
+    try:
+        resp = (
+            supabase_client.table("users")
+            .select("id, email, role")
+            .eq("id", user_id)
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError(
+            {
+                "code": "user_lookup_error",
+                "message": f"Failed to load user record: {str(e)}",
+            },
+            500,
+        )
+
+    if not resp.data:
+        raise DatabaseError(
+            {
+                "code": "user_not_found",
+                "message": "Authenticated user does not exist in users table",
+            },
+            404,
+        )
+
+    return resp.data[0]
+
+
+def require_app_role(required_role: str):
+    """
+    Lightweight role-based authorization using the public.users.role column.
+
+    - Le JWT est déjà vérifié par @requires_auth (signature, issuer, audience, etc.)
+    - Ce décorateur lit simplement le rôle applicatif dans public.users.role
+    - Toute décision d'autorisation reste côté backend (jamais côté frontend)
+    """
+
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            user = get_user_record(g.user_id)
+            role = user.get("role")
+            if role != required_role:
+                raise AuthError(
+                    {
+                        "code": "forbidden",
+                        "message": f"User role '{role}' is not allowed to access this resource (requires '{required_role}').",
+                    },
+                    403,
+                )
+            # Attacher le user applicatif au contexte pour les handlers en aval
+            g.app_user = user
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 def get_device_id(user_id: str) -> Optional[str]:
     """
     Query correspondence database to map internal user UUID to device_id.
@@ -555,6 +636,30 @@ def get_device_id(user_id: str) -> Optional[str]:
         }, 500)
 
 
+def get_device_ids_for_user(user_id: str) -> List[str]:
+    """
+    Return all device_ids linked to a user via user_devices.
+    """
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError({
+            "code": "database_not_configured",
+            "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file"
+        }, 500)
+    try:
+        response = supabase_client.table("user_devices").select(
+            "device_id"
+        ).eq("user_id", user_id).execute()
+        if response.data:
+            return [row.get("device_id") for row in response.data if row.get("device_id")]
+        return []
+    except Exception as e:
+        raise DatabaseError({
+            "code": "correspondence_query_error",
+            "message": f"Failed to query user devices: {str(e)}"
+        }, 500)
+
+
 def get_device_measurements(device_id: str) -> List[Dict[str, Any]]:
     """
     Query medical database to fetch vital measurements for a device.
@@ -586,11 +691,11 @@ def get_device_measurements(device_id: str) -> List[Dict[str, Any]]:
     
     try:
         # Query medical database
-        # SELECT timestamp, heart_rate, spo2, temperature WHERE device_id = ?
+        # SELECT timestamp, heart_rate, spo2, temperature WHERE device_uuid = ?
         response = supabase_client.table("measurements").select(
             "timestamp, heart_rate, spo2, temperature"
         ).eq(
-            "device_id", device_id
+            "device_uuid", device_id
         ).order("timestamp", desc=True).limit(100).execute()
         
         # Return vital measurements
@@ -604,6 +709,202 @@ def get_device_measurements(device_id: str) -> List[Dict[str, Any]]:
             "code": "medical_query_error",
             "message": f"Failed to query medical database: {str(e)}"
         }, 500)
+
+
+def handle_mqtt_message(topic: str, payload: Dict[str, Any], user_id: Optional[str] = None) -> Optional[str]:
+    """
+    Handle a single MQTT message at application level.
+
+    Responsibilities:
+    - Extract device serial_number from MQTT topic
+    - Upsert device into devices table (idempotent, no duplicates)
+    - Optionally link the device to a user via user_devices (pivot table)
+
+    Design notes:
+    - The topic is the source of truth for the device serial:
+      devices publish to topics of the form:
+          vitalio/dev/{SERIAL_NUMBER}/measurements
+      The device lui‑même ne connaît PAS l'utilisateur, seulement son identifiant matériel.
+    - The pivot table user_devices(user_id, device_id) is used to model:
+      * Many devices per user
+      * Future cases of device re-assignment with explicit validation (QR code, pairing code, etc.)
+    - UPSERT is critical in IoT:
+      * Devices reconnect, redémarrent, renvoient plusieurs fois les mêmes infos
+      * The backend may receive the same serial_number many times
+      * We must never create duplicate device rows for the same serial_number.
+
+    SQL intent:
+        -- 1) Upsert the device
+        INSERT INTO devices (serial_number, mqtt_topic)
+        VALUES (:serial_number, :topic)
+        ON CONFLICT (serial_number)
+        DO UPDATE SET mqtt_topic = EXCLUDED.mqtt_topic
+        RETURNING id;
+
+        -- 2) Idempotent user-device link (only if user_id provided)
+        INSERT INTO user_devices (user_id, device_id)
+        VALUES (:user_id, :device_id)
+        ON CONFLICT (user_id, device_id)
+        DO NOTHING;
+
+    Security / data integrity:
+    - Verifies that user_id exists in public.users before linking.
+    - Never links a device that is already linked to another user:
+        * If a row exists in user_devices with device_id and user_id != current,
+          the function logs a warning and skips linking.
+
+    Returns:
+        device_id (UUID as string) if the device row exists/was created, None on failure.
+    """
+    # -----------------------------------------------------------------------
+    # Step 1: Extract serial_number from MQTT topic
+    # Example: "vitalio/dev/SIM-ESP32-003/measurements" -> "SIM-ESP32-003"
+    # -----------------------------------------------------------------------
+    topic_parts = topic.split("/")
+    serial_number = topic_parts[2] if len(topic_parts) > 2 else None
+
+    if not serial_number:
+        print(f"[handle_mqtt_message] Warning: Could not extract serial_number from topic='{topic}'")
+        return None
+
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        print("[handle_mqtt_message] Error: Supabase client not available")
+        return None
+
+    # -----------------------------------------------------------------------
+    # Step 2: Upsert device row (idempotent, based on UNIQUE(serial_number))
+    # NOTE: The supabase-py client does NOT support `.select()` after upsert.
+    #       We therefore:
+    #         1) perform the upsert
+    #         2) re-select the row by serial_number to obtain `id`
+    # -----------------------------------------------------------------------
+    try:
+        (
+            supabase_client
+            .table("devices")
+            .upsert(
+                {
+                    "serial_number": serial_number,
+                    "mqtt_topic": topic,
+                },
+                on_conflict="serial_number",
+            )
+            .execute()
+        )
+    except Exception as e:
+        print(
+            f"[handle_mqtt_message] Error upserting device for serial_number={serial_number}: {e}"
+        )
+        return None
+
+    try:
+        select_response = (
+            supabase_client
+            .table("devices")
+            .select("id")
+            .eq("serial_number", serial_number)
+            .execute()
+        )
+    except Exception as e:
+        print(
+            f"[handle_mqtt_message] Error selecting device id after upsert for "
+            f"serial_number={serial_number}: {e}"
+        )
+        return None
+
+    if not select_response.data:
+        print(
+            f"[handle_mqtt_message] Error: no device row found after upsert for "
+            f"serial_number={serial_number}"
+        )
+        return None
+
+    device_id = select_response.data[0].get("id")
+    if not device_id:
+        print(
+            f"[handle_mqtt_message] Error: device row for serial_number={serial_number} has no 'id'"
+        )
+        return None
+
+    print(
+        f"[handle_mqtt_message] Device resolved: serial_number={serial_number}, device_id={device_id}"
+    )
+
+    # -----------------------------------------------------------------------
+    # Step 3: Optionally link device to user via pivot user_devices
+    # -----------------------------------------------------------------------
+    if user_id:
+        try:
+            # 3.a Ensure user exists in public.users
+            user_resp = (
+                supabase_client
+                .table("users")
+                .select("id")
+                .eq("id", user_id)
+                .execute()
+            )
+
+            if not user_resp.data:
+                print(
+                    f"[handle_mqtt_message] Warning: user_id={user_id} not found in public.users; "
+                    f"skipping user_devices link for device_id={device_id}"
+                )
+                # We still return device_id so measurements can be stored.
+                return device_id
+
+            # 3.b Check if the device is already linked to some user
+            link_resp = (
+                supabase_client
+                .table("user_devices")
+                .select("user_id")
+                .eq("device_id", device_id)
+                .execute()
+            )
+
+            if link_resp.data:
+                existing_user_id = link_resp.data[0].get("user_id")
+                if existing_user_id == user_id:
+                    # Idempotent: the link already exists for this user
+                    print(
+                        f"[handle_mqtt_message] user_devices link already exists: "
+                        f"user_id={user_id}, device_id={device_id}"
+                    )
+                    return device_id
+
+                # Device is already linked to another user -> do NOT reassign automatically
+                print(
+                    f"[handle_mqtt_message] Warning: device_id={device_id} already linked to "
+                    f"user_id={existing_user_id}; refusing to link to user_id={user_id}"
+                )
+                return device_id
+
+            # 3.c Create idempotent link (user_id, device_id)
+            #     Uses ON CONFLICT to be robust to race conditions.
+            pivot_resp = (
+                supabase_client
+                .table("user_devices")
+                .upsert(
+                    {
+                        "user_id": user_id,
+                        "device_id": device_id,
+                    },
+                    on_conflict="user_id,device_id",
+                )
+                .execute()
+            )
+
+            print(
+                f"[handle_mqtt_message] user_devices link created/confirmed: "
+                f"user_id={user_id}, device_id={device_id}, serial_number={serial_number}"
+            )
+        except Exception as e:
+            print(
+                f"[handle_mqtt_message] Error while linking user_id={user_id} to device_id={device_id}: {e}"
+            )
+            # Do not block measurement ingestion; just log the error.
+
+    return device_id
 
 # ============================================================================
 # API ROUTES
@@ -692,8 +993,27 @@ def create_user_device():
     if not serial_number:
         return jsonify({"error": "serial_number required"}), 400
 
-    # Resolve device UUID from serial_number
+    # Ensure a device row exists for this serial_number.
+    # If it n'existe pas encore (capteur jamais vu côté MQTT), on le crée
+    # ici avec un mqtt_topic déterministe : vitalio/dev/<serial_number>/measurements.
     try:
+        mqtt_topic = f"vitalio/dev/{serial_number}/measurements"
+
+        # Idempotent upsert on serial_number to avoid duplicates.
+        (
+            supabase_client
+            .table("devices")
+            .upsert(
+                {
+                    "serial_number": serial_number,
+                    "mqtt_topic": mqtt_topic,
+                },
+                on_conflict="serial_number",
+            )
+            .execute()
+        )
+
+        # Re-select to retrieve the device UUID (devices.id)
         device_response = (
             supabase_client
             .table("devices")
@@ -701,11 +1021,12 @@ def create_user_device():
             .eq("serial_number", serial_number)
             .execute()
         )
+
         if not device_response.data:
             return jsonify({
-                "error": "device_not_found",
-                "message": f"No device found for serial_number={serial_number}"
-            }), 404
+                "error": "device_not_persisted",
+                "message": f"Device row could not be created or found for serial_number={serial_number}"
+            }), 500
 
         device_id = device_response.data[0].get("id")
         if not device_id:
@@ -715,11 +1036,48 @@ def create_user_device():
             }), 500
     except Exception as e:
         raise DatabaseError({
-            "code": "device_lookup_error",
-            "message": f"Failed to resolve device for serial_number={serial_number}: {str(e)}"
+            "code": "device_upsert_error",
+            "message": f"Failed to upsert device for serial_number={serial_number}: {str(e)}"
         }, 500)
 
+    # Enforce uniqueness: a device can only be associated with a single user.
+    # If the device is already linked to a different user, return 409.
+    try:
+        existing_links = (
+            supabase_client
+            .table("user_devices")
+            .select("user_id")
+            .eq("device_id", device_id)
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError({
+            "code": "user_device_lookup_error",
+            "message": f"Failed to check existing user-device links: {str(e)}"
+        }, 500)
+
+    if existing_links.data:
+        existing_user_id = existing_links.data[0].get("user_id")
+        if existing_user_id and existing_user_id != g.user_id:
+            # Device already linked to another user
+            return jsonify({
+                "error": "device_already_associated",
+                "message": "This device is already associated with another user."
+            }), 409
+        if existing_user_id == g.user_id:
+            # Idempotent success: already linked to this user
+            return jsonify({
+                "user_id": g.user_id,
+                "device_id": device_id,
+                "serial_number": serial_number,
+                "message": "Device already associated with this user."
+            }), 200
+
     # Create correspondence user <-> device
+    # We already ensured that either:
+    # - the device is not linked yet, or
+    # - it is linked to this user (early return above).
+    # So a simple INSERT is sufficient here.
     try:
         insert_response = (
             supabase_client
@@ -745,6 +1103,378 @@ def create_user_device():
         }, 500)
 
 
+@app.route("/api/me/device", methods=["GET"])
+@requires_auth
+def get_my_device():
+    """
+    Return the device associated with the authenticated user.
+
+    Response (200):
+        {
+            "device_id": "<uuid from devices.id>",
+            "serial_number": "SIM-ESP32-001",
+            "mqtt_topic": "vitalio/dev/SIM-ESP32-001/measurements"
+        }
+
+    Errors:
+        - 404 if the user has no associated device
+    """
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError({
+            "code": "database_not_configured",
+            "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file"
+        }, 500)
+
+    try:
+        link_response = (
+            supabase_client
+            .table("user_devices")
+            .select("device_id")
+            .eq("user_id", g.user_id)
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError({
+            "code": "user_device_lookup_error",
+            "message": f"Failed to look up user-device link: {str(e)}"
+        }, 500)
+
+    if not link_response.data:
+        return jsonify({
+            "error": "device_not_paired",
+            "message": "No device associated with the authenticated user."
+        }), 404
+
+    device_id = link_response.data[0].get("device_id")
+    if not device_id:
+        return jsonify({
+            "error": "device_invalid",
+            "message": "User-device record is missing device_id."
+        }), 500
+
+    try:
+        device_response = (
+            supabase_client
+            .table("devices")
+            .select("serial_number, mqtt_topic")
+            .eq("id", device_id)
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError({
+            "code": "device_lookup_error",
+            "message": f"Failed to load device information: {str(e)}"
+        }, 500)
+
+    if not device_response.data:
+        return jsonify({
+            "error": "device_not_found",
+            "message": "Associated device not found in devices table."
+        }), 404
+
+    device_row = device_response.data[0]
+
+    return jsonify({
+        "device_id": device_id,
+        "serial_number": device_row.get("serial_number"),
+        "mqtt_topic": device_row.get("mqtt_topic"),
+    }), 200
+
+
+@app.route("/api/doctor/requests", methods=["POST"])
+@requires_auth
+@require_app_role("doctor")
+def create_doctor_request():
+    """
+    Demande d'association Médecin → Patient (validation par Admin).
+
+    - Médecin authentifié (JWT + rôle doctor).
+    - doctor_id = g.user_id (jamais pris depuis le front).
+    - Pas de doublon (doctor_id + patient_email).
+    - Table: doctor_requests(id, doctor_id, patient_email, created_at).
+    """
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError(
+            {
+                "code": "database_not_configured",
+                "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file",
+            },
+            500,
+        )
+
+    data = request.get_json() or {}
+    patient_email_raw = data.get("patient_email") or ""
+    patient_email = patient_email_raw.strip().lower()
+
+    if not patient_email:
+        return jsonify(
+            {
+                "code": "validation_error",
+                "message": "patient_email is required",
+            }
+        ), 400
+
+    if "@" not in patient_email or "." not in patient_email.split("@")[-1]:
+        return jsonify(
+            {
+                "code": "validation_error",
+                "message": "patient_email must be a valid email address",
+            }
+        ), 400
+
+    try:
+        # Pas de doublon (doctor_id + patient_email)
+        existing = (
+            supabase_client.table("doctor_requests")
+            .select("id, created_at")
+            .eq("doctor_id", g.user_id)
+            .eq("patient_email", patient_email)
+            .execute()
+        )
+
+        if existing.data:
+            return jsonify(
+                {
+                    "request": existing.data[0],
+                    "message": "A request for this patient already exists.",
+                }
+            ), 200
+
+        insert_payload = {
+            "doctor_id": g.user_id,
+            "patient_email": patient_email,
+            # Nouveau flux : status explicite pour suivre le cycle de vie (pending → approved/rejected)
+            "status": "pending",
+        }
+
+        insert_resp = (
+            supabase_client.table("doctor_requests")
+            .insert(insert_payload)
+            .execute()
+        )
+
+        created = insert_resp.data[0] if insert_resp.data else insert_payload
+        return jsonify({"request": created}), 201
+
+    except Exception as e:
+        raise DatabaseError(
+            {
+                "code": "doctor_request_insert_error",
+                "message": f"Failed to create doctor request: {str(e)}",
+            },
+            500,
+        )
+
+
+@app.route("/api/doctor/requests", methods=["GET"])
+@requires_auth
+@require_app_role("doctor")
+def list_doctor_requests_for_doctor():
+    """
+    Liste des demandes d'association pour le médecin connecté.
+
+    - Ne retourne QUE les demandes du médecin courant (doctor_id = g.user_id)
+    - Permet au frontend de lister :
+        * les patients déjà associés (status = 'approved')
+        * les demandes en attente / rejetées
+    """
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError(
+            {
+                "code": "database_not_configured",
+                "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file",
+            },
+            500,
+        )
+
+    try:
+        resp = (
+            supabase_client.table("doctor_requests")
+            .select("id, patient_email, status, created_at")
+            .eq("doctor_id", g.user_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        return jsonify({"requests": resp.data or []}), 200
+    except Exception as e:
+        raise DatabaseError(
+            {
+                "code": "doctor_requests_doctor_list_error",
+                "message": f"Failed to list doctor requests for doctor: {str(e)}",
+            },
+            500,
+        )
+
+
+@app.route("/api/doctor/patients/measurements", methods=["GET"])
+@requires_auth
+@require_app_role("doctor")
+def get_doctor_patients_measurements():
+    """
+    Return measurements for all patients associated with the connected doctor
+    (doctor_requests with status = 'approved').
+
+    For each approved patient:
+    - Resolve user id from users.email = patient_email
+    - Get all device_ids from user_devices for that user
+    - Fetch measurements for each device and aggregate (sorted by timestamp desc, limited per patient)
+    """
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError(
+            {
+                "code": "database_not_configured",
+                "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file",
+            },
+            500,
+        )
+
+    try:
+        # 1) Approved doctor_requests for this doctor
+        req_resp = (
+            supabase_client.table("doctor_requests")
+            .select("patient_email")
+            .eq("doctor_id", g.user_id)
+            .eq("status", "approved")
+            .execute()
+        )
+        requests_data = req_resp.data or []
+        patient_emails = list({r.get("patient_email") for r in requests_data if r.get("patient_email")})
+        if not patient_emails:
+            return jsonify({"patients": []}), 200
+
+        # 2) Resolve user ids from emails
+        users_resp = (
+            supabase_client.table("users")
+            .select("id, email")
+            .in_("email", patient_emails)
+            .execute()
+        )
+        users_data = users_resp.data or []
+        email_to_user_id = {u.get("email"): u.get("id") for u in users_data if u.get("email") and u.get("id")}
+
+        # 3) For each patient, get device_ids and then measurements
+        MEASUREMENTS_LIMIT_PER_PATIENT = 100
+        patients_with_measurements = []
+
+        for patient_email in patient_emails:
+            user_id = email_to_user_id.get(patient_email)
+            if not user_id:
+                patients_with_measurements.append({
+                    "patient_email": patient_email,
+                    "measurements": [],
+                })
+                continue
+            device_ids = get_device_ids_for_user(user_id)
+            all_measurements = []
+            for device_id in device_ids:
+                try:
+                    measurements = get_device_measurements(device_id)
+                    for m in measurements:
+                        m_copy = dict(m)
+                        m_copy["device_id"] = device_id
+                        all_measurements.append(m_copy)
+                except Exception:
+                    continue
+            # Sort by timestamp desc and limit
+            all_measurements.sort(
+                key=lambda x: (x.get("timestamp") or ""),
+                reverse=True,
+            )
+            all_measurements = all_measurements[:MEASUREMENTS_LIMIT_PER_PATIENT]
+            patients_with_measurements.append({
+                "patient_email": patient_email,
+                "measurements": all_measurements,
+            })
+
+        return jsonify({"patients": patients_with_measurements}), 200
+    except DatabaseError:
+        raise
+    except Exception as e:
+        raise DatabaseError(
+            {
+                "code": "doctor_patients_measurements_error",
+                "message": f"Failed to fetch patients measurements: {str(e)}",
+            },
+            500,
+        )
+
+
+@app.route("/api/admin/doctor-requests", methods=["GET"])
+@requires_auth
+@requires_permission("add_users")
+def list_doctor_requests():
+    """
+    Consultation des demandes Médecin → Patient (lecture seule, via Auth0 RBAC).
+
+    - Accès réservé aux utilisateurs possédant la permission Auth0 "add_users"
+      (claim "permissions" dans le JWT d'accès).
+    - Ne fait aucune confiance au frontend : la décision est entièrement
+      contrôlée par le backend via @requires_permission.
+
+    Retourne: id, doctor_id, patient_email, created_at.
+    """
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError(
+            {
+                "code": "database_not_configured",
+                "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file",
+            },
+            500,
+        )
+
+    try:
+        resp = (
+            supabase_client.table("doctor_requests")
+            .select("id, doctor_id, patient_email, status, created_at")
+            .order("created_at", desc=True)
+            .execute()
+        )
+        raw_requests = resp.data or []
+        if not raw_requests:
+            return jsonify({"requests": []}), 200
+
+        doctor_ids = list({r.get("doctor_id") for r in raw_requests if r.get("doctor_id")})
+        users_by_id: Dict[str, Dict[str, Any]] = {}
+        if doctor_ids:
+            users_resp = (
+                supabase_client.table("users")
+                .select("id, email")
+                .in_("id", doctor_ids)
+                .execute()
+            )
+            for u in users_resp.data or []:
+                uid = u.get("id")
+                if uid:
+                    users_by_id[uid] = u
+
+        assembled = []
+        for r in raw_requests:
+            doctor_id = r.get("doctor_id")
+            doctor_email = (users_by_id.get(doctor_id) or {}).get("email")
+            assembled.append({
+                "id": r.get("id"),
+                "doctor_id": doctor_id,
+                "doctor_email": doctor_email,
+                "patient_email": r.get("patient_email"),
+                "status": r.get("status"),
+                "created_at": r.get("created_at"),
+            })
+        return jsonify({"requests": assembled}), 200
+    except Exception as e:
+        raise DatabaseError(
+            {
+                "code": "doctor_requests_list_error",
+                "message": f"Failed to list doctor requests: {str(e)}",
+            },
+            500,
+        )
+
+
 @app.route("/health", methods=["GET"])
 def health_check():
     """Health check endpoint for monitoring."""
@@ -758,128 +1488,172 @@ def health_check():
 # MQTT SUBSCRIBER
 # ============================================================================
 
-def validate_measurement_payload(payload: dict) -> dict:
+def build_measurement_input_from_payload(payload: dict) -> MeasurementInput:
     """
-    Validate IoT sensor payload and return validation status.
-    
-    Args:
-        payload: Dictionary containing sensor data
-        
-    Returns:
-        dict: Validation result with status and reasons
+    Pure adapter: build MeasurementInput from raw MQTT payload.
     """
-    reasons = []
-    
     sensors = payload.get("sensors", {})
     max30102 = sensors.get("MAX30102", {})
     mlx90614 = sensors.get("MLX90614", {})
-    
-    hr = max30102.get("heart_rate")
-    spo2 = max30102.get("spo2")
-    temp = mlx90614.get("object_temp")
-    signal_quality = payload.get("signal_quality")
-    
-    # ---- Heart Rate ----
-    if hr is None or hr < 30 or hr > 220:
-        reasons.append("heart_rate_out_of_range")
-    
-    # ---- SpO2 ----
-    if spo2 is None or spo2 < 70 or spo2 > 100:
-        reasons.append("spo2_out_of_range")
-    
-    # ---- Temperature ----
-    if temp is None or temp < 34 or temp > 42:
-        reasons.append("temperature_out_of_range")
-    
-    # ---- Signal Quality ----
-    if signal_quality is None or signal_quality < 50:
-        reasons.append("low_signal_quality")
-    
-    status = "VALID" if not reasons else "INVALID"
-    
+
+    ts_raw = payload.get("timestamp")
+    meta: Dict[str, Any] = {"raw_timestamp": ts_raw}
+    try:
+        if ts_raw:
+            # Normalise à un datetime timezone-aware en UTC pour éviter
+            # les erreurs "can't compare offset-naive and offset-aware datetimes"
+            # dans physio_validation et les calculs downstream.
+            parsed = datetime.fromisoformat(ts_raw.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                ts = parsed.replace(tzinfo=timezone.utc)
+            else:
+                ts = parsed.astimezone(timezone.utc)
+        else:
+            ts = datetime.now(timezone.utc)
+            meta["timestamp_fallback_now"] = True
+    except Exception:
+        ts = datetime.now(timezone.utc)
+        meta["timestamp_parse_error"] = True
+
+    return MeasurementInput(
+        heart_rate_bpm=max30102.get("heart_rate"),
+        spo2_percent=max30102.get("spo2"),
+        temp_celsius=mlx90614.get("object_temp"),
+        timestamp=ts,
+        signal_quality_score=payload.get("signal_quality"),
+        missing_ratio=None,
+        artefact_flag=None,
+        meta=meta,
+    )
+
+
+def validate_measurement_payload(payload: dict) -> dict:
+    """
+    Validate IoT sensor payload using physio_validation module.
+    Returns a dict compatible with existing caller.
+    """
+    m_input = build_measurement_input_from_payload(payload)
+    cfg = PhysioValidationConfig()
+    result = validate_measurement(m_input, cfg)
+
     return {
-        "status": status,
-        "reasons": reasons,
-        "validated_at": datetime.utcnow().isoformat()
+        "status": result.status.value.upper(),
+        "quality_score": result.quality_score,
+        "reasons": result.reasons,
+        "hard_rule_violations": result.hard_rule_violations,
+        "validated_at": datetime.utcnow().isoformat() + "Z",
     }
 
 
 def on_mqtt_message(client, userdata, msg):
     """
     Handle incoming MQTT messages from IoT devices.
-    Extracts device serial_number from topic, resolves it to devices.id (UUID),
-    and inserts measurements into Supabase.
+
+    Responsibilities:
+    - Log reception of the raw MQTT message
+    - Extract device serial_number from topic (vitalio/dev/{SERIAL_NUMBER}/measurements)
+    - Delegate device upsert / resolution to handle_mqtt_message
+    - Insert a new measurement row into Supabase.measurements
+
+    Notes:
+    - We extract serial_number here (in addition to handle_mqtt_message) so that
+      logs are always consistent and serial_number is defined for error messages.
+    - The FK column in measurements is `device_id` (text), which stores the
+      UUID string from devices.id. We align data_to_insert with that schema.
     """
     try:
-        payload = json.loads(msg.payload.decode())
-        
-        # Extract serial_number from topic (e.g., "SIM-ESP32-001" from "vitalio/dev/SIM-ESP32-001/measurements")
-        topic_parts = msg.topic.split('/')
+        # ------------------------------------------------------------------
+        # 1) Decode payload & basic logging
+        # ------------------------------------------------------------------
+        raw_payload = msg.payload.decode()
+        print(f"[on_mqtt_message] Received MQTT message on topic='{msg.topic}': {raw_payload}")
+
+        payload = json.loads(raw_payload)
+
+        # ------------------------------------------------------------------
+        # 2) Extract serial_number from topic for logging and tracing
+        #    Example: vitalio/dev/SIM-ESP32-003/measurements -> SIM-ESP32-003
+        # ------------------------------------------------------------------
+        topic_parts = msg.topic.split("/")
         serial_number = topic_parts[2] if len(topic_parts) > 2 else None
-        
+
         if not serial_number:
-            print(f"Warning: Could not extract device serial_number from topic: {msg.topic}")
+            print(f"[on_mqtt_message] Warning: Could not extract serial_number from topic='{msg.topic}'")
             return
-        
+
+        # ------------------------------------------------------------------
+        # 3) Validate measurement payload (physiological rules)
+        # ------------------------------------------------------------------
         validation = validate_measurement_payload(payload)
-        
-        # Get Supabase client
+
+        # ------------------------------------------------------------------
+        # 4) Resolve / upsert device and get devices.id (UUID as string)
+        # ------------------------------------------------------------------
+        # For pure MQTT ingestion there is no authenticated user context,
+        # so we pass user_id=None. A future pairing flow can supply a real user_id.
+        device_id = handle_mqtt_message(msg.topic, payload, user_id=None)
+        serial_number = msg.topic.split("/")[2]
+        if not device_id:
+            print(
+                f"[on_mqtt_message] Error: handle_mqtt_message could not resolve device "
+                f"for serial_number={serial_number}; skipping measurement insert."
+            )
+            return
+
+        print(
+            f"[on_mqtt_message] Device resolved for serial_number={serial_number}: "
+            f"device_id={device_id}, status={validation['status']}"
+        )
+
+        # ------------------------------------------------------------------
+        # 5) Prepare measurement row for insertion
+        # ------------------------------------------------------------------
         supabase_client = get_supabase_client()
         if not supabase_client:
-            print("Error: Supabase client not available for MQTT subscriber")
+            print("[on_mqtt_message] Error: Supabase client not available for MQTT subscriber")
             return
-        
-        # Resolve serial_number -> devices.id (UUID)
+
         try:
-            device_response = (
-                supabase_client
-                .table("devices")
-                .select("id")
-                .eq("serial_number", serial_number)
-                .execute()
-            )
-            if not device_response.data:
-                print(f"Warning: No device found in 'devices' for serial_number={serial_number}")
-                return
-            
-            device_id = device_response.data[0].get("id")
-            if not device_id:
-                print(f"Warning: Device record for serial_number={serial_number} has no 'id' field")
-                return
-        except Exception as lookup_error:
-            print(f"Error resolving device UUID for serial_number={serial_number}: {lookup_error}")
+            max30102 = payload["sensors"]["MAX30102"]
+            mlx90614 = payload["sensors"]["MLX90614"]
+            timestamp = payload["timestamp"]
+            signal_quality = payload["signal_quality"]
+        except KeyError as e:
+            print(f"[on_mqtt_message] Error: Missing key in payload for serial_number={serial_number}: {e}")
             return
-        
-        # Prepare data for insertion (device_id as UUID FK to devices.id)
+
+        # IMPORTANT: device_id must match the FK column name in Supabase.
+        # Schema: measurements(device_id FK -> devices.id, ...)
         data_to_insert = {
-            "device_id": device_id,  # UUID from devices.id
-            "timestamp": payload["timestamp"],
-            "heart_rate": payload["sensors"]["MAX30102"]["heart_rate"],
-            "spo2": payload["sensors"]["MAX30102"]["spo2"],
-            "temperature": payload["sensors"]["MLX90614"]["object_temp"],
-            "signal_quality": payload["signal_quality"],
-            "status": validation["status"]
+            "device_uuid": device_id,
+            "timestamp": timestamp,
+            "heart_rate": max30102.get("heart_rate"),
+            "spo2": max30102.get("spo2"),
+            "temperature": mlx90614.get("object_temp"),
+            "signal_quality": signal_quality,
+            "status": validation["status"],
         }
-        
-        # Insert into Supabase
+
+        # ------------------------------------------------------------------
+        # 6) Insert into measurements (idempotent at message level: each
+        #    MQTT payload naturally results in one new row)
+        # ------------------------------------------------------------------
         try:
             response = supabase_client.table("measurements").insert(data_to_insert).execute()
             print(
-                f"Measurement inserted for device serial_number={serial_number}, "
-                f"device_id={device_id} (status: {validation['status']})"
+                f"[on_mqtt_message] Measurement inserted for serial_number={serial_number}, "
+                f"device_id={device_id}, inserted_rows={len(response.data) if response and response.data else 0}"
             )
         except Exception as db_error:
             print(
-                f"Error inserting measurement for device serial_number={serial_number}, "
-                f"device_id={device_id}: {str(db_error)}"
+                f"[on_mqtt_message] Error inserting measurement for serial_number={serial_number}, "
+                f"device_id={device_id}: {db_error}"
             )
-    
+
     except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON payload in MQTT message - {str(e)}")
-    except KeyError as e:
-        print(f"Error: Missing key in payload - {str(e)}")
+        print(f"[on_mqtt_message] Error: Invalid JSON payload in MQTT message - {e}")
     except Exception as e:
-        print(f"Error processing MQTT message: {str(e)}")
+        print(f"[on_mqtt_message] Error processing MQTT message: {e}")
 
 
 def on_mqtt_connect(client, userdata, flags, rc, properties=None):
@@ -957,13 +1731,13 @@ def start_mqtt_subscriber():
             )
             
             # Username/password authentication (required - anonymous access disabled)
-            if not MQTT_USERNAME or not MQTT_PASSWORD:
-                raise ValueError(
-                    "MQTT_USERNAME and MQTT_PASSWORD must be set in environment variables.\n"
-                    "Anonymous connections are disabled for security."
-                )
+            # if not MQTT_USERNAME or not MQTT_PASSWORD:
+            #     raise ValueError(
+            #         "MQTT_USERNAME and MQTT_PASSWORD must be set in environment variables.\n"
+            #         "Anonymous connections are disabled for security."
+            #     )
             
-            _mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+            # _mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
             
             # ====================================================================
             # CONNECT TO BROKER
@@ -971,7 +1745,7 @@ def start_mqtt_subscriber():
             
             print(f"Connecting to MQTT broker via TLS {MQTT_BROKER}:{MQTT_PORT}...")
             print(f"   CA Certificate: {MQTT_CA_CERT}")
-            print(f"   Username: {MQTT_USERNAME}")
+            # print(f"   Username: {MQTT_USERNAME}")
             print(f"   TLS Version: 1.2+ (enforced)")
             
             _mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)

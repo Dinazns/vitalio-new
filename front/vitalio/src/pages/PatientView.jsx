@@ -3,21 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Activity, ArrowLeft, AlertCircle, LogOut } from 'lucide-react';
 import { CURRENT_PATIENT } from '../data/mockData';
-import { supabase } from '../services/supabase';
+import { getPatientData, getMyDevice, pairUserDevice } from '../services/api';
+
+const AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE || 'auth';
 
 export default function PatientView() {
     const navigate = useNavigate();
-    const { logout, user, isAuthenticated } = useAuth0();
+    const { logout, user, isAuthenticated, getAccessTokenSilently, loginWithRedirect } = useAuth0();
     const [sosActive, setSosActive] = useState(false);
     const [sosTimer, setSosTimer] = useState(0);
     const [measuring, setMeasuring] = useState(false);
     
+    // Device/sensor state: null = none, object = current device
+    const [device, setDevice] = useState(null);
+    const [deviceLoading, setDeviceLoading] = useState(true);
+    const [newSensorSerial, setNewSensorSerial] = useState('');
+    const [addSensorError, setAddSensorError] = useState(null);
+    const [addSensorSubmitting, setAddSensorSubmitting] = useState(false);
+
     // Measurement History state
     const [measurements, setMeasurements] = useState([]);
     const [measurementsLoading, setMeasurementsLoading] = useState(true);
     const [measurementsError, setMeasurementsError] = useState(null);
     const [showAllMeasurements, setShowAllMeasurements] = useState(false);
-    
+
     // Current time state
     const [currentTime, setCurrentTime] = useState(new Date());
     
@@ -194,81 +203,101 @@ export default function PatientView() {
         }
     }, [sosTimer]);
 
-    // Fetch Measurement History
+    // Fetch device (capteur) for current user
+    useEffect(() => {
+        const fetchDevice = async () => {
+            if (!isAuthenticated || !user) {
+                setDeviceLoading(false);
+                setDevice(null);
+                return;
+            }
+            setDeviceLoading(true);
+            try {
+                let token;
+                try {
+                    token = await getAccessTokenSilently({
+                        authorizationParams: { audience: AUDIENCE, scope: 'openid profile email read:patient_data' },
+                    });
+                } catch (e) {
+                    if (e?.error === 'consent_required' || e?.error === 'login_required' || e?.error === 'interaction_required') {
+                        await loginWithRedirect({
+                            authorizationParams: { audience: AUDIENCE, scope: 'openid profile email read:patient_data' },
+                            appState: { returnTo: '/patient' },
+                        });
+                        return;
+                    }
+                    setDevice(null);
+                    setDeviceLoading(false);
+                    return;
+                }
+                const dev = await getMyDevice(token);
+                setDevice(dev);
+            } catch (err) {
+                console.error('Error fetching device:', err);
+                setDevice(null);
+            } finally {
+                setDeviceLoading(false);
+            }
+        };
+        fetchDevice();
+    }, [isAuthenticated, user, getAccessTokenSilently, loginWithRedirect]);
+
+    // Fetch Measurement History via l'API (only when user has a device)
     useEffect(() => {
         const fetchMeasurements = async () => {
-            // Wait for authentication
             if (!isAuthenticated || !user) {
                 setMeasurementsLoading(false);
                 setMeasurementsError('Veuillez vous connecter pour voir les mesures');
                 return;
             }
-            
+            if (!device) {
+                setMeasurements([]);
+                setMeasurementsError(null);
+                setMeasurementsLoading(false);
+                return;
+            }
+
             setMeasurementsLoading(true);
             setMeasurementsError(null);
-            
+
             try {
-                // Step 1: Get Auth0 user ID (sub claim)
-                const auth0UserId = user.sub;
-                
-                if (!auth0UserId) {
-                    throw new Error('Impossible de récupérer l\'ID utilisateur depuis Auth0');
+                let token;
+                try {
+                    token = await getAccessTokenSilently({
+                        authorizationParams: { audience: AUDIENCE, scope: 'openid profile email read:patient_data' },
+                    });
+                } catch (e) {
+                    if (e?.error === 'consent_required' || e?.error === 'login_required' || e?.error === 'interaction_required') {
+                        await loginWithRedirect({
+                            authorizationParams: {
+                                audience: AUDIENCE,
+                                scope: 'openid profile email read:patient_data',
+                            },
+                            appState: { returnTo: '/patient' },
+                        });
+                        return;
+                    }
+                    setMeasurementsError('Impossible d\'obtenir un token pour charger les mesures.');
+                    setMeasurements([]);
+                    setMeasurementsLoading(false);
+                    return;
                 }
-                
-                // Step 2: Get user's UUID from users table using Auth0 ID
-                // This maps Auth0 user to Supabase user
-                const { data: userRecord, error: userError } = await supabase
-                    .from('users')
-                    .select('id')
-                    .eq('auth0_sub', auth0UserId)
-                    .single();
-                
-                if (userError || !userRecord) {
-                    throw new Error('Utilisateur introuvable dans la base de données. Veuillez contacter le support.');
-                }
-                
-                const userId = userRecord.id;
-                
-                // Step 3: Query measurements using JOIN through user_devices
-                // This ensures we only get measurements from devices owned by the user
-                // JOIN: measurements.device_uuid = user_devices.device_id
-                // WHERE: user_devices.user_id = userId
-                // Limit to last 100 measurements for performance
-                const { data, error } = await supabase
-                    .from('measurements')
-                    .select(`
-                        *,
-                        user_devices!inner(
-                            user_id,
-                            device_id
-                        )
-                    `)
-                    .eq('user_devices.user_id', userId)
-                    .order('timestamp', { ascending: false })
-                    .limit(100);
-                
-                if (error) {
-                    throw new Error(`Échec du chargement des mesures : ${error.message}`);
-                }
-                
-                // Extract just the measurement data (remove the join data)
-                const measurementsData = data ? data.map(item => {
-                    const { user_devices, ...measurement } = item;
-                    return measurement;
-                }) : [];
-                
-                setMeasurements(measurementsData);
+
+                const apiData = await getPatientData(token);
+                const list = apiData?.measurements ?? [];
+                setMeasurements(Array.isArray(list) ? list : []);
             } catch (err) {
                 console.error('Error fetching measurements:', err);
-                setMeasurementsError(err instanceof Error ? err.message : 'Échec du chargement des mesures');
+                const msg = err instanceof Error ? err.message : 'Échec du chargement des mesures';
+                setMeasurementsError(msg);
                 setMeasurements([]);
             } finally {
                 setMeasurementsLoading(false);
             }
         };
-        
+
         fetchMeasurements();
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user, getAccessTokenSilently, loginWithRedirect, device]);
 
     const handleMeasure = () => {
         setMeasuring(true);
@@ -276,6 +305,43 @@ export default function PatientView() {
             setMeasuring(false);
             alert("Mesure envoyée avec succès !");
         }, 2000);
+    };
+
+    const handleAddSensor = async (e) => {
+        e.preventDefault();
+        const serial = newSensorSerial?.trim();
+        if (!serial) {
+            setAddSensorError('Veuillez saisir le numéro de série du capteur.');
+            return;
+        }
+        if (!isAuthenticated || !user) return;
+        setAddSensorError(null);
+        setAddSensorSubmitting(true);
+        try {
+            const token = await getAccessTokenSilently({
+                authorizationParams: { audience: AUDIENCE, scope: 'openid profile email read:patient_data' },
+            });
+            const { status, data } = await pairUserDevice(token, serial);
+            if (status === 201 || status === 200) {
+                setDevice({
+                    device_id: data?.device_id,
+                    serial_number: data?.serial_number ?? serial,
+                    mqtt_topic: data?.mqtt_topic,
+                });
+                setNewSensorSerial('');
+            } else if (status === 409) {
+                setAddSensorError('Ce capteur est déjà associé à un autre utilisateur.');
+            } else if (status === 400) {
+                setAddSensorError(data?.error || 'Numéro de série invalide.');
+            } else {
+                setAddSensorError(data?.message || 'Impossible d\'associer le capteur.');
+            }
+        } catch (err) {
+            console.error('Error pairing device:', err);
+            setAddSensorError(err instanceof Error ? err.message : 'Erreur lors de l\'association.');
+        } finally {
+            setAddSensorSubmitting(false);
+        }
     };
 
     return (
@@ -310,6 +376,35 @@ export default function PatientView() {
                         })}
                     </p>
                 </div>
+
+                {/* Zone de saisie du capteur : visible uniquement si l'utilisateur n'a pas encore de capteur */}
+                {!deviceLoading && !device && (
+                    <div className="add-sensor-section">
+                        <h2 className="add-sensor-title">Ajouter un capteur</h2>
+                        <p className="add-sensor-hint">Saisissez le numéro de série de votre capteur pour l'associer à votre compte.</p>
+                        <form onSubmit={handleAddSensor} className="add-sensor-form">
+                            <input
+                                type="text"
+                                value={newSensorSerial}
+                                onChange={(e) => { setNewSensorSerial(e.target.value); setAddSensorError(null); }}
+                                placeholder="Ex. SIM-ESP32-001"
+                                className="add-sensor-input"
+                                disabled={addSensorSubmitting}
+                                autoComplete="off"
+                            />
+                            <button
+                                type="submit"
+                                disabled={addSensorSubmitting || !newSensorSerial?.trim()}
+                                className="add-sensor-button"
+                            >
+                                {addSensorSubmitting ? 'Association...' : 'Associer le capteur'}
+                            </button>
+                        </form>
+                        {addSensorError && (
+                            <p className="add-sensor-error">{addSensorError}</p>
+                        )}
+                    </div>
+                )}
 
                 {/* Status Indicator Giant */}
                 <div className={`status-indicator ${CURRENT_PATIENT.status === 'stable' ? 'status-stable' : 'status-warning'}`}>
@@ -395,10 +490,10 @@ export default function PatientView() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {displayedMeasurements.map((measurement) => {
+                                        {displayedMeasurements.map((measurement, index) => {
                                             const status = getMedicalStatus(measurement);
                                             return (
-                                                <tr key={measurement.id} className={`measurement-row measurement-row-${status}`}>
+                                                <tr key={measurement.id ?? `m-${index}-${measurement.timestamp ?? ''}`} className={`measurement-row measurement-row-${status}`}>
                                                     <td className="measurement-time">
                                                         {formatDateTime(measurement.timestamp)}
                                                     </td>
