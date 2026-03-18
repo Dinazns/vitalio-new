@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { LogIn, UserPlus, AlertCircle } from 'lucide-react';
@@ -57,13 +57,14 @@ function extractRole(user) {
 
 export default function Login() {
     const navigate = useNavigate();
-    const { 
-        isAuthenticated, 
-        isLoading, 
-        loginWithRedirect, 
-        user, 
-        getAccessTokenSilently,
-        error: auth0Error 
+    const hasRedirectedRef = useRef(false);
+    const {
+        isAuthenticated,
+        isLoading,
+        loginWithRedirect,
+        user,
+        getIdTokenClaims,
+        error: auth0Error,
     } = useAuth0();
 
     
@@ -73,7 +74,7 @@ export default function Login() {
         
     }, [isAuthenticated, user?.sub]);
 
-    const handleAuthenticatedUser = async () => {
+    async function handleAuthenticatedUser() {
         try {
             const token = await getAccessTokenSilently();
 

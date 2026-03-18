@@ -278,6 +278,7 @@ def get_jwks() -> Dict[str, Any]:
     Returns:
         dict: JWKS containing public keys for JWT verification
     """
+    print("JWKS URL =", f"https://{AUTH0_DOMAIN}/.well-known/jwks.json")
     try:
         jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
         jwks_response = urlopen(jwks_url)
@@ -401,6 +402,107 @@ def verify_jwt(token: str) -> Dict[str, Any]:
         }, 401)
 
 
+def get_or_create_user(auth0_sub: str, email: Optional[str]) -> str:
+    """
+    Behaviour:
+        - Look up user by auth0_sub in public.users
+        - If found, return its internal UUID (id)
+        - If not found, create a new row and return the new UUID
+
+    Constraints:
+        - Never touches auth.users or Supabase Auth
+        - Only relies on the Auth0 subject (auth0_sub) and optional email
+    """
+    if not auth0_sub:
+        raise AuthError(
+            {
+                "code": "invalid_token",
+                "message": "Missing Auth0 subject (sub) in JWT payload",
+            },
+            401,
+        )
+
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        raise DatabaseError(
+            {
+                "code": "database_not_configured",
+                "message": "Database client not initialized. Please check SUPABASE_URL and SUPABASE_KEY in .env file",
+            },
+            500,
+        )
+
+    try:
+        # 1) Try to find an existing user by auth0_sub
+        select_response = (
+            supabase_client.table("users")
+            .select("id")
+            .eq("auth0_sub", auth0_sub)
+            .execute()
+        )
+
+        if select_response.data:
+            user_id = select_response.data[0].get("id")
+            if user_id:
+                return user_id
+
+        # 2) Not found: attempt to create the user
+        insert_payload: Dict[str, Any] = {"auth0_sub": auth0_sub}
+        # email can be None; assume column allows NULL
+        insert_payload["email"] = email
+
+        try:
+            insert_response = (
+                supabase_client.table("users")
+                .insert(insert_payload)
+                .execute()
+            )
+
+            if insert_response.data:
+                created_id = insert_response.data[0].get("id")
+                if created_id:
+                    return created_id
+        except Exception as insert_error:
+            # Handle potential race condition: another request may have created the row
+            error_str = str(insert_error)
+            if "duplicate key value" not in error_str and "unique constraint" not in error_str:
+                raise
+
+        # 3) If insert failed due to unique constraint, re-select
+        retry_response = (
+            supabase_client.table("users")
+            .select("id")
+            .eq("auth0_sub", auth0_sub)
+            .execute()
+        )
+        if retry_response.data and retry_response.data[0].get("id"):
+            return retry_response.data[0]["id"]
+
+        # If we still don't have an id, something unexpected happened
+        raise DatabaseError(
+            {
+                "code": "user_resolution_failed",
+                "message": "Unable to resolve or create application user for given Auth0 subject",
+            },
+            500,
+        )
+
+    except AuthError:
+        # Let AuthError bubble up unmodified
+        raise
+    except DatabaseError:
+        # Let DatabaseError bubble up unmodified
+        raise
+    except Exception as e:
+        raise DatabaseError(
+            {
+                "code": "user_resolution_error",
+                "message": f"Error while resolving or creating application user: {str(e)}",
+            },
+            500,
+        )
+
+
 def requires_auth(f):
     """
     Decorator to protect routes requiring JWT authentication.
@@ -430,16 +532,22 @@ def requires_auth(f):
         payload = verify_jwt(token)
         
         # Extract user_id from 'sub' claim and store in request context
-        user_id_auth = payload.get("sub")
+        auth0_sub = payload.get("sub")
+        user_email = payload.get("email")
         
-        if not user_id_auth:
+        if not auth0_sub:
             raise AuthError({
                 "code": "invalid_token",
                 "message": "JWT missing user identifier in 'sub' claim"
             }, 401)
         
+        # Resolve or create internal application user (public.users)
+        user_id = get_or_create_user(auth0_sub, user_email)
+        
         # Store authenticated user information in Flask request context
-        g.user_id_auth = user_id_auth
+        g.user_id_auth = auth0_sub          # Raw Auth0 subject (for logging/traces)
+        g.user_id = user_id                 # Internal UUID from public.users.id
+        g.user_email = user_email
         g.jwt_payload = payload
         
         return f(*args, **kwargs)
@@ -1996,24 +2104,25 @@ def get_patient_data():
     3. Frontend calls GET /api/me/data with Authorization: Bearer <JWT> (this route)
     4. Flask API verifies JWT (handled by @requires_auth decorator)
     5. API authorizes request and identifies user as patient (handled by @requires_auth)
-    6. API queries correspondence database (get_device_id)
-    7. Correspondence database returns device_id
-    8. API queries medical database (get_device_measurements)
-    9. Medical database returns vital measurements
-    10. API returns minimal device identity + medical measurements
+    6. API resolves/creates internal user (public.users) from Auth0 subject
+    7. API queries correspondence database (get_device_id) using internal user UUID
+    8. Correspondence database returns device_id (UUID -> devices.id)
+    9. API queries medical database (get_device_measurements)
+    10. Medical database returns vital measurements
+    11. API returns minimal device identity + medical measurements
     
     Returns:
         JSON response containing:
-        - device_id: Minimal device identity (pivot ID only, TEXT)
+        - device_id: Minimal device identity (pivot ID only, UUID -> devices.id)
         - measurements: List of vital measurements
         
     Raises:
         AuthError: If authentication fails
         DatabaseError: If database queries fail
     """
-    # g.user_id_auth contains the Auth0 user ID from JWT 'sub' claim
+    # g.user_id contains the internal UUID from public.users.id
     
-    device_id = get_device_id(g.user_id_auth)
+    device_id = get_device_id(g.user_id)
     
     if not device_id:
         raise DatabaseError({
@@ -3601,12 +3710,12 @@ def on_mqtt_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
         
-        # Extract device ID from topic (e.g., "SIM-ESP32-001" from "vitalio/dev/SIM-ESP32-001/measurements")
+        # Extract serial_number from topic (e.g., "SIM-ESP32-001" from "vitalio/dev/SIM-ESP32-001/measurements")
         topic_parts = msg.topic.split('/')
-        device_id = topic_parts[2] if len(topic_parts) > 2 else None
+        serial_number = topic_parts[2] if len(topic_parts) > 2 else None
         
-        if not device_id:
-            print(f"Warning: Could not extract device ID from topic: {msg.topic}")
+        if not serial_number:
+            print(f"Warning: Could not extract device serial_number from topic: {msg.topic}")
             return
         
         validation = validate_measurement_payload(payload)

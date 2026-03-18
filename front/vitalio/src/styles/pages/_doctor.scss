@@ -129,6 +129,12 @@
         }
 
         .logout-btn {
+            display: flex;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            background: none;
+            border: none;
             color: #94a3b8;
             cursor: pointer;
 
