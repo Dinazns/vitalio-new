@@ -48,6 +48,18 @@ def get_device_id(user_id_auth: str) -> Optional[str]:
     return ids[0] if ids else None
 
 
+def get_patient_id_from_device(device_id: str) -> Optional[str]:
+    """Return patient user_id_auth for a device (from users_devices)."""
+    try:
+        doc = get_identity_db().users_devices.find_one(
+            {"device_id": device_id},
+            projection={"user_id_auth": 1, "_id": 0}
+        )
+        return doc.get("user_id_auth") if doc else None
+    except PyMongoError:
+        return None
+
+
 def get_device_measurements(device_id: str) -> List[Dict[str, Any]]:
     """Query Vitalio_Medical.measurements for vital measurements of a device."""
     try:

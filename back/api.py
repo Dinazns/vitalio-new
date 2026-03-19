@@ -704,18 +704,100 @@ def get_caregiver_alerts():
     query: Dict[str, Any] = {"device_id": {"$in": device_ids}}
     if status != "ALL":
         query["status"] = status
-    cursor = get_medical_db().alerts.find(query, projection={"_id": 0}).sort("created_at", -1).limit(limit)
+    cursor = get_medical_db().alerts.find(query).sort("created_at", -1).limit(limit)
     alerts = []
     for alert in cursor:
         out = format_alert_for_caregiver(dict(alert))
-        for k in ("created_at", "updated_at", "resolved_at", "first_breach_at", "last_breach_at"):
+        out["alert_id"] = str(alert["_id"]) if alert.get("_id") else None
+        for k in ("created_at", "updated_at", "resolved_at", "first_breach_at", "last_breach_at", "caregiver_resolution_at"):
             v = out.get(k)
             if isinstance(v, datetime):
                 out[k] = datetime_to_iso_utc(v)
         auth_id = patient_by_device.get(alert.get("device_id"))
         out["patient_id"] = id_by_auth.get(auth_id, auth_id) if auth_id else None
+        out["doctor_status"] = alert.get("doctor_status", "PENDING")
+        out["caregiver_resolution_comment"] = alert.get("caregiver_resolution_comment")
         alerts.append(out)
     return jsonify({"caregiver_id": caregiver_user_id_auth, "status_filter": status, "count": len(alerts), "alerts": alerts}), 200
+
+
+@app.route("/api/doctor/alerts/<alert_id>", methods=["PATCH"])
+@requires_auth
+@requires_role("doctor", "superuser", "medecin")
+def patch_doctor_alert(alert_id: str):
+    """Validate or reject a threshold alert."""
+    payload = request.get_json(silent=True) or {}
+    doctor_status = str(payload.get("doctor_status") or "").strip().upper()
+    if doctor_status not in ("VALIDATED", "REJECTED"):
+        return jsonify({"code": "invalid_payload", "message": "doctor_status must be 'VALIDATED' or 'REJECTED'"}), 400
+    try:
+        oid = ObjectId(alert_id)
+    except Exception:
+        return jsonify({"code": "invalid_id", "message": "alert_id is not a valid ObjectId"}), 400
+    alert_doc = get_medical_db().alerts.find_one({"_id": oid})
+    if not alert_doc:
+        return jsonify({"code": "not_found", "message": "Alerte introuvable"}), 404
+    device_id = alert_doc.get("device_id")
+    patient_ids = get_assigned_patient_ids_for_doctor(g.user_id_auth)
+    device_by_patient = {pid: get_device_id(pid) for pid in patient_ids if get_device_id(pid)}
+    if device_id not in device_by_patient.values():
+        return jsonify({"code": "forbidden", "message": "Cette alerte ne concerne pas un de vos patients"}), 403
+    now = datetime.now(timezone.utc)
+    update = {"doctor_status": doctor_status, "updated_at": now}
+    if doctor_status == "VALIDATED":
+        update["validated_by"] = g.user_id_auth
+        update["validated_at"] = now
+    else:
+        update["rejected_by"] = g.user_id_auth
+        update["rejected_at"] = now
+    get_medical_db().alerts.update_one({"_id": oid}, {"$set": update})
+    return jsonify({"message": "Alerte mise à jour", "alert_id": alert_id, "doctor_status": doctor_status,
+                    "validated_at" if doctor_status == "VALIDATED" else "rejected_at": datetime_to_iso_utc(now)}), 200
+
+
+@app.route("/api/caregiver/alerts/<alert_id>", methods=["PATCH"])
+@requires_auth
+@requires_role("caregiver", "aidant")
+def patch_caregiver_alert(alert_id: str):
+    """Add caregiver resolution comment when emergency is resolved."""
+    payload = request.get_json(silent=True) or {}
+    comment = str(payload.get("resolution_comment") or "").strip()
+    if not comment:
+        return jsonify({"code": "invalid_payload", "message": "resolution_comment est requis"}), 400
+    if len(comment) > 1000:
+        return jsonify({"code": "invalid_payload", "message": "Le commentaire ne doit pas dépasser 1000 caractères"}), 400
+    try:
+        oid = ObjectId(alert_id)
+    except Exception:
+        return jsonify({"code": "invalid_id", "message": "alert_id is not a valid ObjectId"}), 400
+    alert_doc = get_medical_db().alerts.find_one({"_id": oid})
+    if not alert_doc:
+        return jsonify({"code": "not_found", "message": "Alerte introuvable"}), 404
+    device_id = alert_doc.get("device_id")
+    patient_ids = get_assigned_patient_ids_for_caregiver(g.user_id_auth)
+    device_by_patient = {pid: get_device_id(pid) for pid in patient_ids if get_device_id(pid)}
+    if device_id not in device_by_patient.values():
+        return jsonify({"code": "forbidden", "message": "Cette alerte ne concerne pas un de vos proches"}), 403
+    patient_by_device = {did: pid for pid, did in device_by_patient.items()}
+    patient_id = patient_by_device.get(device_id)
+    patient_profile = get_user_profile(patient_id) if patient_id else {}
+    patient_name = patient_profile.get("display_name") or patient_profile.get("email") or "le patient"
+    now = datetime.now(timezone.utc)
+    date_str = now.strftime("%d/%m/%Y")
+    time_str = now.strftime("%H:%M")
+    resolution_text = f"Urgence résolue, l'aidant de {patient_name} est intervenu le {date_str} à {time_str} : {comment}"
+    get_medical_db().alerts.update_one(
+        {"_id": oid},
+        {"$set": {
+            "caregiver_resolution_comment": resolution_text,
+            "caregiver_resolution_at": now,
+            "caregiver_resolution_by": g.user_id_auth,
+            "updated_at": now,
+        }}
+    )
+    return jsonify({"message": "Commentaire enregistré", "alert_id": alert_id,
+                    "caregiver_resolution_comment": resolution_text,
+                    "caregiver_resolution_at": datetime_to_iso_utc(now)}), 200
 
 
 @app.route("/api/caregiver/invitations/accept", methods=["POST"])
@@ -876,16 +958,19 @@ def get_doctor_alerts():
     query: Dict[str, Any] = {"device_id": {"$in": device_ids}}
     if status != "ALL":
         query["status"] = status
-    cursor = get_medical_db().alerts.find(query, projection={"_id": 0}).sort("created_at", -1).limit(limit)
+    cursor = get_medical_db().alerts.find(query).sort("created_at", -1).limit(limit)
     alerts = []
     for alert in cursor:
         out = format_alert_for_doctor(dict(alert))
-        for k in ("created_at", "updated_at", "resolved_at", "first_breach_at", "last_breach_at"):
+        out["alert_id"] = str(alert["_id"]) if alert.get("_id") else None
+        for k in ("created_at", "updated_at", "resolved_at", "first_breach_at", "last_breach_at", "validated_at", "caregiver_resolution_at"):
             v = out.get(k)
             if isinstance(v, datetime):
                 out[k] = datetime_to_iso_utc(v)
         auth_id = patient_by_device.get(alert.get("device_id"))
         out["patient_id"] = id_by_auth.get(auth_id, auth_id) if auth_id else None
+        out["doctor_status"] = alert.get("doctor_status", "PENDING")
+        out["caregiver_resolution_comment"] = alert.get("caregiver_resolution_comment")
         alerts.append(out)
     return jsonify({"doctor_id": doctor_user_id_auth, "status_filter": status, "count": len(alerts), "alerts": alerts}), 200
 

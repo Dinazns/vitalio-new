@@ -95,6 +95,20 @@ export async function getCaregiverAlerts(accessToken, params = {}) {
   return apiRequest(`/api/caregiver/alerts${q ? `?${q}` : ''}`, accessToken, { method: 'GET' })
 }
 
+export async function patchDoctorAlert(accessToken, alertId, doctorStatus) {
+  return apiRequest(`/api/doctor/alerts/${encodeURIComponent(alertId)}`, accessToken, {
+    method: 'PATCH',
+    body: JSON.stringify({ doctor_status: doctorStatus }),
+  })
+}
+
+export async function patchCaregiverAlert(accessToken, alertId, resolutionComment) {
+  return apiRequest(`/api/caregiver/alerts/${encodeURIComponent(alertId)}`, accessToken, {
+    method: 'PATCH',
+    body: JSON.stringify({ resolution_comment: resolutionComment }),
+  })
+}
+
 export async function getPatientMeasurementsById(accessToken, patientId, params = {}) {
   const searchParams = new URLSearchParams()
   if (params.limit) searchParams.set('limit', String(params.limit))

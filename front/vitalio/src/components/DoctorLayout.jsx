@@ -13,7 +13,7 @@ import {
 
 const NAV_ITEMS = [
   { to: '/doctor', icon: LayoutDashboard, label: 'Patients', end: true },
-  { to: '/doctor/analyses', icon: BrainCircuit, label: 'Analyses' },
+  { to: '/doctor/alertes', icon: BrainCircuit, label: 'Alertes' },
 ]
 
 const ROLE_DISPLAY = { superuser: 'Superuser', doctor: 'Médecin', medecin: 'Médecin', 'médecin': 'Médecin' }

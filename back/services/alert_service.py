@@ -113,8 +113,11 @@ def has_consecutive_breach(device_id: str, breach: Dict[str, Any], consecutive_r
     return True
 
 
-def upsert_open_alert(device_id: str, breach: Dict[str, Any], threshold_config: Dict[str, Any], measured_at: datetime):
-    """Create or update an open alert for a durable breach."""
+def upsert_open_alert(device_id: str, breach: Dict[str, Any], threshold_config: Dict[str, Any], measured_at: datetime) -> bool:
+    """
+    Create or update an open alert for a durable breach.
+    Returns True if a NEW alert was created (insert), False if existing was updated.
+    """
     metric = breach["metric"]
     operator = breach["operator"]
     query = {"device_id": device_id, "metric": metric, "operator": operator, "status": "OPEN"}
@@ -134,12 +137,14 @@ def upsert_open_alert(device_id: str, breach: Dict[str, Any], threshold_config: 
         "status": "OPEN",
         "created_at": now,
         "first_breach_at": measured_at,
+        "doctor_status": "PENDING",
     }
-    get_medical_db().alerts.update_one(
+    result = get_medical_db().alerts.update_one(
         query,
         {"$set": set_fields, "$setOnInsert": set_on_insert},
         upsert=True
     )
+    return result.upserted_id is not None
 
 
 def resolve_metric_alert(device_id: str, metric: str):
@@ -173,13 +178,34 @@ def evaluate_measurement_alerts(device_id: str, measurement: Dict[str, Any], pat
 
     for breach in breaches:
         if has_consecutive_breach(device_id, breach, threshold_config["consecutive_breaches"]):
-            upsert_open_alert(device_id, breach, threshold_config, measured_at)
+            is_new = upsert_open_alert(device_id, breach, threshold_config, measured_at)
             durable.append({
                 "metric": breach["metric"],
                 "operator": breach["operator"],
                 "value": breach["value"],
                 "threshold": breach["threshold"],
                 "scope": threshold_config["scope"],
+                "is_new": is_new,
             })
+            if is_new:
+                try:
+                    from services.invitation_service import send_alert_emails_for_new_alert
+                    from services.user_service import get_patient_id_from_device, get_user_profile
+                    patient_id = get_patient_id_from_device(device_id)
+                    patient_name = "Un patient"
+                    if patient_id:
+                        profile = get_user_profile(patient_id)
+                        patient_name = profile.get("display_name") or profile.get("email") or "Un patient"
+                    send_alert_emails_for_new_alert(
+                        device_id=device_id,
+                        metric=breach["metric"],
+                        operator=breach["operator"],
+                        value=breach["value"],
+                        threshold=breach["threshold"],
+                        patient_name=patient_name,
+                    )
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).warning("Failed to send alert emails for device %s: %s", device_id, e)
 
     return durable

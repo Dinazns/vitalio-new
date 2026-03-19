@@ -432,6 +432,100 @@
     margin: 0 0 1rem 0;
 }
 
+.caregiver-alert-resolution {
+    font-size: 0.875rem;
+    color: #047857;
+    background: #ecfdf5;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    margin: 0.75rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.caregiver-alert-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.caregiver-alert-resolve-btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #047857 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
+    }
+}
+
+.caregiver-alert-resolve-form {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #fecaca;
+}
+
+.caregiver-alert-resolve-hint {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0 0 0.5rem 0;
+}
+
+.caregiver-alert-resolve-input {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 0.5rem;
+
+    &:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+    }
+}
+
+.caregiver-alert-error {
+    font-size: 0.8rem;
+    color: #b91c1c;
+    margin: 0 0 0.5rem 0;
+}
+
+.caregiver-alert-resolve-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.caregiver-alert-resolve-submit {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #047857 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+}
+
 .caregiver-alert-view-btn {
     padding: 0.5rem 1.25rem;
     font-size: 0.875rem;

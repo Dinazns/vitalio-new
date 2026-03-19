@@ -120,6 +120,18 @@
   color: #64748b;
 }
 
+.ml-panel--summary {
+  border-color: #c7d2fe;
+  background: linear-gradient(to bottom, #fafbff, #fff);
+}
+
+.ml-summary-chart .recharts-bar-rectangle {
+  transition: opacity 0.2s;
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
 // Charts
 .ml-chart-wrap {
   margin-top: 0.5rem;

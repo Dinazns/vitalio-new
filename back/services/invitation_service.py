@@ -292,6 +292,163 @@ def log_link_audit_event(
     })
 
 
+def _get_metric_label(metric: str, operator: str = "") -> str:
+    """Return human-readable metric label for alert emails."""
+    labels = {
+        "heart_rate": "Fréquence cardiaque",
+        "spo2": "SpO2 (oxygénation)",
+        "temperature": "Température",
+    }
+    base = labels.get(metric, metric)
+    if operator == "lt":
+        return f"{base} (trop bas)"
+    if operator == "gt":
+        return f"{base} (trop élevé)"
+    return base
+
+
+def send_alert_email(
+    recipient_email: str,
+    recipient_name: str,
+    patient_name: str,
+    metric: str,
+    operator: str,
+    value: float,
+    threshold: float,
+    is_doctor: bool = True,
+) -> None:
+    """
+    Send health alert email to doctor or caregiver.
+    """
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASSWORD:
+        logger.warning("SMTP non configuré - email alerte non envoyé vers %s", recipient_email)
+        return
+
+    metric_label = _get_metric_label(metric, operator)
+    value_str = f"{value:.1f}" if isinstance(value, (int, float)) else str(value)
+    threshold_str = f"{threshold:.1f}" if isinstance(threshold, (int, float)) else str(threshold)
+
+    if is_doctor:
+        subject = f"VitalIO - Alerte santé : {patient_name} - {metric_label}"
+        intro = f"Une alerte a été déclenchée pour le patient <strong>{patient_name}</strong>."
+        detail = f"Type de défaillance : <strong>{metric_label}</strong>. Valeur mesurée : {value_str} (seuil : {threshold_str})."
+    else:
+        subject = f"VitalIO - Alerte : état de santé de {patient_name}"
+        intro = f"L'état de santé de <strong>{patient_name}</strong> nécessite votre attention."
+        detail = f"Type de défaillance : <strong>{metric_label}</strong>. Valeur mesurée : {value_str} (seuil : {threshold_str})."
+
+    html_body = f"""
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 500px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #b91c1c;">VitalIO - Alerte santé</h2>
+  <p>Bonjour {recipient_name or 'Madame, Monsieur'},</p>
+  <p>{intro}</p>
+  <p>{detail}</p>
+  <p style="margin-top: 24px;">
+    <a href="{FRONTEND_URL.rstrip('/')}" style="display: inline-block; padding: 12px 24px; background: #2563eb; color: #fff !important; text-decoration: none; border-radius: 8px; font-weight: bold;">
+      Voir les détails sur VitalIO
+    </a>
+  </p>
+  <p style="color: #666; font-size: 14px;">Cordialement,<br/>L'équipe VitalIO</p>
+</body>
+</html>
+"""
+    msg = MIMEMultipart("related")
+    msg["Subject"] = subject
+    msg["From"] = EMAIL_FROM
+    msg["To"] = recipient_email
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+    def _send_async():
+        try:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(SMTP_USER, SMTP_PASSWORD)
+                server.sendmail(EMAIL_FROM, recipient_email, msg.as_string())
+            logger.info("Email alerte envoyé vers %s (patient: %s, métrique: %s)", recipient_email, patient_name, metric)
+        except Exception as e:
+            logger.exception("Envoi email alerte échoué vers %s: %s", recipient_email, e)
+
+    threading.Thread(target=_send_async, daemon=True).start()
+
+
+def send_alert_emails_for_new_alert(
+    device_id: str,
+    metric: str,
+    operator: str,
+    value: float,
+    threshold: float,
+    patient_name: str = "Un patient",
+) -> None:
+    """
+    Send alert emails to all doctors and caregivers of the patient.
+    Called when a new threshold alert is created.
+    """
+    from services.user_service import (
+        get_patient_id_from_device,
+        get_assigned_doctor_ids_for_patient,
+        get_assigned_caregiver_ids_for_patient,
+        get_user_profile,
+    )
+
+    patient_id = get_patient_id_from_device(device_id)
+    if not patient_id:
+        logger.warning("Impossible d'envoyer les emails d'alerte: patient inconnu pour device %s", device_id)
+        return
+
+    display_name = patient_name
+    if patient_name == "Un patient":
+        profile = get_user_profile(patient_id)
+        display_name = profile.get("display_name") or profile.get("email") or "Un patient"
+
+    doctor_ids = get_assigned_doctor_ids_for_patient(patient_id)
+    caregiver_ids = get_assigned_caregiver_ids_for_patient(patient_id)
+
+    for did in doctor_ids:
+        doc_profile = get_user_profile(did)
+        email = _normalize_email(doc_profile.get("email"))
+        if email:
+            name = doc_profile.get("display_name") or doc_profile.get("first_name") or ""
+            send_alert_email(
+                recipient_email=email,
+                recipient_name=name,
+                patient_name=display_name,
+                metric=metric,
+                operator=operator,
+                value=value,
+                threshold=threshold,
+                is_doctor=True,
+            )
+
+    for cid in caregiver_ids:
+        cg_profile = get_user_profile(cid)
+        email = _normalize_email(cg_profile.get("email"))
+        if email:
+            name = cg_profile.get("display_name") or cg_profile.get("first_name") or ""
+            send_alert_email(
+                recipient_email=email,
+                recipient_name=name,
+                patient_name=display_name,
+                metric=metric,
+                operator=operator,
+                value=value,
+                threshold=threshold,
+                is_doctor=False,
+            )
+
+
+def _normalize_email(email_raw) -> Optional[str]:
+    """Normalize and validate email for sending."""
+    if not email_raw or not isinstance(email_raw, str):
+        return None
+    s = str(email_raw).strip().lower()
+    return s if "@" in s and "." in s and len(s) > 5 else None
+
+
 def log_caregiver_audit_event(
     event_type: str,
     actor_user_id_auth: str,

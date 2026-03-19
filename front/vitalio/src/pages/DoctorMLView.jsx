@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
   BrainCircuit,
@@ -12,8 +13,10 @@ import {
   Stethoscope,
   Clock,
   ArrowRight,
+  Heart,
+  Phone,
 } from 'lucide-react'
-import { getMLModelInfo, getMLAnomalies, apiRequest } from '../services/api'
+import { getMLModelInfo, getMLAnomalies, getDoctorAlerts, getDoctorPatients, patchDoctorAlert, apiRequest } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
 
 const URGENCY_CONFIG = {
@@ -32,6 +35,12 @@ const STATUS_CONFIG = {
   pending:   { color: '#1d4ed8', bg: '#eff6ff', label: 'En attente' },
   validated: { color: '#047857', bg: '#ecfdf5', label: 'Validée' },
   rejected:  { color: '#94a3b8', bg: '#f8fafc', label: 'Rejetée' },
+}
+
+const DOCTOR_STATUS_CONFIG = {
+  PENDING:   { color: '#1d4ed8', bg: '#eff6ff', label: 'En attente' },
+  VALIDATED: { color: '#047857', bg: '#ecfdf5', label: 'Validée' },
+  REJECTED:  { color: '#94a3b8', bg: '#f8fafc', label: 'Rejetée' },
 }
 
 const formatTime = (iso) => {
@@ -83,20 +92,36 @@ function SuggestionCard({ anomaly }) {
 }
 
 export default function DoctorMLView() {
+  const navigate = useNavigate()
   const { getAccessTokenSilently } = useAuth0()
+  const [activeTab, setActiveTab] = useState('vital') // 'vital' | 'ml'
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modelInfo, setModelInfo] = useState(null)
   const [anomalies, setAnomalies] = useState([])
+  const [vitalAlerts, setVitalAlerts] = useState([])
+  const [patients, setPatients] = useState([])
+  const [vitalStatusFilter, setVitalStatusFilter] = useState('OPEN')
   const [statusFilter, setStatusFilter] = useState('')
   const [severityFilter, setSeverityFilter] = useState('critical')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [validatingId, setValidatingId] = useState(null)
+  const [validatingVitalId, setValidatingVitalId] = useState(null)
   const [retraining, setRetraining] = useState(false)
   const [retrainResult, setRetrainResult] = useState(null)
   const [expandedAnomaly, setExpandedAnomaly] = useState(null)
   const [toast, setToast] = useState(null)
+
+  const patientNames = React.useMemo(() => {
+    const m = {}
+    patients.forEach((p) => {
+      const key = p.id || p.patient_id
+      if (key) m[key] = p.display_name || p.patient_id
+      if (p.patient_id && p.patient_id !== key) m[p.patient_id] = p.display_name || p.patient_id
+    })
+    return m
+  }, [patients])
 
   const loadData = useCallback(async () => {
     try {
@@ -109,18 +134,22 @@ export default function DoctorMLView() {
       if (dateFrom) anomalyParams.from_date = dateFrom
       if (dateTo) anomalyParams.to_date = dateTo
 
-      const [mlInfo, anomalyRes] = await Promise.all([
+      const [mlInfo, anomalyRes, vitalRes, patientsRes] = await Promise.all([
         getMLModelInfo().catch(() => null),
         getMLAnomalies(token, anomalyParams).catch(() => ({ anomalies: [] })),
+        getDoctorAlerts(token, { status: vitalStatusFilter, limit: 100 }).catch(() => ({ alerts: [] })),
+        getDoctorPatients(token).catch(() => ({ patients: [] })),
       ])
       setModelInfo(mlInfo)
       setAnomalies(Array.isArray(anomalyRes.anomalies) ? anomalyRes.anomalies : [])
+      setVitalAlerts(Array.isArray(vitalRes.alerts) ? vitalRes.alerts : [])
+      setPatients(Array.isArray(patientsRes.patients) ? patientsRes.patients : [])
     } catch (e) {
       setError(e.message || 'Erreur de chargement')
     } finally {
       setLoading(false)
     }
-  }, [getAccessTokenSilently, statusFilter, severityFilter, dateFrom, dateTo])
+  }, [getAccessTokenSilently, statusFilter, severityFilter, dateFrom, dateTo, vitalStatusFilter])
 
   useEffect(() => { loadData() }, [loadData])
 
@@ -150,6 +179,27 @@ export default function DoctorMLView() {
     }
   }
 
+  const handleValidateVital = async (alertId, doctorStatus) => {
+    try {
+      setValidatingVitalId(alertId)
+      const token = await getAccessTokenSilently()
+      await patchDoctorAlert(token, alertId, doctorStatus)
+      setVitalAlerts((prev) =>
+        prev.map((a) =>
+          (a.alert_id === alertId) ? { ...a, doctor_status: doctorStatus } : a
+        )
+      )
+      setToast({
+        message: doctorStatus === 'VALIDATED' ? 'Alerte validée' : 'Alerte rejetée',
+        type: 'success',
+      })
+    } catch (e) {
+      setToast({ message: e.message || 'Erreur lors du traitement', type: 'error' })
+    } finally {
+      setValidatingVitalId(null)
+    }
+  }
+
   const handleRetrain = async () => {
     try {
       setRetraining(true)
@@ -176,8 +226,8 @@ export default function DoctorMLView() {
 
         <header className="ml-header">
           <div>
-            <h1><BrainCircuit size={28} /> Surveillance avancée</h1>
-            <p>Alertes critiques détectées par l&apos;IA. Validez ou rejetez les alertes pour optimiser le suivi.</p>
+            <h1><BrainCircuit size={28} /> Alertes</h1>
+            <p>Alertes vitales (FC, SpO2, température) et détection IA. Validez ou rejetez les alertes, prenez contact avec l&apos;aidant ou le patient.</p>
           </div>
           <div className="ml-header-actions">
             {modelInfo && (
@@ -212,9 +262,133 @@ export default function DoctorMLView() {
 
         {!loading && !error && (
           <>
+            <div className="ml-tabs">
+              <button
+                className={`ml-tab ${activeTab === 'vital' ? 'ml-tab--active' : ''}`}
+                onClick={() => setActiveTab('vital')}
+              >
+                <Heart size={18} /> Alertes vitales
+                {vitalAlerts.filter((a) => a.status === 'OPEN').length > 0 && (
+                  <span className="ml-tab-badge">{vitalAlerts.filter((a) => a.status === 'OPEN').length}</span>
+                )}
+              </button>
+              <button
+                className={`ml-tab ${activeTab === 'ml' ? 'ml-tab--active' : ''}`}
+                onClick={() => setActiveTab('ml')}
+              >
+                <BrainCircuit size={18} /> Alertes IA
+              </button>
+            </div>
+
+            {activeTab === 'vital' && (
+              <section className="ml-panel">
+                <div className="ml-anomaly-header">
+                  <h2><Heart size={18} /> Alertes vitales (seuils)</h2>
+                  <div className="ml-anomaly-filters">
+                    <div className="ml-filter-group">
+                      {['OPEN', 'ALL'].map((val) => (
+                        <button
+                          key={val}
+                          className={`ml-filter-btn ${vitalStatusFilter === val ? 'ml-filter-btn--active' : ''}`}
+                          onClick={() => setVitalStatusFilter(val)}
+                        >
+                          {val === 'OPEN' ? 'Ouvertes' : 'Toutes'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {vitalAlerts.length === 0 ? (
+                  <div className="ml-empty">
+                    <Info size={20} />
+                    <span>Aucune alerte vitale {vitalStatusFilter === 'OPEN' ? 'ouverte' : ''}.</span>
+                  </div>
+                ) : (
+                  <div className="ml-anomaly-table-wrap">
+                    <table className="ml-anomaly-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Patient</th>
+                          <th>Type de défaillance</th>
+                          <th>Valeur / Seuil</th>
+                          <th>Statut médecin</th>
+                          <th>Commentaire aidant</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {vitalAlerts.map((a) => {
+                          const dsCfg = DOCTOR_STATUS_CONFIG[a.doctor_status] || DOCTOR_STATUS_CONFIG.PENDING
+                          const patientName = patientNames[a.patient_id] || a.patient_id || '-'
+                          const value = a.latest_value ?? a.value ?? '-'
+                          const threshold = a.threshold ?? '-'
+                          return (
+                            <tr key={a.alert_id || a.device_id + a.metric}>
+                              <td>{formatTime(a.created_at || a.last_breach_at)}</td>
+                              <td>{patientName}</td>
+                              <td>{a.medical_label || a.metric}</td>
+                              <td className="ml-table-mono">{value} / {threshold}</td>
+                              <td>
+                                <span className="ml-level-badge" style={{ background: dsCfg.bg, color: dsCfg.color }}>
+                                  {dsCfg.label}
+                                </span>
+                              </td>
+                              <td className="ml-alert-comment">
+                                {a.caregiver_resolution_comment || '-'}
+                              </td>
+                              <td>
+                                <div className="ml-action-btns" style={{ flexWrap: 'wrap', gap: '0.35rem' }}>
+                                  {a.doctor_status === 'PENDING' && (
+                                    <>
+                                      <button
+                                        className="ml-action-btn ml-action-btn--validate"
+                                        onClick={() => handleValidateVital(a.alert_id, 'VALIDATED')}
+                                        disabled={validatingVitalId === a.alert_id}
+                                        title="Valider l'alerte"
+                                      >
+                                        <ThumbsUp size={15} />
+                                      </button>
+                                      <button
+                                        className="ml-action-btn ml-action-btn--reject"
+                                        onClick={() => handleValidateVital(a.alert_id, 'REJECTED')}
+                                        disabled={validatingVitalId === a.alert_id}
+                                        title="Rejeter l'alerte"
+                                      >
+                                        <ThumbsDown size={15} />
+                                      </button>
+                                    </>
+                                  )}
+                                  {a.doctor_status !== 'PENDING' && (
+                                    <span className="ml-table-validated">
+                                      {a.doctor_status === 'VALIDATED' ? 'Validée' : 'Rejetée'}
+                                    </span>
+                                  )}
+                                  {a.patient_id && (
+                                    <button
+                                      className="ml-action-btn ml-action-btn--contact"
+                                      onClick={() => navigate(`/doctor/patient/${encodeURIComponent(a.patient_id)}`)}
+                                      title="Prendre contact (voir patient, aidant)"
+                                    >
+                                      <Phone size={15} />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeTab === 'ml' && (
             <section className="ml-panel">
               <div className="ml-anomaly-header">
-                <h2><AlertTriangle size={18} /> Alertes cliniques</h2>
+                <h2><AlertTriangle size={18} /> Alertes cliniques (IA)</h2>
                 <div className="ml-anomaly-filters">
                   <div className="ml-filter-group">
                     {['', 'pending', 'validated', 'rejected'].map((val) => (
@@ -369,6 +543,7 @@ export default function DoctorMLView() {
                 </div>
               )}
             </section>
+            )}
           </>
         )}
       </div>

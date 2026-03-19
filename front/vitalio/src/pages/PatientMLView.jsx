@@ -11,7 +11,7 @@ import {
   Info,
 } from 'lucide-react'
 import {
-  LineChart, Line, AreaChart, Area,
+  LineChart, Line, AreaChart, Area, BarChart, Bar, Cell, LabelList,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import { getPatientData, getMLModelInfo } from '../services/api'
@@ -99,7 +99,24 @@ export default function PatientMLView() {
       .slice(-20)
       .reverse()
 
-    return { scoreSeries, counts, vitalSeries, anomalies, total: withScore.length }
+    // Récapitulatif global : dernières mesures pour le graphique patient
+    const recent = measurements
+      .filter((m) => m.heart_rate != null || m.spo2 != null || m.temperature != null)
+      .slice(-14)
+      .reverse() // [0] = plus récent
+    const latest = (key) => {
+      const m = recent.find((x) => x[key] != null)
+      return m ? Number(m[key]) : null
+    }
+    const summaryBars = [
+      { nom: 'Fréquence cardiaque', valeur: latest('heart_rate'), unite: 'bpm', couleur: '#b91c1c', zoneNormale: [60, 100] },
+      { nom: 'Oxygène dans le sang', valeur: latest('spo2'), unite: '%', couleur: '#1d4ed8', zoneNormale: [95, 100] },
+      { nom: 'Température', valeur: latest('temperature'), unite: '°C', couleur: '#b45309', zoneNormale: [36.5, 37.5] },
+    ]
+      .filter((b) => b.valeur != null)
+      .map((b) => ({ ...b, label: b.unite === '°C' ? `${Number(b.valeur).toFixed(1)} ${b.unite}` : `${b.valeur} ${b.unite}` }))
+
+    return { scoreSeries, counts, vitalSeries, anomalies, total: withScore.length, summaryBars }
   }, [measurements])
 
   const CustomTooltip = ({ active, payload }) => {
@@ -166,6 +183,48 @@ export default function PatientMLView() {
               </article>
             </section>
 
+            {mlData.summaryBars.length > 0 && (
+              <section className="ml-panel ml-panel--summary">
+                <h2><Activity size={18} /> Vue d'ensemble de mes dernières mesures</h2>
+                <p className="ml-panel-sub">Valeurs les plus récentes de vos constantes vitales.</p>
+                <div className="ml-chart-wrap ml-summary-chart">
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart
+                      data={mlData.summaryBars}
+                      layout="vertical"
+                      margin={{ top: 10, right: 50, left: 0, bottom: 10 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 11 }} domain={[0, 'auto']} />
+                      <YAxis type="category" dataKey="nom" width={160} tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null
+                          const d = payload[0].payload
+                          const afficher = d.unite === '°C' ? Number(d.valeur).toFixed(1) : d.valeur
+                          return (
+                            <div className="ml-chart-tooltip">
+                              <p className="ml-chart-tooltip-time">{d.nom}</p>
+                              <p><strong>{afficher} {d.unite}</strong></p>
+                              <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                Zone habituelle : {d.zoneNormale[0]}–{d.zoneNormale[1]} {d.unite}
+                              </p>
+                            </div>
+                          )
+                        }}
+                      />
+                      <Bar dataKey="valeur" radius={[0, 4, 4, 0]}>
+                        {mlData.summaryBars.map((entry, i) => (
+                          <Cell key={i} fill={entry.couleur} />
+                        ))}
+                        <LabelList dataKey="label" position="right" />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </section>
+            )}
+
             {mlData.scoreSeries.length === 0 && (
               <div className="ml-panel ml-panel--info">
                 <Info size={20} />
@@ -175,7 +234,6 @@ export default function PatientMLView() {
 
             {mlData.scoreSeries.length > 0 && (
               <>
-                {}
                 <section className="ml-panel">
                   <h2><Activity size={18} /> Score d'anomalie dans le temps</h2>
                   <p className="ml-panel-sub">Plus le score est élevé, plus la mesure est inhabituielle.</p>
@@ -224,7 +282,6 @@ export default function PatientMLView() {
                   </div>
                 </section>
 
-                {}
                 {mlData.anomalies.length > 0 && (
                   <section className="ml-panel">
                     <h2><AlertTriangle size={18} /> Dernières anomalies détectées</h2>

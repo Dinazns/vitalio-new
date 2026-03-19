@@ -94,7 +94,7 @@ function AppRoutes() {
         } 
       />
       <Route
-        path="/doctor/analyses"
+        path="/doctor/alertes"
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['doctor', 'medecin', 'Superuser']}>
