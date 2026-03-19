@@ -27,7 +27,7 @@ CA_CERT_PATH=os.getenv("MQTT_CA_CERT","./mosquitto/certs/ca.crt")
 U_ID=os.getenv("DEVICE_ID","SIM-ESP32-002")
 TOPIC=f"vitalio/dev/{U_ID}/measurements"
 
-MONGODB_URI=os.getenv("MONGODB_URI","mongodb://localhost:27017")
+MONGODB_URI=os.getenv("MONGODB_URI")
 MONGODB_MEDICAL_DB=os.getenv("MONGODB_MEDICAL_DB","Vitalio_Medical")
 MONGODB_MEASUREMENTS_COLLECTION=os.getenv("MONGODB_MEASUREMENTS_COLLECTION","measurements")
 MONGODB_DIRECT_WRITE_ENABLED=os.getenv("MONGODB_DIRECT_WRITE_ENABLED","true").lower()=="true"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
@@ -10,6 +10,7 @@ import {
   Home,
   Stethoscope,
 } from 'lucide-react'
+import { getDoctorAlerts } from '../services/api'
 
 const NAV_ITEMS = [
   { to: '/doctor', icon: LayoutDashboard, label: 'Patients', end: true },
@@ -29,8 +30,25 @@ function getDisplayRole() {
 
 export default function DoctorLayout({ children }) {
   const navigate = useNavigate()
-  const { logout, user } = useAuth0()
+  const { logout, user, getAccessTokenSilently } = useAuth0()
   const [collapsed, setCollapsed] = useState(false)
+  const [criticalCount, setCriticalCount] = useState(0)
+
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const token = await getAccessTokenSilently()
+        const res = await getDoctorAlerts(token, { status: 'OPEN', limit: 500 })
+        const count = Array.isArray(res.alerts) ? res.alerts.length : 0
+        if (mounted) setCriticalCount(count)
+      } catch {
+        if (mounted) setCriticalCount(0)
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [getAccessTokenSilently])
 
   const handleLogout = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
@@ -80,6 +98,9 @@ export default function DoctorLayout({ children }) {
             >
               <Icon size={20} />
               {!collapsed && <span>{label}</span>}
+              {!collapsed && to === '/doctor/alertes' && criticalCount > 0 && (
+                <span className="sidebar-badge sidebar-badge--critical">{criticalCount}</span>
+              )}
             </NavLink>
           ))}
         </nav>

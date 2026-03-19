@@ -13,6 +13,10 @@
     position: relative;
     overflow: hidden;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+
+    @media (max-width: 480px) {
+        padding: 1rem;
+    }
 }
 
 // Animated Background Effects
@@ -147,6 +151,11 @@
     object-fit: contain;
     margin-bottom: 1rem;
     animation: logo-pulse 3s ease-in-out infinite;
+
+    @media (max-width: 480px) {
+        width: 80px;
+        height: 80px;
+    }
 }
 
 @keyframes logo-pulse {
@@ -169,6 +178,10 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 0.5rem;
+
+    @media (max-width: 480px) {
+        font-size: 1.875rem;
+    }
 }
 
 .login-subtitle {
@@ -471,4 +484,10 @@
     font-size: 0.85rem;
     position: relative;
     z-index: 10;
+
+    @media (max-width: 480px) {
+        font-size: 0.75rem;
+        margin-top: 1.5rem;
+        padding: 0 0.5rem;
+    }
 }

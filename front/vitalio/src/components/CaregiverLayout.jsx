@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink, useNavigate, useParams, Outlet, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Home,
 } from 'lucide-react'
+import { getCaregiverAlerts } from '../services/api'
 
 const ROLE_DISPLAY = { caregiver: 'Aidant', aidant: 'Aidant' }
 
@@ -26,8 +27,25 @@ export default function CaregiverLayout({ children }) {
   const { patientId } = useParams()
   const { pathname } = useLocation()
   const base = pathname.startsWith('/family') ? '/family' : '/caregiver'
-  const { logout, user } = useAuth0()
+  const { logout, user, getAccessTokenSilently } = useAuth0()
   const [collapsed, setCollapsed] = useState(false)
+  const [criticalCount, setCriticalCount] = useState(0)
+
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const token = await getAccessTokenSilently()
+        const res = await getCaregiverAlerts(token, { status: 'OPEN', limit: 500 })
+        const count = Array.isArray(res.alerts) ? res.alerts.length : 0
+        if (mounted) setCriticalCount(count)
+      } catch {
+        if (mounted) setCriticalCount(0)
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [getAccessTokenSilently])
 
   const handleLogout = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
@@ -77,6 +95,9 @@ export default function CaregiverLayout({ children }) {
           >
             <Heart size={20} />
             {!collapsed && <span>Mon proche</span>}
+            {!collapsed && criticalCount > 0 && (
+              <span className="sidebar-badge sidebar-badge--critical">{criticalCount}</span>
+            )}
           </NavLink>
           {patientId && (
             <NavLink

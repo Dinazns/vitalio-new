@@ -9,12 +9,13 @@ import {
   TrendingUp,
   Activity,
   Info,
+  Sparkles,
 } from 'lucide-react'
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, Cell, LabelList,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
-import { getPatientData, getMLModelInfo } from '../services/api'
+import { getPatientData, getMLModelInfo, getPatientWeeklyAnalysis } from '../services/api'
 import PatientLayout from '../components/PatientLayout'
 
 const LEVEL_CONFIG = {
@@ -35,12 +36,19 @@ const formatShort = (iso) => {
   return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit' })
 }
 
+const formatWeekLabel = (iso) => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return d.toLocaleString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
 export default function PatientMLView() {
   const { getAccessTokenSilently } = useAuth0()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [measurements, setMeasurements] = useState([])
   const [modelInfo, setModelInfo] = useState(null)
+  const [weeklyData, setWeeklyData] = useState(null)
 
   useEffect(() => {
     let mounted = true
@@ -49,13 +57,15 @@ export default function PatientMLView() {
         setLoading(true)
         setError('')
         const token = await getAccessTokenSilently()
-        const [data, mlInfo] = await Promise.all([
+        const [data, mlInfo, weekly] = await Promise.all([
           getPatientData(token),
           getMLModelInfo().catch(() => null),
+          getPatientWeeklyAnalysis(token).catch(() => ({ measurements: [], summary: null })),
         ])
         if (mounted) {
           setMeasurements(Array.isArray(data.measurements) ? data.measurements : [])
           setModelInfo(mlInfo)
+          setWeeklyData(weekly)
         }
       } catch (e) {
         if (mounted) setError(e.message || 'Erreur de chargement')
@@ -116,7 +126,26 @@ export default function PatientMLView() {
       .filter((b) => b.valeur != null)
       .map((b) => ({ ...b, label: b.unite === '°C' ? `${Number(b.valeur).toFixed(1)} ${b.unite}` : `${b.valeur} ${b.unite}` }))
 
-    return { scoreSeries, counts, vitalSeries, anomalies, total: withScore.length, summaryBars }
+    // Données de la semaine pour le graphique en courbes (7 derniers jours)
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+    const weekSeries = measurements
+      .filter((m) => {
+        const ts = m.timestamp || m.measured_at
+        if (!ts) return false
+        return new Date(ts).getTime() >= sevenDaysAgo
+      })
+      .filter((m) => m.heart_rate != null || m.spo2 != null || m.temperature != null)
+      .slice()
+      .reverse()
+      .map((m) => ({
+        timestamp: formatShort(m.timestamp || m.measured_at),
+        fullTime: formatWeekLabel(m.timestamp || m.measured_at),
+        heart_rate: m.heart_rate,
+        spo2: m.spo2,
+        temperature: m.temperature != null ? Number(m.temperature) : null,
+      }))
+
+    return { scoreSeries, counts, vitalSeries, anomalies, total: withScore.length, summaryBars, weekSeries }
   }, [measurements])
 
   const CustomTooltip = ({ active, payload }) => {
@@ -183,47 +212,50 @@ export default function PatientMLView() {
               </article>
             </section>
 
-            {mlData.summaryBars.length > 0 && (
-              <section className="ml-panel ml-panel--summary">
-                <h2><Activity size={18} /> Vue d'ensemble de mes dernières mesures</h2>
-                <p className="ml-panel-sub">Valeurs les plus récentes de vos constantes vitales.</p>
-                <div className="ml-chart-wrap ml-summary-chart">
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart
-                      data={mlData.summaryBars}
-                      layout="vertical"
-                      margin={{ top: 10, right: 50, left: 0, bottom: 10 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                      <XAxis type="number" tick={{ fontSize: 11 }} domain={[0, 'auto']} />
-                      <YAxis type="category" dataKey="nom" width={160} tick={{ fontSize: 12 }} />
-                      <Tooltip
-                        content={({ active, payload }) => {
-                          if (!active || !payload?.length) return null
-                          const d = payload[0].payload
-                          const afficher = d.unite === '°C' ? Number(d.valeur).toFixed(1) : d.valeur
-                          return (
-                            <div className="ml-chart-tooltip">
-                              <p className="ml-chart-tooltip-time">{d.nom}</p>
-                              <p><strong>{afficher} {d.unite}</strong></p>
-                              <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                Zone habituelle : {d.zoneNormale[0]}–{d.zoneNormale[1]} {d.unite}
-                              </p>
-                            </div>
-                          )
-                        }}
-                      />
-                      <Bar dataKey="valeur" radius={[0, 4, 4, 0]}>
-                        {mlData.summaryBars.map((entry, i) => (
-                          <Cell key={i} fill={entry.couleur} />
-                        ))}
-                        <LabelList dataKey="label" position="right" />
-                      </Bar>
-                    </BarChart>
+            {mlData.weekSeries.length > 0 && (
+              <section className="ml-panel">
+                <h2><TrendingUp size={18} /> Mes mesures de la semaine</h2>
+                <p className="ml-panel-sub">Évolution de vos constantes vitales sur les 7 derniers jours.</p>
+                <div className="ml-chart-wrap">
+                  <ResponsiveContainer width="100%" height={280}>
+                    <LineChart data={mlData.weekSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="timestamp" tick={{ fontSize: 11 }} />
+                      <YAxis yAxisId="vitals" tick={{ fontSize: 11 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend />
+                      <Line yAxisId="vitals" type="monotone" dataKey="heart_rate" name="Fréquence cardiaque (bpm)" stroke="#b91c1c" dot={false} strokeWidth={2} />
+                      <Line yAxisId="vitals" type="monotone" dataKey="spo2" name="Oxygène dans le sang (%)" stroke="#1d4ed8" dot={false} strokeWidth={2} />
+                      <Line yAxisId="vitals" type="monotone" dataKey="temperature" name="Température (°C)" stroke="#b45309" dot={false} strokeWidth={2} />
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               </section>
             )}
+
+            {weeklyData?.summary && (
+              <section className="ml-panel ml-panel--ai-summary">
+                <h2><Sparkles size={18} /> Résumé par l'IA</h2>
+                <p className="ml-panel-sub">Analyse automatique de vos mesures de la semaine.</p>
+                <div className="ml-ai-summary-content">
+                  <p className="ml-ai-summary-text">{weeklyData.summary.text}</p>
+                  <div className="ml-ai-summary-actions">
+                    <span className={`ml-ai-risk ml-ai-risk--${weeklyData.summary.risk_level}`}>
+                      {weeklyData.summary.risk_level === 'high' && 'Vigilance'}
+                      {weeklyData.summary.risk_level === 'moderate' && 'Surveillance'}
+                      {weeklyData.summary.risk_level === 'low' && 'Normal'}
+                      {weeklyData.summary.risk_level === 'minimal' && 'Rassurant'}
+                      {weeklyData.summary.risk_level === 'unknown' && '—'}
+                    </span>
+                    {weeklyData.summary.recommended_action && (
+                      <p className="ml-ai-recommendation">{weeklyData.summary.recommended_action}</p>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            
 
             {mlData.scoreSeries.length === 0 && (
               <div className="ml-panel ml-panel--info">

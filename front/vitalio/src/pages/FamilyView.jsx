@@ -22,6 +22,7 @@ export default function FamilyView() {
   const [resolutionComment, setResolutionComment] = useState('')
   const [resolutionError, setResolutionError] = useState('')
 
+  const hasNotifiedRef = React.useRef(false)
   useEffect(() => {
     let mounted = true
     const load = async () => {
@@ -55,6 +56,34 @@ export default function FamilyView() {
     }
   }, [getAccessTokenSilently, navigate])
 
+  // Notification navigateur au chargement si des alertes ouvertes
+  useEffect(() => {
+    if (loading || hasNotifiedRef.current) return
+    const openCount = alerts.filter((a) => a.status === 'OPEN').length
+    if (openCount > 0 && typeof window !== 'undefined' && 'Notification' in window) {
+      hasNotifiedRef.current = true
+      try {
+        if (Notification.permission === 'granted') {
+          new Notification('VitalIO - Alertes à surveiller', {
+            body: `${openCount} alerte(s) ouverte(s) pour votre proche.`,
+            icon: '/favicon.ico',
+          })
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then((p) => {
+            if (p === 'granted') {
+              new Notification('VitalIO - Alertes à surveiller', {
+                body: `${openCount} alerte(s) ouverte(s) pour votre proche.`,
+                icon: '/favicon.ico',
+              })
+            }
+          })
+        }
+      } catch (e) {
+        console.warn('Notification non disponible:', e)
+      }
+    }
+  }, [alerts, loading])
+
   const filteredPatients = patients
 
   const patientNames = useMemo(() => {
@@ -66,9 +95,17 @@ export default function FamilyView() {
     return m
   }, [patients])
 
-  const alertCount = filteredPatients.filter((p) => p.alert).length
+  const alertCount = Math.max(
+    alerts.filter((a) => a.status === 'OPEN').length,
+    filteredPatients.filter((p) => p.alert).length
+  )
 
   const handleResolveAlert = async (alertId) => {
+    const id = alertId || (alerts.find((a) => a.alert_id)?.alert_id)
+    if (!id) {
+      setResolutionError('Identifiant d\'alerte manquant. Veuillez rafraîchir la page.')
+      return
+    }
     const comment = resolutionComment.trim()
     if (!comment) {
       setResolutionError('Veuillez indiquer ce qui a été fait (ex. : vérification sur place, appel au médecin).')
@@ -77,10 +114,10 @@ export default function FamilyView() {
     try {
       setResolutionError('')
       const token = await getAccessTokenSilently()
-      const res = await patchCaregiverAlert(token, alertId, comment)
+      const res = await patchCaregiverAlert(token, id, comment)
       setAlerts((prev) =>
         prev.map((a) =>
-          (a.alert_id === alertId)
+          ((a.alert_id || a._id) === id)
             ? { ...a, caregiver_resolution_comment: res.caregiver_resolution_comment }
             : a
         )
@@ -127,8 +164,8 @@ export default function FamilyView() {
                 <TriangleAlert size={24} />
               </div>
               <div className="caregiver-stat-content">
-                <span className="caregiver-stat-value">{alertCount}</span>
-                <span className="caregiver-stat-label">Alertes actives</span>
+                <span className="caregiver-stat-value caregiver-stat-value--critical">{alertCount}</span>
+                <span className="caregiver-stat-label">Critiques</span>
               </div>
             </article>
           </section>
@@ -159,13 +196,13 @@ export default function FamilyView() {
                         <button
                           type="button"
                           className="caregiver-alert-resolve-btn"
-                          onClick={() => setResolvingAlertId(resolvingAlertId === a.alert_id ? null : a.alert_id)}
+                          onClick={() => setResolvingAlertId(resolvingAlertId === (a.alert_id || a._id) ? null : (a.alert_id || a._id))}
                         >
                           <CheckCircle2 size={14} /> Urgence résolue
                         </button>
                       )}
                     </div>
-                    {resolvingAlertId === a.alert_id && (
+                    {resolvingAlertId === (a.alert_id || a._id) && (
                       <div className="caregiver-alert-resolve-form">
                         <p className="caregiver-alert-resolve-hint">
                           Indiquez ce que vous avez fait (ex. : vérification sur place, appel au médecin).
@@ -189,7 +226,7 @@ export default function FamilyView() {
                           <button
                             type="button"
                             className="caregiver-alert-resolve-submit"
-                            onClick={() => handleResolveAlert(a.alert_id)}
+                            onClick={() => handleResolveAlert(a.alert_id || a._id)}
                           >
                             Enregistrer
                           </button>

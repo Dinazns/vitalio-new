@@ -153,6 +153,35 @@ export default function DoctorMLView() {
 
   useEffect(() => { loadData() }, [loadData])
 
+  // Notification navigateur au chargement si des alertes ouvertes (une fois par montage)
+  const hasNotifiedRef = React.useRef(false)
+  useEffect(() => {
+    if (loading || hasNotifiedRef.current) return
+    const openCount = vitalAlerts.filter((a) => a.status === 'OPEN').length
+    if (openCount > 0 && typeof window !== 'undefined' && 'Notification' in window) {
+      hasNotifiedRef.current = true
+      try {
+        if (Notification.permission === 'granted') {
+          new Notification('VitalIO - Alertes à traiter', {
+            body: `${openCount} alerte(s) vitale(s) ouverte(s) nécessitent votre attention.`,
+            icon: '/favicon.ico',
+          })
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then((p) => {
+            if (p === 'granted') {
+              new Notification('VitalIO - Alertes à traiter', {
+                body: `${openCount} alerte(s) vitale(s) ouverte(s) nécessitent votre attention.`,
+                icon: '/favicon.ico',
+              })
+            }
+          })
+        }
+      } catch (e) {
+        console.warn('Notification non disponible:', e)
+      }
+    }
+  }, [vitalAlerts, loading])
+
   const handleValidate = async (anomalyId, newStatus) => {
     try {
       setValidatingId(anomalyId)
@@ -319,7 +348,8 @@ export default function DoctorMLView() {
                       </thead>
                       <tbody>
                         {vitalAlerts.map((a) => {
-                          const dsCfg = DOCTOR_STATUS_CONFIG[a.doctor_status] || DOCTOR_STATUS_CONFIG.PENDING
+                          const docStatus = (a.doctor_status || 'PENDING').toUpperCase()
+                          const dsCfg = DOCTOR_STATUS_CONFIG[docStatus] || DOCTOR_STATUS_CONFIG.PENDING
                           const patientName = patientNames[a.patient_id] || a.patient_id || '-'
                           const value = a.latest_value ?? a.value ?? '-'
                           const threshold = a.threshold ?? '-'
@@ -339,7 +369,7 @@ export default function DoctorMLView() {
                               </td>
                               <td>
                                 <div className="ml-action-btns" style={{ flexWrap: 'wrap', gap: '0.35rem' }}>
-                                  {a.doctor_status === 'PENDING' && (
+                                  {(docStatus === 'PENDING') && (
                                     <>
                                       <button
                                         className="ml-action-btn ml-action-btn--validate"
@@ -359,10 +389,11 @@ export default function DoctorMLView() {
                                       </button>
                                     </>
                                   )}
-                                  {a.doctor_status !== 'PENDING' && (
-                                    <span className="ml-table-validated">
-                                      {a.doctor_status === 'VALIDATED' ? 'Validée' : 'Rejetée'}
-                                    </span>
+                                  {docStatus === 'VALIDATED' && (
+                                    <span className="ml-table-validated">Validée</span>
+                                  )}
+                                  {docStatus === 'REJECTED' && (
+                                    <span className="ml-table-validated">Rejetée</span>
                                   )}
                                   {a.patient_id && (
                                     <button
@@ -388,7 +419,7 @@ export default function DoctorMLView() {
             {activeTab === 'ml' && (
             <section className="ml-panel">
               <div className="ml-anomaly-header">
-                <h2><AlertTriangle size={18} /> Alertes cliniques (IA)</h2>
+                <h2><AlertTriangle size={18} /> Alertes (IA)</h2>
                 <div className="ml-anomaly-filters">
                   <div className="ml-filter-group">
                     {['', 'pending', 'validated', 'rejected'].map((val) => (

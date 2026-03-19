@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Filter, Mail, QrCode, Search, Send, TriangleAlert, Users } from 'lucide-react'
-import { createCabinetCode, createDoctorInvitation, getDoctorPatients } from '../services/api'
+import { createCabinetCode, createDoctorInvitation, getDoctorPatients, getDoctorAlerts } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
 
 function formatLastTime(timestamp) {
@@ -24,6 +24,7 @@ export default function DoctorView() {
   const [patientEmail, setPatientEmail] = useState('')
   const [sendEmail, setSendEmail] = useState(false)
   const [actionError, setActionError] = useState('')
+  const [criticalCount, setCriticalCount] = useState(0)
 
   useEffect(() => {
     let mounted = true
@@ -33,9 +34,13 @@ export default function DoctorView() {
         setLoading(true)
         setError('')
         const token = await getAccessTokenSilently()
-        const data = await getDoctorPatients(token)
+        const [data, alertsRes] = await Promise.all([
+          getDoctorPatients(token),
+          getDoctorAlerts(token, { status: 'OPEN', limit: 500 }).catch(() => ({ alerts: [] })),
+        ])
         if (mounted) {
           setPatients(Array.isArray(data.patients) ? data.patients : [])
+          setCriticalCount(Array.isArray(alertsRes.alerts) ? alertsRes.alerts.length : 0)
         }
       } catch (fetchError) {
         if (mounted) {
@@ -65,7 +70,7 @@ export default function DoctorView() {
     })
   }, [patients, query])
 
-  const alertCount = filteredPatients.filter((patient) => patient.alert).length
+  const alertCount = Math.max(criticalCount, filteredPatients.filter((patient) => patient.alert).length)
 
   const handleGenerateInvitation = async () => {
     try {
@@ -132,8 +137,8 @@ export default function DoctorView() {
                 <TriangleAlert size={24} />
               </div>
               <div className="doctor-stat-content">
-                <span className="doctor-stat-value">{alertCount}</span>
-                <span className="doctor-stat-label">Alertes actives</span>
+                <span className="doctor-stat-value doctor-stat-value--critical">{alertCount}</span>
+                <span className="doctor-stat-label">Critiques</span>
               </div>
             </article>
             <article className="doctor-stat-card doctor-stat-filtered">

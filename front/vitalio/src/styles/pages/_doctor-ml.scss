@@ -7,6 +7,14 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem 1.25rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.875rem 1rem;
+  }
 }
 
 .doctor-ml .ml-header {
@@ -19,6 +27,10 @@
   h1 {
     margin: 0;
     font-size: 1.75rem;
+
+    @media (max-width: 480px) {
+      font-size: 1.35rem;
+    }
     color: #0f172a;
     display: flex;
     align-items: center;

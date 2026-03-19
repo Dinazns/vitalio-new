@@ -119,6 +119,10 @@
     @media (min-width: 640px) {
         padding: 1.5rem 2rem 2rem;
     }
+
+    @media (max-width: 480px) {
+        padding: 0.875rem 1rem 1.5rem;
+    }
     @include custom-scrollbar;
 }
 
@@ -180,6 +184,10 @@
         font-weight: 700;
         color: #0f172a;
         line-height: 1.2;
+
+        &--critical {
+            color: #b91c1c;
+        }
     }
 
     .caregiver-stat-label {
@@ -388,8 +396,14 @@
         font-size: 1.0625rem;
         font-weight: 700;
         color: #b91c1c;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
     }
+}
+
+.caregiver-alerts-intro {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0 0 1rem 0;
 }
 
 .caregiver-alerts-list {
@@ -692,12 +706,22 @@
     background-color: #f8fafc; // slate-50
     padding-bottom: 5rem;
 
-    .family-header {
+    @media (max-width: 480px) {
+        padding-bottom: 6rem;
+    }
+
+        .family-header {
         background-color: white;
         border-bottom-left-radius: 1.5rem;
         border-bottom-right-radius: 1.5rem;
         box-shadow: $shadow-sm;
         padding: 1.5rem;
+
+        @media (max-width: 480px) {
+            padding: 1rem;
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+        }
         position: sticky;
         top: 0;
         z-index: 20;
@@ -733,6 +757,10 @@
             background: linear-gradient(to right, #8b5cf6, #d946ef); // violet-500 to fuchsia-500
             border-radius: 1rem;
             padding: 1.5rem;
+
+            @media (max-width: 480px) {
+                padding: 1rem;
+            }
             color: white;
             box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);
             position: relative;
@@ -776,6 +804,10 @@
                 .details h2 {
                     font-size: 1.5rem;
                     font-weight: 700;
+
+                    @media (max-width: 480px) {
+                        font-size: 1.25rem;
+                    }
                 }
 
                 .status {
@@ -818,6 +850,10 @@
 
     .timeline-section {
         padding: 2rem 1.5rem;
+
+        @media (max-width: 480px) {
+            padding: 1.25rem 1rem;
+        }
 
         h3 {
             font-size: 1.125rem;
@@ -930,6 +966,11 @@
         display: flex;
         justify-content: center;
         padding: 0 1.5rem;
+
+        @media (max-width: 480px) {
+            padding: 0 1rem;
+            bottom: 1rem;
+        }
 
         button {
             width: 100%;

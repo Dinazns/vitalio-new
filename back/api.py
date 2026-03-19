@@ -62,7 +62,7 @@ app.config['JSON_SORT_KEYS'] = False
 
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:5174"],
+        "origins": ["https://vitalio-new.vercel.app"],
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True,
@@ -137,6 +137,10 @@ def get_my_profile():
         if name:
             profile_data["first_name"], profile_data["last_name"] = _split_display_name(name)
     doctor_ids = get_assigned_doctor_ids_for_patient(user_id_auth)
+    device_ids = get_device_ids(user_id_auth)
+    measurements_count = count_patient_measurements_total(device_ids)
+    profile_data["has_measurements"] = measurements_count > 0
+    profile_data["has_doctor"] = len(doctor_ids) > 0
     doctors = []
     for idx, did in enumerate(doctor_ids):
         doc_profile = get_user_profile(did)
@@ -384,6 +388,95 @@ def get_patient_data():
         raise DatabaseError({"code": "device_not_found", "message": "No device record found for authenticated user"}, 404)
     measurements = get_device_measurements(device_id)
     return jsonify({"device_id": device_id, "measurements": measurements, "measurement_count": len(measurements)}), 200
+
+
+def _build_patient_summary(analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Build a patient-friendly summary from ml_module analyze_patient_vitals result."""
+    if analysis.get("status") == "insufficient_data":
+        return {
+            "text": "Pas assez de données pour générer un résumé. Continuez à enregistrer vos mesures.",
+            "risk_level": "unknown",
+            "recommended_action": "Enregistrer plus de mesures cette semaine.",
+        }
+    vitals = analysis.get("vitals", {})
+    texts = []
+    max_severity = 0
+    severity_map = {"critical": 3, "warning": 2, "mild": 1, "moderate": 1, "negligible": 0, "normal": 0}
+    labels_fr = {"heart_rate": "Fréquence cardiaque", "spo2": "Oxygène dans le sang", "temperature": "Température"}
+    for feat, info in vitals.items():
+        if info.get("status") != "ok":
+            continue
+        stats = info.get("statistics", {})
+        trend = info.get("trend", {})
+        unit = info.get("unit", "")
+        label = labels_fr.get(feat, feat)
+        mean_val = stats.get("mean")
+        if mean_val is not None:
+            txt = f"{label} : moyenne {mean_val:.0f} {unit}" if unit in ("bpm", "%") else f"{label} : moyenne {mean_val:.1f} {unit}"
+            strength = trend.get("strength", "negligible")
+            direction = trend.get("direction", "")
+            if strength not in ("negligible", "normal") and direction:
+                dir_fr = "à la hausse" if "up" in direction.lower() else "à la baisse"
+                txt += f", tendance {dir_fr}"
+            texts.append(txt)
+        for alert in info.get("clinical_alerts", []):
+            sev = severity_map.get(alert.get("severity", ""), 0)
+            if sev > max_severity:
+                max_severity = sev
+    if not texts:
+        return {
+            "text": "Vos constantes vitales de la semaine sont dans les plages habituelles.",
+            "risk_level": "minimal",
+            "recommended_action": "Continuez à surveiller vos mesures.",
+        }
+    summary_text = ". ".join(texts) + "."
+    if max_severity >= 3:
+        risk, action = "high", "Consultez votre médecin pour une évaluation."
+    elif max_severity >= 2:
+        risk, action = "moderate", "Surveillance renforcée recommandée."
+    elif max_severity >= 1:
+        risk, action = "low", "Surveillance standard."
+    else:
+        risk, action = "minimal", "Pas d'action particulière nécessaire."
+    return {"text": summary_text, "risk_level": risk, "recommended_action": action}
+
+
+@app.route("/api/me/weekly-analysis", methods=["GET"])
+@requires_auth
+@requires_role("patient")
+def get_patient_weekly_analysis():
+    """Return last 7 days of measurements + AI summary for patient view."""
+    device_id = get_device_id(g.user_id_auth)
+    if not device_id:
+        raise DatabaseError({"code": "device_not_found", "message": "No device record found for authenticated user"}, 404)
+    measurements = query_patient_measurements_for_devices(device_ids=[device_id], days=7, limit=500)
+    if not measurements:
+        return jsonify({
+            "device_id": device_id,
+            "measurements": [],
+            "measurement_count": 0,
+            "summary": {
+                "text": "Aucune mesure enregistrée cette semaine. Enregistrez vos constantes vitales pour obtenir une analyse.",
+                "risk_level": "unknown",
+                "recommended_action": "Enregistrer des mesures.",
+            },
+        }), 200
+    try:
+        analysis = ml_module.analyze_patient_vitals(measurements)
+        summary = _build_patient_summary(analysis)
+    except Exception as e:
+        logger.warning("Weekly analysis failed for patient: %s", e)
+        summary = {
+            "text": "Analyse en cours de chargement. Réessayez dans quelques instants.",
+            "risk_level": "unknown",
+            "recommended_action": "",
+        }
+    return jsonify({
+        "device_id": device_id,
+        "measurements": measurements,
+        "measurement_count": len(measurements),
+        "summary": summary,
+    }), 200
 
 
 @app.route("/api/me/measurements", methods=["POST"])
@@ -708,7 +801,9 @@ def get_caregiver_alerts():
     alerts = []
     for alert in cursor:
         out = format_alert_for_caregiver(dict(alert))
-        out["alert_id"] = str(alert["_id"]) if alert.get("_id") else None
+        oid = alert.get("_id")
+        out["alert_id"] = str(oid) if oid is not None else None
+        out.pop("_id", None)
         for k in ("created_at", "updated_at", "resolved_at", "first_breach_at", "last_breach_at", "caregiver_resolution_at"):
             v = out.get(k)
             if isinstance(v, datetime):

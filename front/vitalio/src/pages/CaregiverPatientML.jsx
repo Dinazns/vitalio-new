@@ -462,7 +462,7 @@ export default function CaregiverPatientML() {
                   )
                 })}
                 <StatCard
-                  label="Alertes cliniques"
+                  label="Alertes"
                   value={analysis.anomaly_summary?.total ?? 0}
                   unit=""
                   icon={AlertTriangle}

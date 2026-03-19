@@ -461,7 +461,7 @@ export default function DoctorPatientML() {
                   )
                 })}
                 <StatCard
-                  label="Alertes cliniques"
+                  label="Alertes"
                   value={analysis.anomaly_summary?.total ?? 0}
                   unit=""
                   icon={AlertTriangle}
@@ -955,7 +955,7 @@ export default function DoctorPatientML() {
             {/* Anomaly summary */}
             {analysis.anomaly_summary?.total > 0 && (
               <section className="pml-panel">
-                <h2><ShieldAlert size={18} /> Historique des alertes cliniques</h2>
+                <h2><ShieldAlert size={18} /> Historique des alertes</h2>
                 <div className="pml-anomaly-summary-grid">
                   <div className="pml-anomaly-count-card" style={{ borderColor: '#b45309' }}>
                     <span className="pml-count">{analysis.anomaly_summary.total}</span>

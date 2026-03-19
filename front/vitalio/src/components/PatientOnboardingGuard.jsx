@@ -22,7 +22,11 @@ export default function PatientOnboardingGuard({ children }) {
       try {
         const token = await getAccessTokenSilently()
         const res = await getPatientProfile(token)
-        const completed = res?.profile?.onboarding_completed === true
+        const onboardingCompleted = res?.profile?.onboarding_completed === true
+        const hasMeasurements = res?.profile?.has_measurements === true
+        const hasDoctor = res?.profile?.has_doctor === true
+        // Skip onboarding for users who already have data and are linked to a doctor (existing users)
+        const completed = onboardingCompleted || (hasMeasurements && hasDoctor)
         if (mounted) {
           if (isOnboardingRoute && completed) {
             navigate('/patient', { replace: true })

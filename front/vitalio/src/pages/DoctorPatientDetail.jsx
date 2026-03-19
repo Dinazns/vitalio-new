@@ -156,7 +156,7 @@ export default function DoctorPatientDetail() {
           <header className="doctor-header">
             <div className="doctor-header-left">
               <h1 className="doctor-title">Détail patient</h1>
-              <p className="doctor-subtitle">Constantes vitales, tendances et commentaires cliniques</p>
+              <p className="doctor-subtitle">Constantes vitales, tendances et commentaires</p>
             </div>
             <div className="header-actions">
               <button

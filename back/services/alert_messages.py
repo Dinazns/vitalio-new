@@ -76,14 +76,16 @@ def format_alert_for_caregiver(alert: Dict[str, Any]) -> Dict[str, Any]:
             out["lay_description"] = (
                 f"Le capteur indique {_v(value)} battements par minute. "
                 "C'est en dessous de la normale. Si la personne se sent mal ou si vous êtes inquiet, "
-                "contactez le médecin ou composez le 15."
+                "Le médecin est déjà informé. Appelez le SAMU en composant le 15."
+                "Sinon indiquez que la situation est résolue."
             )
         else:
             out["summary"] = "Le cœur bat très vite"
             out["lay_description"] = (
                 f"Le capteur indique {_v(value)} battements par minute. "
-                "C'est au-dessus de la normale. Demandez à la personne si elle ressent des palpitations ou un malaise. "
-                "En cas de persistance, prévenez le médecin."
+                "C'est au-dessus de la normale. Demandez à la personne si elle ressent des palpitations ou un malaise."
+                "Le médecin est déjà informé. Appelez le SAMU en composant le 15."
+                "Sinon indiquez que la situation est résolue."
             )
     elif metric == "spo2":
         out["summary"] = "L'oxygénation du sang est basse"
@@ -91,6 +93,8 @@ def format_alert_for_caregiver(alert: Dict[str, Any]) -> Dict[str, Any]:
             f"Le capteur indique {_v(value)} % d'oxygène dans le sang. "
             "C'est en dessous de la normale. Prévenez le médecin. "
             "Assurez-vous que la personne respire bien et n'est pas en position allongée trop longtemps."
+            "Le médecin est déjà informé. Appelez le SAMU en composant le 15."
+            "Sinon indiquez que la situation est résolue."
         )
     elif metric == "temperature":
         if operator == "lt":
@@ -98,14 +102,16 @@ def format_alert_for_caregiver(alert: Dict[str, Any]) -> Dict[str, Any]:
             out["lay_description"] = (
                 f"Le capteur indique {_v(value)} °C. "
                 "Couvrez la personne et vérifiez qu'elle n'a pas froid. "
-                "Si elle est confuse ou tremble beaucoup, contactez le médecin."
+                "Si elle est confuse ou tremble beaucoup, appelez le SAMU en composant le 15."
+                "Sinon indiquez que la situation est résolue."
             )
         else:
             out["summary"] = "La personne a de la fièvre"
             out["lay_description"] = (
                 f"Le capteur indique {_v(value)} °C. "
                 "Proposez à boire, déshabillez légèrement si besoin. "
-                "Si la fièvre monte ou dure plus de 24 h, prévenez le médecin."
+                "Si la fièvre monte ou dure plus de 24 h, appelez le SAMU en composant le 15."
+                "Sinon indiquez que la situation est résolue."
             )
     else:
         out["summary"] = "Une mesure est hors de la normale"

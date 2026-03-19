@@ -28,6 +28,12 @@ export async function getPatientData(accessToken) {
   })
 }
 
+export async function getPatientWeeklyAnalysis(accessToken) {
+  return apiRequest('/api/me/weekly-analysis', accessToken, {
+    method: 'GET',
+  })
+}
+
 export async function getPatientProfile(accessToken) {
   return apiRequest('/api/me/profile', accessToken, {
     method: 'GET',

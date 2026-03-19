@@ -16715,3 +16715,518 @@ To fix this, use `chmod 0700 /mosquitto/passwd`.
 2026-03-19 22:28:55: Received PINGREQ from SIM-ESP32-001
 2026-03-19 22:28:55: Sending PINGRESP to SIM-ESP32-001
 2026-03-19 22:29:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:29:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1199, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:29:25: Sending PUBACK to SIM-ESP32-001 (m1199, rc0)
+2026-03-19 22:29:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1200, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:29:55: Sending PUBACK to SIM-ESP32-001 (m1200, rc0)
+2026-03-19 22:29:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:29:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:30:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:30:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1201, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:30:25: Sending PUBACK to SIM-ESP32-001 (m1201, rc0)
+2026-03-19 22:30:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1202, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:30:55: Sending PUBACK to SIM-ESP32-001 (m1202, rc0)
+2026-03-19 22:30:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:30:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:31:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:31:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1203, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:31:25: Sending PUBACK to SIM-ESP32-001 (m1203, rc0)
+2026-03-19 22:31:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1204, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:31:55: Sending PUBACK to SIM-ESP32-001 (m1204, rc0)
+2026-03-19 22:31:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:31:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:32:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:32:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1205, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:32:25: Sending PUBACK to SIM-ESP32-001 (m1205, rc0)
+2026-03-19 22:32:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1206, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:32:55: Sending PUBACK to SIM-ESP32-001 (m1206, rc0)
+2026-03-19 22:32:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:32:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:33:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:33:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1207, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:33:25: Sending PUBACK to SIM-ESP32-001 (m1207, rc0)
+2026-03-19 22:33:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1208, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:33:55: Sending PUBACK to SIM-ESP32-001 (m1208, rc0)
+2026-03-19 22:33:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:33:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:34:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1209, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:34:25: Sending PUBACK to SIM-ESP32-001 (m1209, rc0)
+2026-03-19 22:34:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:34:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1210, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:34:55: Sending PUBACK to SIM-ESP32-001 (m1210, rc0)
+2026-03-19 22:34:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:34:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:35:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1211, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:35:25: Sending PUBACK to SIM-ESP32-001 (m1211, rc0)
+2026-03-19 22:35:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:35:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1212, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:35:55: Sending PUBACK to SIM-ESP32-001 (m1212, rc0)
+2026-03-19 22:35:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:35:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:36:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1213, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:36:25: Sending PUBACK to SIM-ESP32-001 (m1213, rc0)
+2026-03-19 22:36:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:36:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1214, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:36:55: Sending PUBACK to SIM-ESP32-001 (m1214, rc0)
+2026-03-19 22:36:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:36:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:37:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1215, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:37:25: Sending PUBACK to SIM-ESP32-001 (m1215, rc0)
+2026-03-19 22:37:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:37:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1216, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:37:55: Sending PUBACK to SIM-ESP32-001 (m1216, rc0)
+2026-03-19 22:37:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:37:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:38:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1217, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:38:25: Sending PUBACK to SIM-ESP32-001 (m1217, rc0)
+2026-03-19 22:38:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:38:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1218, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:38:55: Sending PUBACK to SIM-ESP32-001 (m1218, rc0)
+2026-03-19 22:38:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:38:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:39:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1219, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:39:25: Sending PUBACK to SIM-ESP32-001 (m1219, rc0)
+2026-03-19 22:39:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:39:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1220, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:39:55: Sending PUBACK to SIM-ESP32-001 (m1220, rc0)
+2026-03-19 22:39:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:39:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:40:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1221, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:40:25: Sending PUBACK to SIM-ESP32-001 (m1221, rc0)
+2026-03-19 22:40:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:40:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1222, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:40:55: Sending PUBACK to SIM-ESP32-001 (m1222, rc0)
+2026-03-19 22:40:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:40:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:41:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1223, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:41:25: Sending PUBACK to SIM-ESP32-001 (m1223, rc0)
+2026-03-19 22:41:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:41:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1224, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:41:55: Sending PUBACK to SIM-ESP32-001 (m1224, rc0)
+2026-03-19 22:41:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:41:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:42:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1225, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:42:25: Sending PUBACK to SIM-ESP32-001 (m1225, rc0)
+2026-03-19 22:42:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:42:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1226, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 22:42:55: Sending PUBACK to SIM-ESP32-001 (m1226, rc0)
+2026-03-19 22:42:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:42:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:43:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1227, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 22:43:25: Sending PUBACK to SIM-ESP32-001 (m1227, rc0)
+2026-03-19 22:43:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:43:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1228, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:43:55: Sending PUBACK to SIM-ESP32-001 (m1228, rc0)
+2026-03-19 22:43:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:43:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:44:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1229, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:44:25: Sending PUBACK to SIM-ESP32-001 (m1229, rc0)
+2026-03-19 22:44:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:44:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1230, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:44:55: Sending PUBACK to SIM-ESP32-001 (m1230, rc0)
+2026-03-19 22:44:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:44:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:45:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1231, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:45:25: Sending PUBACK to SIM-ESP32-001 (m1231, rc0)
+2026-03-19 22:45:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:45:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1232, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 22:45:55: Sending PUBACK to SIM-ESP32-001 (m1232, rc0)
+2026-03-19 22:45:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:45:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:46:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1233, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:46:25: Sending PUBACK to SIM-ESP32-001 (m1233, rc0)
+2026-03-19 22:46:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:46:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1234, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:46:55: Sending PUBACK to SIM-ESP32-001 (m1234, rc0)
+2026-03-19 22:46:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:46:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:47:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1235, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 22:47:25: Sending PUBACK to SIM-ESP32-001 (m1235, rc0)
+2026-03-19 22:47:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:47:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1236, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:47:55: Sending PUBACK to SIM-ESP32-001 (m1236, rc0)
+2026-03-19 22:47:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:47:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:48:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1237, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 22:48:25: Sending PUBACK to SIM-ESP32-001 (m1237, rc0)
+2026-03-19 22:48:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:48:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1238, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:48:55: Sending PUBACK to SIM-ESP32-001 (m1238, rc0)
+2026-03-19 22:48:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:48:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:49:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1239, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:49:25: Sending PUBACK to SIM-ESP32-001 (m1239, rc0)
+2026-03-19 22:49:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:49:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1240, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:49:55: Sending PUBACK to SIM-ESP32-001 (m1240, rc0)
+2026-03-19 22:49:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:49:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:50:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1241, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 22:50:25: Sending PUBACK to SIM-ESP32-001 (m1241, rc0)
+2026-03-19 22:50:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:50:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1242, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:50:55: Sending PUBACK to SIM-ESP32-001 (m1242, rc0)
+2026-03-19 22:50:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:50:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:51:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1243, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:51:25: Sending PUBACK to SIM-ESP32-001 (m1243, rc0)
+2026-03-19 22:51:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:51:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1244, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:51:55: Sending PUBACK to SIM-ESP32-001 (m1244, rc0)
+2026-03-19 22:51:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:51:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:52:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1245, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:52:25: Sending PUBACK to SIM-ESP32-001 (m1245, rc0)
+2026-03-19 22:52:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:52:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1246, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:52:55: Sending PUBACK to SIM-ESP32-001 (m1246, rc0)
+2026-03-19 22:52:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:52:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:53:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1247, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:53:25: Sending PUBACK to SIM-ESP32-001 (m1247, rc0)
+2026-03-19 22:53:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:53:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1248, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:53:55: Sending PUBACK to SIM-ESP32-001 (m1248, rc0)
+2026-03-19 22:53:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:53:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:54:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1249, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:54:25: Sending PUBACK to SIM-ESP32-001 (m1249, rc0)
+2026-03-19 22:54:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:54:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1250, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:54:55: Sending PUBACK to SIM-ESP32-001 (m1250, rc0)
+2026-03-19 22:54:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:54:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:55:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1251, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:55:25: Sending PUBACK to SIM-ESP32-001 (m1251, rc0)
+2026-03-19 22:55:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:55:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1252, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:55:55: Sending PUBACK to SIM-ESP32-001 (m1252, rc0)
+2026-03-19 22:55:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:55:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:56:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1253, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:56:25: Sending PUBACK to SIM-ESP32-001 (m1253, rc0)
+2026-03-19 22:56:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:56:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1254, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:56:55: Sending PUBACK to SIM-ESP32-001 (m1254, rc0)
+2026-03-19 22:56:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:56:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:57:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1255, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 22:57:25: Sending PUBACK to SIM-ESP32-001 (m1255, rc0)
+2026-03-19 22:57:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:57:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1256, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:57:55: Sending PUBACK to SIM-ESP32-001 (m1256, rc0)
+2026-03-19 22:57:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:57:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:58:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1257, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:58:25: Sending PUBACK to SIM-ESP32-001 (m1257, rc0)
+2026-03-19 22:58:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:58:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1258, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:58:55: Sending PUBACK to SIM-ESP32-001 (m1258, rc0)
+2026-03-19 22:58:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:58:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 22:59:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1259, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:59:25: Sending PUBACK to SIM-ESP32-001 (m1259, rc0)
+2026-03-19 22:59:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 22:59:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1260, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 22:59:55: Sending PUBACK to SIM-ESP32-001 (m1260, rc0)
+2026-03-19 22:59:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 22:59:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:00:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1261, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:00:25: Sending PUBACK to SIM-ESP32-001 (m1261, rc0)
+2026-03-19 23:00:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:00:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1262, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:00:55: Sending PUBACK to SIM-ESP32-001 (m1262, rc0)
+2026-03-19 23:00:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:00:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:01:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1263, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:01:25: Sending PUBACK to SIM-ESP32-001 (m1263, rc0)
+2026-03-19 23:01:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:01:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1264, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:01:55: Sending PUBACK to SIM-ESP32-001 (m1264, rc0)
+2026-03-19 23:01:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:01:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:02:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1265, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:02:25: Sending PUBACK to SIM-ESP32-001 (m1265, rc0)
+2026-03-19 23:02:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:02:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1266, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:02:55: Sending PUBACK to SIM-ESP32-001 (m1266, rc0)
+2026-03-19 23:02:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:02:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:03:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1267, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:03:25: Sending PUBACK to SIM-ESP32-001 (m1267, rc0)
+2026-03-19 23:03:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:03:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1268, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:03:55: Sending PUBACK to SIM-ESP32-001 (m1268, rc0)
+2026-03-19 23:03:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:03:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:04:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1269, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:04:25: Sending PUBACK to SIM-ESP32-001 (m1269, rc0)
+2026-03-19 23:04:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:04:55: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1270, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:04:55: Sending PUBACK to SIM-ESP32-001 (m1270, rc0)
+2026-03-19 23:04:55: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:04:55: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:05:25: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1271, 'vitalio/dev/SIM-ESP32-001/measurements', ... (208 bytes))
+2026-03-19 23:05:25: Sending PUBACK to SIM-ESP32-001 (m1271, rc0)
+2026-03-19 23:05:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1272, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:05:56: Sending PUBACK to SIM-ESP32-001 (m1272, rc0)
+2026-03-19 23:05:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:05:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:05:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:06:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1273, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:06:26: Sending PUBACK to SIM-ESP32-001 (m1273, rc0)
+2026-03-19 23:06:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1274, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:06:56: Sending PUBACK to SIM-ESP32-001 (m1274, rc0)
+2026-03-19 23:06:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:06:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:06:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:07:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1275, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:07:26: Sending PUBACK to SIM-ESP32-001 (m1275, rc0)
+2026-03-19 23:07:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1276, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:07:56: Sending PUBACK to SIM-ESP32-001 (m1276, rc0)
+2026-03-19 23:07:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:07:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:07:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:08:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1277, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:08:26: Sending PUBACK to SIM-ESP32-001 (m1277, rc0)
+2026-03-19 23:08:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1278, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:08:56: Sending PUBACK to SIM-ESP32-001 (m1278, rc0)
+2026-03-19 23:08:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:08:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:08:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:09:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1279, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:09:26: Sending PUBACK to SIM-ESP32-001 (m1279, rc0)
+2026-03-19 23:09:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1280, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:09:56: Sending PUBACK to SIM-ESP32-001 (m1280, rc0)
+2026-03-19 23:09:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:09:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:10:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:10:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1281, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:10:26: Sending PUBACK to SIM-ESP32-001 (m1281, rc0)
+2026-03-19 23:10:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1282, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:10:56: Sending PUBACK to SIM-ESP32-001 (m1282, rc0)
+2026-03-19 23:10:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:10:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:11:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:11:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1283, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:11:26: Sending PUBACK to SIM-ESP32-001 (m1283, rc0)
+2026-03-19 23:11:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1284, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:11:56: Sending PUBACK to SIM-ESP32-001 (m1284, rc0)
+2026-03-19 23:11:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:11:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:12:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:12:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1285, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:12:26: Sending PUBACK to SIM-ESP32-001 (m1285, rc0)
+2026-03-19 23:12:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1286, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:12:56: Sending PUBACK to SIM-ESP32-001 (m1286, rc0)
+2026-03-19 23:12:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:12:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:13:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:13:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1287, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:13:26: Sending PUBACK to SIM-ESP32-001 (m1287, rc0)
+2026-03-19 23:13:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1288, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:13:56: Sending PUBACK to SIM-ESP32-001 (m1288, rc0)
+2026-03-19 23:13:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:13:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:14:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:14:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1289, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:14:26: Sending PUBACK to SIM-ESP32-001 (m1289, rc0)
+2026-03-19 23:14:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1290, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:14:56: Sending PUBACK to SIM-ESP32-001 (m1290, rc0)
+2026-03-19 23:14:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:14:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:15:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:15:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1291, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:15:26: Sending PUBACK to SIM-ESP32-001 (m1291, rc0)
+2026-03-19 23:15:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1292, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:15:56: Sending PUBACK to SIM-ESP32-001 (m1292, rc0)
+2026-03-19 23:15:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:15:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:16:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:16:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1293, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:16:26: Sending PUBACK to SIM-ESP32-001 (m1293, rc0)
+2026-03-19 23:16:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1294, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:16:56: Sending PUBACK to SIM-ESP32-001 (m1294, rc0)
+2026-03-19 23:16:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:16:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:17:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:17:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1295, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:17:26: Sending PUBACK to SIM-ESP32-001 (m1295, rc0)
+2026-03-19 23:17:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1296, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:17:56: Sending PUBACK to SIM-ESP32-001 (m1296, rc0)
+2026-03-19 23:17:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:17:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:18:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:18:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1297, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:18:26: Sending PUBACK to SIM-ESP32-001 (m1297, rc0)
+2026-03-19 23:18:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1298, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:18:56: Sending PUBACK to SIM-ESP32-001 (m1298, rc0)
+2026-03-19 23:18:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:18:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:19:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:19:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1299, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:19:26: Sending PUBACK to SIM-ESP32-001 (m1299, rc0)
+2026-03-19 23:19:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1300, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:19:56: Sending PUBACK to SIM-ESP32-001 (m1300, rc0)
+2026-03-19 23:19:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:19:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:20:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:20:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1301, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:20:26: Sending PUBACK to SIM-ESP32-001 (m1301, rc0)
+2026-03-19 23:20:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1302, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:20:56: Sending PUBACK to SIM-ESP32-001 (m1302, rc0)
+2026-03-19 23:20:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:20:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:21:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:21:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1303, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:21:26: Sending PUBACK to SIM-ESP32-001 (m1303, rc0)
+2026-03-19 23:21:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1304, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:21:56: Sending PUBACK to SIM-ESP32-001 (m1304, rc0)
+2026-03-19 23:21:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:21:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:22:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:22:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1305, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:22:26: Sending PUBACK to SIM-ESP32-001 (m1305, rc0)
+2026-03-19 23:22:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1306, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:22:56: Sending PUBACK to SIM-ESP32-001 (m1306, rc0)
+2026-03-19 23:22:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:22:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:23:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:23:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1307, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:23:26: Sending PUBACK to SIM-ESP32-001 (m1307, rc0)
+2026-03-19 23:23:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1308, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:23:56: Sending PUBACK to SIM-ESP32-001 (m1308, rc0)
+2026-03-19 23:23:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:23:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:24:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:24:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1309, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:24:26: Sending PUBACK to SIM-ESP32-001 (m1309, rc0)
+2026-03-19 23:24:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1310, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:24:56: Sending PUBACK to SIM-ESP32-001 (m1310, rc0)
+2026-03-19 23:24:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:24:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:25:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:25:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1311, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:25:26: Sending PUBACK to SIM-ESP32-001 (m1311, rc0)
+2026-03-19 23:25:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1312, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:25:56: Sending PUBACK to SIM-ESP32-001 (m1312, rc0)
+2026-03-19 23:25:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:25:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:26:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:26:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1313, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:26:26: Sending PUBACK to SIM-ESP32-001 (m1313, rc0)
+2026-03-19 23:26:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1314, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:26:56: Sending PUBACK to SIM-ESP32-001 (m1314, rc0)
+2026-03-19 23:26:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:26:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:27:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:27:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1315, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:27:26: Sending PUBACK to SIM-ESP32-001 (m1315, rc0)
+2026-03-19 23:27:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1316, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:27:56: Sending PUBACK to SIM-ESP32-001 (m1316, rc0)
+2026-03-19 23:27:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:27:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:28:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:28:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1317, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:28:26: Sending PUBACK to SIM-ESP32-001 (m1317, rc0)
+2026-03-19 23:28:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1318, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:28:56: Sending PUBACK to SIM-ESP32-001 (m1318, rc0)
+2026-03-19 23:28:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:28:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:29:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:29:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1319, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:29:26: Sending PUBACK to SIM-ESP32-001 (m1319, rc0)
+2026-03-19 23:29:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1320, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:29:56: Sending PUBACK to SIM-ESP32-001 (m1320, rc0)
+2026-03-19 23:29:56: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:29:56: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:30:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:30:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1321, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:30:26: Sending PUBACK to SIM-ESP32-001 (m1321, rc0)
+2026-03-19 23:30:39: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:30:39: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:30:39: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1322, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:30:39: Sending PUBACK to SIM-ESP32-001 (m1322, rc0)
+2026-03-19 23:30:44: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:30:44: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:42:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1323, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:42:56: Sending PUBACK to SIM-ESP32-001 (m1323, rc0)
+2026-03-19 23:43:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:43:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1324, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:43:26: Sending PUBACK to SIM-ESP32-001 (m1324, rc0)
+2026-03-19 23:43:42: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:43:42: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:43:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1325, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:43:56: Sending PUBACK to SIM-ESP32-001 (m1325, rc0)
+2026-03-19 23:44:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:44:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1326, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:44:26: Sending PUBACK to SIM-ESP32-001 (m1326, rc0)
+2026-03-19 23:44:42: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:44:42: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:44:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1327, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:44:56: Sending PUBACK to SIM-ESP32-001 (m1327, rc0)
+2026-03-19 23:45:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:45:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1328, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:45:26: Sending PUBACK to SIM-ESP32-001 (m1328, rc0)
+2026-03-19 23:45:42: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:45:42: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:45:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1329, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:45:56: Sending PUBACK to SIM-ESP32-001 (m1329, rc0)
+2026-03-19 23:46:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:46:26: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1330, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:46:26: Sending PUBACK to SIM-ESP32-001 (m1330, rc0)
+2026-03-19 23:46:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:46:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:46:56: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1331, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:46:56: Sending PUBACK to SIM-ESP32-001 (m1331, rc0)
+2026-03-19 23:47:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:47:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1332, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:47:27: Sending PUBACK to SIM-ESP32-001 (m1332, rc0)
+2026-03-19 23:47:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:47:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:47:57: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1333, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:47:57: Sending PUBACK to SIM-ESP32-001 (m1333, rc0)
+2026-03-19 23:48:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:48:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1334, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:48:27: Sending PUBACK to SIM-ESP32-001 (m1334, rc0)
+2026-03-19 23:48:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:48:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:48:57: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1335, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:48:57: Sending PUBACK to SIM-ESP32-001 (m1335, rc0)
+2026-03-19 23:49:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:49:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1336, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:49:27: Sending PUBACK to SIM-ESP32-001 (m1336, rc0)
+2026-03-19 23:49:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:49:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:49:57: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1337, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:49:57: Sending PUBACK to SIM-ESP32-001 (m1337, rc0)
+2026-03-19 23:50:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:50:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1338, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:50:27: Sending PUBACK to SIM-ESP32-001 (m1338, rc0)
+2026-03-19 23:50:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:50:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:50:57: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1339, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:50:57: Sending PUBACK to SIM-ESP32-001 (m1339, rc0)
+2026-03-19 23:51:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1340, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:51:27: Sending PUBACK to SIM-ESP32-001 (m1340, rc0)
+2026-03-19 23:51:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:51:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:51:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:51:57: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1341, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:51:57: Sending PUBACK to SIM-ESP32-001 (m1341, rc0)
+2026-03-19 23:52:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1342, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:52:27: Sending PUBACK to SIM-ESP32-001 (m1342, rc0)
+2026-03-19 23:52:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:52:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:52:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:52:57: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1343, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-19 23:52:57: Sending PUBACK to SIM-ESP32-001 (m1343, rc0)
+2026-03-19 23:53:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1344, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:53:27: Sending PUBACK to SIM-ESP32-001 (m1344, rc0)
+2026-03-19 23:53:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-19 23:53:43: Received PINGREQ from SIM-ESP32-001
+2026-03-19 23:53:43: Sending PINGRESP to SIM-ESP32-001
+2026-03-19 23:53:57: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1345, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-19 23:53:57: Sending PUBACK to SIM-ESP32-001 (m1345, rc0)
+2026-03-19 23:54:27: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1346, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-19 23:54:27: Sending PUBACK to SIM-ESP32-001 (m1346, rc0)

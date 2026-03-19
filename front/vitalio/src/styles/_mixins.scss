@@ -1,5 +1,24 @@
 @use 'variables' as *;
 
+// Responsive mixins
+@mixin respond-to($breakpoint) {
+    @if $breakpoint == 'sm' {
+        @media (max-width: $bp-sm) { @content; }
+    } @else if $breakpoint == 'md' {
+        @media (max-width: $bp-md) { @content; }
+    } @else if $breakpoint == 'lg' {
+        @media (max-width: $bp-lg) { @content; }
+    } @else if $breakpoint == 'xl' {
+        @media (max-width: $bp-xl) { @content; }
+    } @else if $breakpoint == 'min-sm' {
+        @media (min-width: $bp-sm + 1px) { @content; }
+    } @else if $breakpoint == 'min-md' {
+        @media (min-width: $bp-md + 1px) { @content; }
+    } @else if $breakpoint == 'min-lg' {
+        @media (min-width: $bp-lg + 1px) { @content; }
+    }
+}
+
 // Glassmorphism Mixin
 @mixin glass($opacity: 0.7, $blur: 12px) {
     background: rgba(255, 255, 255, $opacity);

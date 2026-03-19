@@ -28,6 +28,12 @@ $shadow-glow: 0 0 16px rgba(29, 78, 216, 0.08);
 // Animation
 $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
+// Responsive breakpoints
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+
 // Root CSS Variables for runtime usage if needed
 :root {
     --primary: #{$primary};
