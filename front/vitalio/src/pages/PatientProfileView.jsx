@@ -27,6 +27,13 @@ export default function PatientProfileView() {
   const [caregiverInviteMessage, setCaregiverInviteMessage] = useState('')
   const [caregiverInviteError, setCaregiverInviteError] = useState('')
   const [caregiverInviteSending, setCaregiverInviteSending] = useState(false)
+  const [addressLine1, setAddressLine1] = useState('')
+  const [addressLine2, setAddressLine2] = useState('')
+  const [postalCode, setPostalCode] = useState('')
+  const [city, setCity] = useState('')
+  const [country, setCountry] = useState('')
+  const [addressSaving, setAddressSaving] = useState(false)
+  const [addressMsg, setAddressMsg] = useState('')
 
   const refreshProfile = async () => {
     try {
@@ -68,6 +75,36 @@ export default function PatientProfileView() {
     fetchData()
     return () => { mounted = false }
   }, [getAccessTokenSilently])
+
+  useEffect(() => {
+    if (!profile) return
+    setAddressLine1(profile.address_line1 || '')
+    setAddressLine2(profile.address_line2 || '')
+    setPostalCode(profile.postal_code || '')
+    setCity(profile.city || '')
+    setCountry(profile.country || '')
+  }, [profile])
+
+  const handleSaveAddress = async () => {
+    setAddressMsg('')
+    setAddressSaving(true)
+    try {
+      const token = await getAccessTokenSilently()
+      await updatePatientProfile(token, {
+        address_line1: addressLine1.trim() || null,
+        address_line2: addressLine2.trim() || null,
+        postal_code: postalCode.trim() || null,
+        city: city.trim() || null,
+        country: country.trim() || null,
+      })
+      setAddressMsg('Adresse enregistrée.')
+      await refreshProfile()
+    } catch (e) {
+      setAddressMsg(e.message || "Impossible d'enregistrer l'adresse")
+    } finally {
+      setAddressSaving(false)
+    }
+  }
 
   const handleAcceptInvitation = async () => {
     try {
@@ -216,6 +253,69 @@ export default function PatientProfileView() {
                   ))}
                 </div>
 
+                <div className="patient-address-block panel" style={{ marginTop: '1.25rem' }}>
+                  <h3 className="panel-title" style={{ marginTop: 0 }}>Adresse en cas d&apos;urgence</h3>
+                  <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                    Ces informations sont visibles par votre médecin pour faciliter un contact avec les secours (SAMU) si nécessaire.
+                  </p>
+                  <div style={{ display: 'grid', gap: '0.75rem', maxWidth: '32rem' }}>
+                    <input
+                      type="text"
+                      className="link-doctor-input"
+                      placeholder="Ligne d&apos;adresse 1"
+                      value={addressLine1}
+                      onChange={(e) => setAddressLine1(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      className="link-doctor-input"
+                      placeholder="Complément (optionnel)"
+                      value={addressLine2}
+                      onChange={(e) => setAddressLine2(e.target.value)}
+                    />
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      <input
+                        type="text"
+                        className="link-doctor-input"
+                        style={{ width: '6rem' }}
+                        placeholder="CP"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="link-doctor-input"
+                        style={{ flex: 1, minWidth: '10rem' }}
+                        placeholder="Ville"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      className="link-doctor-input"
+                      placeholder="Pays"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className="link-doctor-btn link-doctor-btn--invite"
+                        onClick={handleSaveAddress}
+                        disabled={addressSaving}
+                      >
+                        {addressSaving ? 'Enregistrement…' : 'Enregistrer l&apos;adresse'}
+                      </button>
+                      {addressMsg && (
+                        <span style={{ fontSize: '0.875rem', color: addressMsg.includes('Impossible') ? '#b91c1c' : '#047857' }}>
+                          {addressMsg}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {patientModalOpen && (
                   <div className="profile-modal-overlay" onClick={() => setPatientModalOpen(false)} role="dialog" aria-modal="true" aria-label="Informations personnelles">
                     <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
@@ -252,6 +352,16 @@ export default function PatientProfileView() {
                           <div className="profile-modal-row profile-modal-row--block">
                             <span className="profile-modal-label">Historique médical</span>
                             <span className="profile-modal-value">{profile.medical_history}</span>
+                          </div>
+                        )}
+                        {(profile?.address_line1 || profile?.city || profile?.postal_code) && (
+                          <div className="profile-modal-row profile-modal-row--block">
+                            <span className="profile-modal-label">Adresse (urgences)</span>
+                            <span className="profile-modal-value">
+                              {[profile.address_line1, profile.address_line2,
+                                [profile.postal_code, profile.city].filter(Boolean).join(' ').trim(),
+                                profile.country].filter(Boolean).join(', ')}
+                            </span>
                           </div>
                         )}
                         {profile?.emergency_contact && (

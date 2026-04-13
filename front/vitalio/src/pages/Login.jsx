@@ -69,9 +69,9 @@ export default function Login() {
 
     
     useEffect(() => {
-        if (!isAuthenticated || !user?.sub) return;
+        if (!isAuthenticated || !user?.sub || hasRedirectedRef.current) return;
+        hasRedirectedRef.current = true;
         handleAuthenticatedUser();
-        
     }, [isAuthenticated, user?.sub]);
 
     async function handleAuthenticatedUser() {
@@ -141,6 +141,7 @@ export default function Login() {
             navigate(ROLE_ROUTES[roleForRouting] || '/patient');
         } catch (error) {
             console.error('Error handling authenticated user:', error);
+            hasRedirectedRef.current = false;
         }
     };
 
@@ -168,6 +169,20 @@ export default function Login() {
                         <img src={vitalioLogo} alt="VitalIO Logo" className="login-logo" />
                         <h1 className="login-title">VitalIO</h1>
                         <p className="login-subtitle">Chargement...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isAuthenticated && user?.sub) {
+        return (
+            <div className="login-container">
+                <div className="login-card animate-fade-in">
+                    <div className="login-logo-section">
+                        <img src={vitalioLogo} alt="VitalIO Logo" className="login-logo" />
+                        <h1 className="login-title">VitalIO</h1>
+                        <p className="login-subtitle">Connexion en cours...</p>
                     </div>
                 </div>
             </div>

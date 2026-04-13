@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Filter, Mail, QrCode, Search, Send, TriangleAlert, Users } from 'lucide-react'
@@ -109,6 +109,13 @@ export default function DoctorView() {
               <p className="doctor-subtitle">Suivez vos patients et gérez les associations</p>
             </div>
             <div className="header-actions">
+              <Link to="/doctor/alertes" className="doctor-btn doctor-btn-secondary doctor-alertes-link">
+                <TriangleAlert size={18} />
+                File d&apos;alertes
+                {criticalCount > 0 && (
+                  <span className="doctor-alertes-badge">{criticalCount}</span>
+                )}
+              </Link>
               <div className="search-bar">
                 <Search className="icon" size={18} />
                 <input
@@ -122,36 +129,6 @@ export default function DoctorView() {
           </header>
 
           <main className="doctor-main">
-          <section className="doctor-stats">
-            <article className="doctor-stat-card doctor-stat-patients">
-              <div className="doctor-stat-icon">
-                <Users size={24} />
-              </div>
-              <div className="doctor-stat-content">
-                <span className="doctor-stat-value">{patients.length}</span>
-                <span className="doctor-stat-label">Patients assignés</span>
-              </div>
-            </article>
-            <article className="doctor-stat-card doctor-stat-alerts">
-              <div className="doctor-stat-icon">
-                <TriangleAlert size={24} />
-              </div>
-              <div className="doctor-stat-content">
-                <span className="doctor-stat-value doctor-stat-value--critical">{alertCount}</span>
-                <span className="doctor-stat-label">Critiques</span>
-              </div>
-            </article>
-            <article className="doctor-stat-card doctor-stat-filtered">
-              <div className="doctor-stat-icon">
-                <Filter size={24} />
-              </div>
-              <div className="doctor-stat-content">
-                <span className="doctor-stat-value">{filteredPatients.length}</span>
-                <span className="doctor-stat-label">Résultats recherche</span>
-              </div>
-            </article>
-          </section>
-
           <section className="doctor-invite-section">
             <div className="doctor-invite-card">
               <div className="doctor-invite-header">

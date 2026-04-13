@@ -22,6 +22,9 @@ import {
   Layers,
   Clock,
   Crosshair,
+  CheckCircle,
+  XCircle,
+  ExternalLink,
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -29,7 +32,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend, Brush,
 } from 'recharts'
-import { getPatientMLAnalysis } from '../services/api'
+import { getPatientMLAnalysis, patchDoctorAlert } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
 
 const VITAL_CONFIG = {
@@ -60,6 +63,7 @@ const LEVEL_COLORS = {
   normal: '#047857',
   warning: '#b45309',
   critical: '#b91c1c',
+  threshold: '#b45309',
 }
 
 const RISK_CONFIG = {
@@ -181,6 +185,7 @@ export default function DoctorPatientML() {
   const [showMA, setShowMA] = useState(true)
   const [showAnomalies, setShowAnomalies] = useState(true)
   const [variabilityWindow, setVariabilityWindow] = useState(6)
+  const [patchingAlerts, setPatchingAlerts] = useState({})
 
   const loadAnalysis = useCallback(async () => {
     try {
@@ -199,6 +204,19 @@ export default function DoctorPatientML() {
       setLoading(false)
     }
   }, [getAccessTokenSilently, patientId, days])
+
+  const handleAlertAction = useCallback(async (alertId, action) => {
+    setPatchingAlerts(prev => ({ ...prev, [alertId]: true }))
+    try {
+      const token = await getAccessTokenSilently()
+      await patchDoctorAlert(token, alertId, { action })
+      await loadAnalysis()
+    } catch (e) {
+      console.error('Patch alert error:', e)
+    } finally {
+      setPatchingAlerts(prev => ({ ...prev, [alertId]: false }))
+    }
+  }, [getAccessTokenSilently, loadAnalysis])
 
   useEffect(() => { loadAnalysis() }, [loadAnalysis])
 
@@ -977,37 +995,103 @@ export default function DoctorPatientML() {
 
                 {analysis.anomaly_summary.recent?.length > 0 && (
                   <div className="pml-anomaly-recent">
-                    <h3>Alertes récentes</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <h3 style={{ margin: 0 }}>Alertes récentes</h3>
+                      <button
+                        onClick={() => navigate('/doctor/alertes')}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 4,
+                          background: 'none', border: '1px solid #cbd5e1', borderRadius: 6,
+                          padding: '4px 10px', cursor: 'pointer', fontSize: 12, color: '#1d4ed8',
+                        }}
+                      >
+                        <ExternalLink size={13} /> Voir la file d'alertes
+                      </button>
+                    </div>
                     <div className="pml-anomaly-table-wrap">
                       <table className="pml-table">
                         <thead>
                           <tr>
                             <th>Date</th>
-                            <th>Indice de risque</th>
                             <th>Niveau</th>
                             <th>Statut</th>
                             <th>Paramètres impliqués</th>
+                            <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {analysis.anomaly_summary.recent.map((a, i) => (
-                            <tr key={i}>
-                              <td>{formatTime(a.timestamp)}</td>
-                              <td>{(a.score ?? 0).toFixed(3)}</td>
-                              <td>
-                                <span className="pml-level-dot" style={{ background: LEVEL_COLORS[a.level] || '#1d4ed8' }} />
-                                {a.level}
-                              </td>
-                              <td>{a.status}</td>
-                              <td>
-                                {(a.contributing_variables || []).slice(0, 3).map((cv, j) => (
-                                  <span key={j} className="pml-contrib-tag">
-                                    {cv.variable} ({(cv.contribution_weight * 100).toFixed(0)}%)
+                          {analysis.anomaly_summary.recent.map((a, i) => {
+                            const isPending = (a.status_raw || a.status || '').toUpperCase() === 'PENDING'
+                            const isPatching = patchingAlerts[a.alert_id]
+                            return (
+                              <tr key={i}>
+                                <td>{formatTime(a.timestamp)}</td>
+                                <td>
+                                  <span className="pml-level-dot" style={{ background: LEVEL_COLORS[a.level] || '#1d4ed8' }} />
+                                  {a.level}
+                                </td>
+                                <td>
+                                  <span style={{
+                                    padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
+                                    background: a.status === 'pending' ? '#fef3c7' : a.status === 'validated' ? '#dcfce7' : '#fee2e2',
+                                    color: a.status === 'pending' ? '#92400e' : a.status === 'validated' ? '#166534' : '#991b1b',
+                                  }}>
+                                    {a.status === 'pending' ? 'En attente' : a.status === 'validated' ? 'Validée' : 'Rejetée'}
                                   </span>
-                                ))}
-                              </td>
-                            </tr>
-                          ))}
+                                </td>
+                                <td>
+                                  {(a.contributing_variables || []).slice(0, 3).map((cv, j) => (
+                                    <span key={j} className="pml-contrib-tag">
+                                      {cv.variable} ({(cv.contribution_weight * 100).toFixed(0)}%)
+                                    </span>
+                                  ))}
+                                  {a.value != null && a.threshold != null && (
+                                    <span style={{ fontSize: 11, color: '#64748b', marginLeft: 6 }}>
+                                      {a.value} {a.operator} {a.threshold}
+                                    </span>
+                                  )}
+                                </td>
+                                <td>
+                                  {a.alert_id && isPending ? (
+                                    <div style={{ display: 'flex', gap: 6 }}>
+                                      <button
+                                        disabled={isPatching}
+                                        onClick={() => handleAlertAction(a.alert_id, 'validate')}
+                                        title="Valider l'alerte"
+                                        style={{
+                                          display: 'flex', alignItems: 'center', gap: 3,
+                                          background: '#dcfce7', border: '1px solid #86efac',
+                                          borderRadius: 6, padding: '3px 8px', cursor: 'pointer',
+                                          fontSize: 11, color: '#166534', fontWeight: 600,
+                                          opacity: isPatching ? 0.5 : 1,
+                                        }}
+                                      >
+                                        <CheckCircle size={13} /> Valider
+                                      </button>
+                                      <button
+                                        disabled={isPatching}
+                                        onClick={() => handleAlertAction(a.alert_id, 'reject')}
+                                        title="Rejeter l'alerte"
+                                        style={{
+                                          display: 'flex', alignItems: 'center', gap: 3,
+                                          background: '#fee2e2', border: '1px solid #fca5a5',
+                                          borderRadius: 6, padding: '3px 8px', cursor: 'pointer',
+                                          fontSize: 11, color: '#991b1b', fontWeight: 600,
+                                          opacity: isPatching ? 0.5 : 1,
+                                        }}
+                                      >
+                                        <XCircle size={13} /> Rejeter
+                                      </button>
+                                    </div>
+                                  ) : a.alert_id && !isPending ? (
+                                    <span style={{ fontSize: 11, color: '#94a3b8' }}>-</span>
+                                  ) : (
+                                    <span style={{ fontSize: 11, color: '#94a3b8' }}>ML</span>
+                                  )}
+                                </td>
+                              </tr>
+                            )
+                          })}
                         </tbody>
                       </table>
                     </div>

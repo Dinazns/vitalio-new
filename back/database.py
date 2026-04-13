@@ -74,6 +74,8 @@ def init_database():
         identity_db.audit_links.create_index([("doctor_user_id_auth", 1), ("patient_user_id_auth", 1), ("created_at", -1)])
         identity_db.alerts.create_index("medical_alert_id", unique=True)
         identity_db.alerts.create_index([("author", 1), ("createdAt", -1)])
+        identity_db.push_subscriptions.create_index([("user_id_auth", 1), ("endpoint", 1)], unique=True)
+        identity_db.push_subscriptions.create_index("user_id_auth")
 
         medical_db.measurements.create_index([("device_id", 1), ("measured_at", -1)])
         medical_db.doctor_feedback.create_index([("patient_user_id_auth", 1), ("created_at", -1)])
@@ -82,7 +84,18 @@ def init_database():
             [("scope", 1), ("device_id", 1), ("pathology", 1)],
             unique=True
         )
+        try:
+            medical_db.alert_thresholds.create_index(
+                [("device_id", 1)],
+                unique=True,
+                name="uniq_alert_thresholds_patient_device",
+                partialFilterExpression={"scope": "patient", "device_id": {"$exists": True, "$type": "string"}},
+            )
+        except PyMongoError:
+            pass
         medical_db.alert_thresholds.create_index("enabled")
+        medical_db.threshold_breach_events.create_index([("device_id", 1), ("created_at", -1)])
+        medical_db.threshold_breach_events.create_index([("measurement_id", 1)], sparse=True)
         medical_db.alerts.create_index([("device_id", 1), ("status", 1), ("created_at", -1)])
         medical_db.alerts.create_index([("device_id", 1), ("metric", 1), ("status", 1)])
 
@@ -94,10 +107,27 @@ def init_database():
         medical_db.ml_decisions.create_index([("device_id", 1), ("processed_at", -1)])
         medical_db.ml_decisions.create_index("measurement_id", unique=True)
         medical_db.ml_model_versions.create_index("version", unique=True)
+        medical_db.ml_thresholds.create_index("_id")
+
+        medical_db.alerts.create_index("ml_anomaly_id", unique=True, sparse=True)
+        medical_db.alerts.create_index("measurement_id", sparse=True)
+        medical_db.alerts.create_index("alert_source")
+        medical_db.alerts.create_index([("device_id", 1), ("alert_source", 1), ("status", 1)])
 
         medical_db.measurements.create_index("ml_is_anomaly", sparse=True)
         medical_db.measurements.create_index("ml_anomaly_status", sparse=True)
         medical_db.measurements.create_index("ml_anomaly_id", sparse=True)
+
+        # Append-only audit journal for alert lifecycle events
+        medical_db.alert_events.create_index([("medical_alert_id", 1), ("created_at", -1)])
+        medical_db.alert_events.create_index([("medical_alert_id", 1), ("event_type", 1)])
+        medical_db.alert_events.create_index([("actor_user_id_auth", 1), ("created_at", -1)])
+        medical_db.alert_events.create_index("created_at")
+        try:
+            from services.ml_thresholds_store import load_ml_thresholds_from_db
+            load_ml_thresholds_from_db()
+        except Exception:
+            pass
     except DatabaseError:
         raise
     except PyMongoError as e:

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import { ArrowLeft, CheckCircle2, Heart, TriangleAlert, Users } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, Heart, Siren, TriangleAlert, Users } from 'lucide-react'
 import { getCaregiverPatients, getCaregiverAlerts, patchCaregiverAlert } from '../services/api'
 
 function formatLastTime(timestamp) {
@@ -21,6 +21,9 @@ export default function FamilyView() {
   const [resolvingAlertId, setResolvingAlertId] = useState(null)
   const [resolutionComment, setResolutionComment] = useState('')
   const [resolutionError, setResolutionError] = useState('')
+  const [seenAlertId, setSeenAlertId] = useState(null)  // alert being acked as "seen patient"
+  const [seenComment, setSeenComment] = useState('')
+  const [seenError, setSeenError] = useState('')
 
   const hasNotifiedRef = React.useRef(false)
   useEffect(() => {
@@ -114,7 +117,7 @@ export default function FamilyView() {
     try {
       setResolutionError('')
       const token = await getAccessTokenSilently()
-      const res = await patchCaregiverAlert(token, id, comment)
+      const res = await patchCaregiverAlert(token, id, { resolution_comment: comment })
       setAlerts((prev) =>
         prev.map((a) =>
           ((a.alert_id || a._id) === id)
@@ -126,6 +129,35 @@ export default function FamilyView() {
       setResolutionComment('')
     } catch (e) {
       setResolutionError(e.message || 'Erreur lors de l\'enregistrement')
+    }
+  }
+
+  const handleSeenPatient = async (alertId, seen) => {
+    const id = alertId
+    if (!id) return
+    try {
+      setSeenError('')
+      const token = await getAccessTokenSilently()
+      const res = await patchCaregiverAlert(token, id, {
+        seen_patient_since_alert: seen,
+        ...(seenComment.trim() ? { resolution_comment: seenComment.trim() } : {}),
+      })
+      setAlerts((prev) =>
+        prev.map((a) =>
+          ((a.alert_id || a._id) === id)
+            ? {
+                ...a,
+                caregiver_seen_patient: res.caregiver_seen_patient,
+                caregiver_seen_at: res.caregiver_seen_at,
+                caregiver_resolution_comment: res.caregiver_resolution_comment ?? a.caregiver_resolution_comment,
+              }
+            : a
+        )
+      )
+      setSeenAlertId(null)
+      setSeenComment('')
+    } catch (e) {
+      setSeenError(e.message || 'Erreur lors de l\'enregistrement')
     }
   }
 
@@ -174,16 +206,42 @@ export default function FamilyView() {
             <section className="caregiver-alerts-section">
               <h3><TriangleAlert size={20} /> Alertes à surveiller</h3>
               <div className="caregiver-alerts-list">
-                {alerts.map((a, i) => (
-                  <article key={a.alert_id || i} className="caregiver-alert-card">
-                    <strong>{patientNames[a.patient_id] || a.patient_id}</strong>
+                {alerts.map((a, i) => {
+                  const aid = a.alert_id || a._id
+                  const isManual = a.alert_source === 'manual'
+                  return (
+                  <article key={aid || i} className={`caregiver-alert-card${isManual ? ' caregiver-alert-card--manual' : ''}`}>
+                    <div className="caregiver-alert-card-header">
+                      <strong>{patientNames[a.patient_id] || a.patient_id}</strong>
+                      {isManual && (
+                        <span className="caregiver-source-badge caregiver-source-badge--manual">
+                          <Siren size={13} /> Alerte patient
+                        </span>
+                      )}
+                    </div>
                     <p className="caregiver-alert-summary">{a.summary}</p>
+                    {isManual && a.patient_message && (
+                      <p className="caregiver-alert-patient-msg">« {a.patient_message} »</p>
+                    )}
                     <p className="caregiver-alert-description">{a.lay_description}</p>
+
+                    {/* Caregiver seen-patient status */}
+                    {a.caregiver_seen_patient != null && (
+                      <p className={`caregiver-seen-status ${a.caregiver_seen_patient ? 'caregiver-seen-status--yes' : 'caregiver-seen-status--no'}`}>
+                        {a.caregiver_seen_patient
+                          ? <><Eye size={13} /> Vu en personne</>
+                          : <><EyeOff size={13} /> Pas vu en personne</>
+                        }
+                        {a.caregiver_seen_at && ` · ${new Date(a.caregiver_seen_at).toLocaleString('fr-FR')}`}
+                      </p>
+                    )}
+
                     {a.caregiver_resolution_comment && (
                       <p className="caregiver-alert-resolution">
                         <CheckCircle2 size={14} /> {a.caregiver_resolution_comment}
                       </p>
                     )}
+
                     <div className="caregiver-alert-actions">
                       <button
                         type="button"
@@ -192,17 +250,67 @@ export default function FamilyView() {
                       >
                         Voir le patient
                       </button>
+                      {a.status === 'OPEN' && a.caregiver_seen_patient == null && (
+                        <button
+                          type="button"
+                          className="caregiver-alert-resolve-btn caregiver-alert-seen-btn"
+                          onClick={() => setSeenAlertId(seenAlertId === aid ? null : aid)}
+                        >
+                          <Eye size={14} /> J'ai vu le patient
+                        </button>
+                      )}
                       {!a.caregiver_resolution_comment && a.status === 'OPEN' && (
                         <button
                           type="button"
                           className="caregiver-alert-resolve-btn"
-                          onClick={() => setResolvingAlertId(resolvingAlertId === (a.alert_id || a._id) ? null : (a.alert_id || a._id))}
+                          onClick={() => setResolvingAlertId(resolvingAlertId === aid ? null : aid)}
                         >
                           <CheckCircle2 size={14} /> Urgence résolue
                         </button>
                       )}
                     </div>
-                    {resolvingAlertId === (a.alert_id || a._id) && (
+
+                    {/* "J'ai vu le patient" form */}
+                    {seenAlertId === aid && (
+                      <div className="caregiver-alert-resolve-form">
+                        <p className="caregiver-alert-resolve-hint">
+                          Avez-vous vu votre proche en personne depuis cette alerte ?
+                        </p>
+                        <textarea
+                          className="caregiver-alert-resolve-input"
+                          value={seenComment}
+                          onChange={(e) => setSeenComment(e.target.value)}
+                          placeholder="Commentaire optionnel (ex. : vu à domicile, il va bien)"
+                          rows={2}
+                        />
+                        {seenError && <p className="caregiver-alert-error">{seenError}</p>}
+                        <div className="caregiver-alert-resolve-btns">
+                          <button
+                            type="button"
+                            className="caregiver-alert-view-btn"
+                            onClick={() => { setSeenAlertId(null); setSeenComment(''); setSeenError('') }}
+                          >
+                            Annuler
+                          </button>
+                          <button
+                            type="button"
+                            className="caregiver-alert-resolve-submit caregiver-alert-seen-no"
+                            onClick={() => handleSeenPatient(aid, false)}
+                          >
+                            <EyeOff size={14} /> Non, pas encore
+                          </button>
+                          <button
+                            type="button"
+                            className="caregiver-alert-resolve-submit"
+                            onClick={() => handleSeenPatient(aid, true)}
+                          >
+                            <Eye size={14} /> Oui, je l'ai vu
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {resolvingAlertId === aid && (
                       <div className="caregiver-alert-resolve-form">
                         <p className="caregiver-alert-resolve-hint">
                           Indiquez ce que vous avez fait (ex. : vérification sur place, appel au médecin).
@@ -226,7 +334,7 @@ export default function FamilyView() {
                           <button
                             type="button"
                             className="caregiver-alert-resolve-submit"
-                            onClick={() => handleResolveAlert(a.alert_id || a._id)}
+                            onClick={() => handleResolveAlert(aid)}
                           >
                             Enregistrer
                           </button>
@@ -234,7 +342,8 @@ export default function FamilyView() {
                       </div>
                     )}
                   </article>
-                ))}
+                  )
+                })}
               </div>
             </section>
           )}

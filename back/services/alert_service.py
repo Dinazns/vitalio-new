@@ -1,6 +1,7 @@
 """
 Alert threshold and breach evaluation logic.
 """
+import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 from pymongo.errors import PyMongoError
@@ -8,6 +9,49 @@ from pymongo.errors import PyMongoError
 from config import ALERT_DEFAULT_THRESHOLDS, ALERT_DEFAULT_CONSECUTIVE_BREACHES
 from database import get_medical_db
 from exceptions import DatabaseError
+
+logger = logging.getLogger(__name__)
+
+# Cooldown in seconds between manual alerts from the same patient
+MANUAL_ALERT_COOLDOWN_SECONDS = 0
+MANUAL_ALERT_MAX_PER_HOUR = 9999
+
+
+def write_alert_event(
+    medical_alert_id: str,
+    event_type: str,
+    actor_user_id_auth: str,
+    actor_role: str,
+    payload: Dict[str, Any],
+) -> None:
+    """
+    Append an immutable audit event to medical.alert_events.
+    event_type values:
+      alert_created, alert_resolved,
+      doctor_validated, doctor_rejected, doctor_escalation, doctor_note,
+      caregiver_seen_patient, caregiver_comment,
+      patient_manual_trigger,
+      ml_audit_merged.
+    """
+    try:
+        doc: Dict[str, Any] = {
+            "medical_alert_id": medical_alert_id,
+            "event_type": event_type,
+            "actor_user_id_auth": actor_user_id_auth,
+            "actor_role": actor_role,
+            "payload": payload,
+            "created_at": datetime.now(timezone.utc),
+        }
+        get_medical_db().alert_events.insert_one(doc)
+    except Exception as exc:
+        logger.warning("alert_events insert failed (event_type=%s): %s", event_type, exc)
+
+
+def _rule_enabled(doc: Optional[Dict[str, Any]]) -> bool:
+    """Missing 'enabled' counts as True (legacy documents)."""
+    if not doc:
+        return False
+    return doc.get("enabled") is not False
 
 
 def merge_thresholds(raw_thresholds: Optional[Dict[str, Any]]) -> Dict[str, float]:
@@ -33,16 +77,19 @@ def get_alert_threshold_config(device_id: str, pathology: Optional[str] = None) 
     scope = "builtin_default"
 
     try:
-        config = collection.find_one({"scope": "patient", "device_id": device_id, "enabled": True})
-        if config:
+        patient_doc = collection.find_one({"scope": "patient", "device_id": device_id})
+        if patient_doc and _rule_enabled(patient_doc):
+            config = patient_doc
             scope = "patient"
         elif pathology:
-            config = collection.find_one({"scope": "pathology", "pathology": pathology, "enabled": True})
-            if config:
+            path_doc = collection.find_one({"scope": "pathology", "pathology": pathology})
+            if path_doc and _rule_enabled(path_doc):
+                config = path_doc
                 scope = "pathology"
-        if not config:
-            config = collection.find_one({"scope": "default", "enabled": True})
-            if config:
+        if config is None:
+            default_doc = collection.find_one({"scope": "default"})
+            if default_doc and _rule_enabled(default_doc):
+                config = default_doc
                 scope = "default"
     except PyMongoError:
         config = None
@@ -60,6 +107,7 @@ def get_alert_threshold_config(device_id: str, pathology: Optional[str] = None) 
         "thresholds": thresholds,
         "consecutive_breaches": consecutive,
         "pathology": (config or {}).get("pathology"),
+        "rule_id": (config or {}).get("_id"),
     }
 
 
@@ -113,10 +161,17 @@ def has_consecutive_breach(device_id: str, breach: Dict[str, Any], consecutive_r
     return True
 
 
-def upsert_open_alert(device_id: str, breach: Dict[str, Any], threshold_config: Dict[str, Any], measured_at: datetime) -> bool:
+def upsert_open_alert(
+    device_id: str,
+    breach: Dict[str, Any],
+    threshold_config: Dict[str, Any],
+    measured_at: datetime,
+    measurement_id: Any = None,
+) -> bool:
     """
     Create or update an open alert for a durable breach.
     Returns True if a NEW alert was created (insert), False if existing was updated.
+    On creation also writes an alert_created event to alert_events.
     """
     metric = breach["metric"]
     operator = breach["operator"]
@@ -128,8 +183,14 @@ def upsert_open_alert(device_id: str, breach: Dict[str, Any], threshold_config: 
         "consecutive_required": threshold_config["consecutive_breaches"],
         "last_breach_at": measured_at,
         "rule_scope": threshold_config["scope"],
+        "applied_thresholds": threshold_config.get("thresholds"),
         "updated_at": now,
     }
+    rid = threshold_config.get("rule_id")
+    if rid is not None:
+        set_fields["alert_thresholds_rule_id"] = rid
+    if measurement_id is not None:
+        set_fields["measurement_id"] = measurement_id
     set_on_insert = {
         "device_id": device_id,
         "metric": metric,
@@ -138,13 +199,93 @@ def upsert_open_alert(device_id: str, breach: Dict[str, Any], threshold_config: 
         "created_at": now,
         "first_breach_at": measured_at,
         "doctor_status": "PENDING",
+        "alert_source": "threshold",
+        # first_measurement_id is set once at creation and never overwritten
+        **({"first_measurement_id": measurement_id} if measurement_id is not None else {}),
     }
+    # measurement_id is NOT duplicated in $setOnInsert - it lives only in $set above
     result = get_medical_db().alerts.update_one(
         query,
         {"$set": set_fields, "$setOnInsert": set_on_insert},
         upsert=True
     )
-    return result.upserted_id is not None
+    is_new = result.upserted_id is not None
+    if is_new:
+        write_alert_event(
+            medical_alert_id=str(result.upserted_id),
+            event_type="alert_created",
+            actor_user_id_auth=device_id,
+            actor_role="system",
+            payload={
+                "alert_source": "threshold",
+                "metric": metric,
+                "operator": operator,
+                "value": breach["value"],
+                "threshold": breach["threshold"],
+                "rule_scope": threshold_config["scope"],
+                "measurement_id": str(measurement_id) if measurement_id else None,
+            },
+        )
+    return is_new
+
+
+def create_manual_alert(
+    device_id: str,
+    patient_user_id_auth: str,
+    message: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Create a manual alert triggered by the patient via the alert button.
+    Returns {"created": bool, "reason": str, "alert_id": str|None}.
+    Anti-spam: cooldown of MANUAL_ALERT_COOLDOWN_SECONDS and max MANUAL_ALERT_MAX_PER_HOUR per hour.
+    """
+    from datetime import timedelta
+    now = datetime.now(timezone.utc)
+    medical_db = get_medical_db()
+
+    # Rate-limit check: last manual alert from this device
+    cutoff_cooldown = now - timedelta(seconds=MANUAL_ALERT_COOLDOWN_SECONDS)
+    recent = medical_db.alerts.find_one(
+        {"device_id": device_id, "alert_source": "manual", "created_at": {"$gte": cutoff_cooldown}},
+        sort=[("created_at", -1)],
+    )
+    if recent:
+        wait_s = int((recent["created_at"].replace(tzinfo=timezone.utc) - cutoff_cooldown).total_seconds())
+        return {"created": False, "reason": f"cooldown", "wait_seconds": max(0, wait_s), "alert_id": None}
+
+    # Hourly cap
+    cutoff_hour = now - timedelta(hours=1)
+    count_hour = medical_db.alerts.count_documents(
+        {"device_id": device_id, "alert_source": "manual", "created_at": {"$gte": cutoff_hour}}
+    )
+    if count_hour >= MANUAL_ALERT_MAX_PER_HOUR:
+        return {"created": False, "reason": "hourly_limit", "wait_seconds": None, "alert_id": None}
+
+    doc: Dict[str, Any] = {
+        "device_id": device_id,
+        "metric": "manual",
+        "operator": "manual",
+        "status": "OPEN",
+        "alert_source": "manual",
+        "doctor_status": "PENDING",
+        "created_at": now,
+        "updated_at": now,
+        "triggered_at": now,
+        "patient_user_id_auth": patient_user_id_auth,
+    }
+    if message:
+        doc["patient_message"] = message[:500]
+
+    result = medical_db.alerts.insert_one(doc)
+    alert_id = str(result.inserted_id)
+    write_alert_event(
+        medical_alert_id=alert_id,
+        event_type="patient_manual_trigger",
+        actor_user_id_auth=patient_user_id_auth,
+        actor_role="patient",
+        payload={"device_id": device_id, "message": message or ""},
+    )
+    return {"created": True, "reason": "ok", "wait_seconds": None, "alert_id": alert_id}
 
 
 def resolve_metric_alert(device_id: str, metric: str):
@@ -153,6 +294,35 @@ def resolve_metric_alert(device_id: str, metric: str):
         {"device_id": device_id, "metric": metric, "status": "OPEN"},
         {"$set": {"status": "RESOLVED", "resolved_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)}}
     )
+
+
+def _record_threshold_breach_event(
+    device_id: str,
+    measurement_id: Any,
+    breach: Dict[str, Any],
+    threshold_config: Dict[str, Any],
+    *,
+    new_alert: bool,
+) -> None:
+    """Audit row when a durable threshold breach opens a new OPEN alert."""
+    doc: Dict[str, Any] = {
+        "device_id": device_id,
+        "metric": breach["metric"],
+        "operator": breach["operator"],
+        "value": breach["value"],
+        "threshold": breach["threshold"],
+        "rule_scope": threshold_config.get("scope"),
+        "pathology_context": threshold_config.get("pathology"),
+        "applied_thresholds": threshold_config.get("thresholds"),
+        "new_alert_opened": new_alert,
+        "created_at": datetime.now(timezone.utc),
+    }
+    rid = threshold_config.get("rule_id")
+    if rid is not None:
+        doc["alert_thresholds_rule_id"] = rid
+    if measurement_id is not None:
+        doc["measurement_id"] = measurement_id
+    get_medical_db().threshold_breach_events.insert_one(doc)
 
 
 def evaluate_measurement_alerts(device_id: str, measurement: Dict[str, Any], pathology: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -178,7 +348,10 @@ def evaluate_measurement_alerts(device_id: str, measurement: Dict[str, Any], pat
 
     for breach in breaches:
         if has_consecutive_breach(device_id, breach, threshold_config["consecutive_breaches"]):
-            is_new = upsert_open_alert(device_id, breach, threshold_config, measured_at)
+            is_new = upsert_open_alert(
+                device_id, breach, threshold_config, measured_at,
+                measurement_id=measurement.get("_id"),
+            )
             durable.append({
                 "metric": breach["metric"],
                 "operator": breach["operator"],
@@ -189,7 +362,25 @@ def evaluate_measurement_alerts(device_id: str, measurement: Dict[str, Any], pat
             })
             if is_new:
                 try:
+                    _record_threshold_breach_event(
+                        device_id=device_id,
+                        measurement_id=measurement.get("_id"),
+                        breach=breach,
+                        threshold_config=threshold_config,
+                        new_alert=True,
+                    )
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).warning("threshold_breach_events insert failed: %s", e)
+                try:
+                    from services.ml_retrain_scheduler import schedule_retrain_after_threshold_breach
+                    schedule_retrain_after_threshold_breach(device_id, breach["metric"])
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).warning("schedule ML retrain after threshold failed: %s", e)
+                try:
                     from services.invitation_service import send_alert_emails_for_new_alert
+                    from services.webpush_service import send_alert_push_notifications
                     from services.user_service import get_patient_id_from_device, get_user_profile
                     patient_id = get_patient_id_from_device(device_id)
                     patient_name = "Un patient"
@@ -204,8 +395,16 @@ def evaluate_measurement_alerts(device_id: str, measurement: Dict[str, Any], pat
                         threshold=breach["threshold"],
                         patient_name=patient_name,
                     )
+                    send_alert_push_notifications(
+                        device_id=device_id,
+                        metric=breach["metric"],
+                        operator=breach["operator"],
+                        value=breach["value"],
+                        threshold=breach["threshold"],
+                        patient_name=patient_name,
+                    )
                 except Exception as e:
                     import logging
-                    logging.getLogger(__name__).warning("Failed to send alert emails for device %s: %s", device_id, e)
+                    logging.getLogger(__name__).warning("Failed to send alert notifications for device %s: %s", device_id, e)
 
     return durable

@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import { Activity, Thermometer, HeartPulse, ShieldAlert } from 'lucide-react'
+import { Activity, Thermometer, HeartPulse, ShieldAlert, Siren } from 'lucide-react'
 import {
   getLatestPatientFeedback,
   getPatientData,
   getPatientProfile,
+  triggerManualAlert,
 } from '../services/api'
 import PatientLayout from '../components/PatientLayout'
 
@@ -72,6 +73,10 @@ export default function PatientView() {
   const [measurements, setMeasurements] = useState([])
   const [feedback, setFeedback] = useState([])
   const [profile, setProfile] = useState(null)
+  const [alertStep, setAlertStep] = useState('idle') // 'idle' | 'confirm' | 'sending' | 'sent' | 'error'
+  const [alertMessage, setAlertMessage] = useState('')
+  const [alertError, setAlertError] = useState('')
+  const [alertCooldown, setAlertCooldown] = useState(0)
 
   useEffect(() => {
     let mounted = true
@@ -113,6 +118,27 @@ export default function PatientView() {
       mounted = false
     }
   }, [getAccessTokenSilently, user?.sub])
+
+  const handleSendAlert = async () => {
+    setAlertStep('sending')
+    setAlertError('')
+    try {
+      const token = await getAccessTokenSilently()
+      await triggerManualAlert(token, alertMessage.trim())
+      setAlertStep('sent')
+      setAlertMessage('')
+    } catch (e) {
+      const waitMatch = (e.message || '').match(/(\d+)\s*secondes?/)
+      if (waitMatch) {
+        const secs = parseInt(waitMatch[1], 10)
+        setAlertCooldown(secs)
+        setAlertError(`Veuillez patienter ${secs} secondes avant de renvoyer une alerte.`)
+      } else {
+        setAlertError(e.message || "Erreur lors de l'envoi de l'alerte.")
+      }
+      setAlertStep('error')
+    }
+  }
 
   const latest = measurements[0]
   // Auth0 met souvent user.name = email quand aucun nom n'est défini ; on l'exclut du fallback
@@ -198,6 +224,86 @@ export default function PatientView() {
               <button onClick={() => navigate('/patient/measure')} className="primary-button">
                 Démarrer
               </button>
+            </section>
+
+            <section className="panel panel-alert-trigger">
+              <div className="panel-title">
+                <h2><Siren size={18} /> Alerte urgente</h2>
+              </div>
+              <p className="panel-alert-trigger-desc">
+                Appuyez sur le bouton ci-dessous si vous avez besoin d'aide immédiate.
+                Votre médecin et votre aidant seront notifiés.
+              </p>
+              {alertStep === 'idle' && (
+                <button
+                  type="button"
+                  className="alert-trigger-btn"
+                  onClick={() => setAlertStep('confirm')}
+                >
+                  <Siren size={18} /> Déclencher une alerte
+                </button>
+              )}
+              {alertStep === 'confirm' && (
+                <div className="alert-trigger-confirm">
+                  <p className="alert-trigger-confirm-msg">
+                    Votre médecin et votre aidant seront immédiatement notifiés.
+                    En cas de danger de mort, appelez le <strong>15</strong>.
+                  </p>
+                  <textarea
+                    className="alert-trigger-input"
+                    rows={2}
+                    placeholder="Message optionnel (ex. : douleur thoracique, difficultés à respirer...)"
+                    value={alertMessage}
+                    onChange={(e) => setAlertMessage(e.target.value)}
+                    maxLength={500}
+                  />
+                  <div className="alert-trigger-btns">
+                    <button
+                      type="button"
+                      className="alert-trigger-cancel"
+                      onClick={() => { setAlertStep('idle'); setAlertMessage('') }}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      className="alert-trigger-btn alert-trigger-btn--confirm"
+                      onClick={handleSendAlert}
+                    >
+                      <Siren size={16} /> Confirmer l'alerte
+                    </button>
+                  </div>
+                </div>
+              )}
+              {alertStep === 'sending' && (
+                <p className="alert-trigger-status">Envoi en cours...</p>
+              )}
+              {alertStep === 'sent' && (
+                <div className="alert-trigger-success">
+                  <p>Alerte envoyée. Votre médecin et votre aidant ont été notifiés.</p>
+                  <button
+                    type="button"
+                    className="alert-trigger-btn"
+                    style={{ marginTop: '0.5rem', background: '#475569' }}
+                    onClick={() => setAlertStep('idle')}
+                  >
+                    Fermer
+                  </button>
+                </div>
+              )}
+              {alertStep === 'error' && (
+                <div className="alert-trigger-error">
+                  <p>{alertError}</p>
+                  <button
+                    type="button"
+                    className="alert-trigger-btn"
+                    style={{ background: '#475569', marginTop: '0.5rem' }}
+                    onClick={() => setAlertStep('idle')}
+                  >
+                    Fermer
+                  </button>
+                </div>
+              )}
             </section>
 
             <section className="panel">

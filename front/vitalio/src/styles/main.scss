@@ -11,6 +11,9 @@
 @use 'animations';
 @use 'themes';
 
+// Component styles
+@use 'components/push-banner';
+
 // Page-specific styles
 @use 'pages/login';
 @use 'pages/home';

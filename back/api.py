@@ -5,8 +5,9 @@ Refactored: configuration, database, auth, and business logic are in separate mo
 import logging
 import os
 import re
+import threading
 from datetime import datetime, timedelta, timezone, date
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
@@ -33,7 +34,7 @@ from services.user_service import (
     get_assigned_doctor_ids_for_patient, get_assigned_caregiver_ids_for_patient,
     ensure_patient_access_or_403, resolve_patient_id_to_user_id_auth, get_user_db_id,
     parse_iso_datetime, normalize_user_id_auth, get_user_profile, _split_display_name,
-    datetime_to_iso_utc,
+    datetime_to_iso_utc, get_address_dict_from_profile,
 )
 from services.invitation_service import (
     hash_secret_token, generate_invite_token, generate_cabinet_code,
@@ -49,13 +50,111 @@ from services.measurement_service import (
     build_assigned_patients_payload, build_trend_window,
     normalize_patient_measurement_payload, validate_measurement_values,
 )
-from services.alert_service import evaluate_measurement_alerts, merge_thresholds, get_alert_threshold_config
+from services.alert_service import (
+    evaluate_measurement_alerts, merge_thresholds, get_alert_threshold_config,
+    create_manual_alert, write_alert_event,
+)
+from services.ml_retrain_runner import do_ml_retrain
 from services.alert_messages import format_alert_for_doctor, format_alert_for_caregiver
 from services.ml_service import run_ml_scoring
+from services.alert_ml_audit import create_or_merge_alert_for_validated_ml
+from services.ml_thresholds_store import save_ml_thresholds_to_db
 from mqtt_handler import start_mqtt_subscriber
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+
+def _sanitize_alert_dict(d: Dict[str, Any]) -> None:
+    """Convert any remaining ObjectId / non-serialisable values to strings in-place."""
+    for key, val in list(d.items()):
+        if isinstance(val, ObjectId):
+            d[key] = str(val)
+
+
+def _finalize_alert_api_payload(
+    raw_alert: Dict[str, Any],
+    out: Dict[str, Any],
+    patient_user_id_auth: Optional[str],
+    *,
+    include_patient_address: bool,
+) -> None:
+    if include_patient_address and patient_user_id_auth:
+        addr = get_address_dict_from_profile(get_user_profile(patient_user_id_auth))
+        if addr:
+            out["patient_address"] = addr
+    out["caregiver_intervened"] = bool(
+        raw_alert.get("caregiver_resolution_at") or raw_alert.get("caregiver_resolution_comment")
+    )
+    esc = raw_alert.get("emergency_escalations") or []
+    serialized = []
+    if isinstance(esc, list):
+        for e in esc:
+            if not isinstance(e, dict):
+                continue
+            item = dict(e)
+            at = item.get("at")
+            if isinstance(at, datetime):
+                item["at"] = datetime_to_iso_utc(at)
+            serialized.append(item)
+    out["emergency_escalations"] = serialized
+
+
+def _build_combined_anomaly_summary_for_analysis(
+    anomaly_records: List[Dict[str, Any]],
+    threshold_alert_docs: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """
+    Merge ml_anomalies with threshold-based alerts (medical.alerts, excluding metric=ml_anomaly).
+    Dedup: if a threshold alert references the same measurement_id as an ML anomaly, count the alert only.
+    """
+    thr_m_ids = {a.get("measurement_id") for a in threshold_alert_docs if a.get("measurement_id")}
+    ml_filtered = [a for a in anomaly_records if a.get("measurement_id") not in thr_m_ids]
+    by_status: Dict[str, int] = {}
+    for a in ml_filtered:
+        st = str(a.get("status") or "pending").lower()
+        by_status[st] = by_status.get(st, 0) + 1
+    for a in threshold_alert_docs:
+        ds = (a.get("doctor_status") or "PENDING").upper()
+        sk = "validated" if ds == "VALIDATED" else "rejected" if ds == "REJECTED" else "pending"
+        by_status[sk] = by_status.get(sk, 0) + 1
+    recent_ml = [
+        {
+            "timestamp": str(a.get("measured_at", "")),
+            "score": float(a.get("anomaly_score") or 0),
+            "level": a.get("anomaly_level", "critical"),
+            "status": a.get("status", "pending"),
+            "contributing_variables": a.get("contributing_variables", []),
+        }
+        for a in ml_filtered[:15]
+    ]
+    recent_thr: List[Dict[str, Any]] = []
+    for a in threshold_alert_docs[:12]:
+        ts = a.get("last_breach_at") or a.get("created_at")
+        metric = str(a.get("metric") or "seuil")
+        recent_thr.append({
+            "timestamp": str(ts) if ts else "",
+            "score": 0.0,
+            "level": "threshold",
+            "status": str(a.get("doctor_status") or "PENDING").lower(),
+            "contributing_variables": [{"variable": metric, "contribution_weight": 1.0}],
+            # expose IDs so the UI can send PATCH requests directly from this panel
+            "alert_id": str(a["_id"]) if a.get("_id") else None,
+            "alert_source": a.get("alert_source", "threshold"),
+            "metric": metric,
+            "operator": a.get("operator"),
+            "value": a.get("latest_value") or a.get("value"),
+            "threshold": a.get("threshold"),
+            "status_raw": str(a.get("doctor_status") or "PENDING"),
+        })
+    combined_recent = recent_ml + recent_thr
+    combined_recent.sort(key=lambda x: str(x.get("timestamp") or ""), reverse=True)
+    return {
+        "total": len(ml_filtered) + len(threshold_alert_docs),
+        "by_status": by_status,
+        "recent": combined_recent[:25],
+    }
+
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -99,6 +198,53 @@ def handle_internal_error(e):
 # ROUTES - ME / Patient
 # ============================================================================
 
+@app.route("/api/push/vapid-public-key", methods=["GET"])
+def get_vapid_public_key():
+    """Return VAPID public key for push subscription (public, no auth required)."""
+    from config import VAPID_PUBLIC_KEY
+    return jsonify({"vapid_public_key": VAPID_PUBLIC_KEY or ""}), 200
+
+
+@app.route("/api/me/push-subscribe", methods=["POST"])
+@requires_auth
+@requires_role("doctor", "medecin", "caregiver", "aidant", "Superuser")
+def push_subscribe():
+    """Register a push subscription for alert notifications (doctors/caregivers)."""
+    from config import VAPID_PUBLIC_KEY
+    from datetime import datetime, timezone
+    payload = request.get_json(silent=True) or {}
+    subscription = payload.get("subscription")
+    if not subscription or not isinstance(subscription, dict):
+        return jsonify({"code": "invalid_subscription", "message": "subscription object required"}), 400
+    endpoint = subscription.get("endpoint")
+    keys = subscription.get("keys") or {}
+    if not endpoint or not keys.get("p256dh") or not keys.get("auth"):
+        return jsonify({"code": "invalid_subscription", "message": "endpoint and keys (p256dh, auth) required"}), 400
+    user_id_auth = g.user_id_auth
+    now = datetime.now(timezone.utc)
+    doc = {
+        "user_id_auth": user_id_auth,
+        "endpoint": endpoint,
+        "subscription": subscription,
+        "enabled": True,
+        "updated_at": now,
+    }
+    try:
+        coll = get_identity_db().push_subscriptions
+        coll.update_one(
+            {"user_id_auth": user_id_auth, "endpoint": endpoint},
+            {"$set": doc, "$setOnInsert": {"created_at": now}},
+            upsert=True,
+        )
+        return jsonify({
+            "message": "Push subscription enregistrée",
+            "vapid_public_key": VAPID_PUBLIC_KEY or None,
+        }), 200
+    except PyMongoError as e:
+        logger.warning("Push subscription save failed: %s", e)
+        return jsonify({"code": "database_error", "message": "Failed to save subscription"}), 500
+
+
 @app.route("/api/me/role", methods=["GET"])
 @requires_auth
 def get_my_role():
@@ -109,8 +255,14 @@ def get_my_role():
     jwt_role = (payload.get(f"{ns}role") or payload.get("role") or "").strip()
     role_raw = (db_role or jwt_role or "").strip().lower()
     role_display_map = {
-        "superuser": "Superuser", "doctor": "Médecin", "medecin": "Médecin", "médecin": "Médecin",
-        "patient": "Patient", "caregiver": "Aidant", "aidant": "Aidant", "admin": "Admin",
+        "superuser": "doctor", 
+        "doctor": "doctor", 
+        "medecin": "doctor", 
+        "médecin": "doctor",
+        "patient": "patient", 
+        "caregiver": "caregiver", 
+        "aidant": "caregiver", 
+        "admin": "admin",
     }
     display_role = role_display_map.get(role_raw, "Patient")
     return jsonify({"role": display_role, "user_id_auth": user_id_auth}), 200
@@ -134,6 +286,11 @@ def get_my_profile():
         "emergency_contact": profile.get("emergency_contact") or None,
         "medical_history": profile.get("medical_history") or None,
         "onboarding_completed": profile.get("onboarding_completed", False),
+        "address_line1": profile.get("address_line1") or "",
+        "address_line2": profile.get("address_line2") or "",
+        "postal_code": profile.get("postal_code") or "",
+        "city": profile.get("city") or "",
+        "country": profile.get("country") or "",
     }
     if not profile_data["first_name"] and not profile_data["last_name"]:
         name = profile.get("display_name") or payload.get("name") or ""
@@ -241,6 +398,16 @@ def patch_my_profile():
             new_emergency_email = ec_email
         has_any = any(v for v in emergency.values())
         updates["emergency_contact"] = emergency if has_any else None
+
+    if get_user_role(g.user_id_auth) == "patient":
+        ADDRESS_FIELDS = {
+            "address_line1": 128, "address_line2": 128, "postal_code": 16,
+            "city": 64, "country": 64,
+        }
+        for field, max_len in ADDRESS_FIELDS.items():
+            if field not in payload:
+                continue
+            updates[field] = str(payload[field] or "").strip()[:max_len] or None
 
     if not updates:
         return jsonify({"message": "No fields to update"}), 400
@@ -503,13 +670,18 @@ def submit_patient_measurement():
         "validation_reasons": normalized["reasons"],
     }
     try:
-        get_medical_db().measurements.insert_one(measurement_doc)
+        ins = get_medical_db().measurements.insert_one(measurement_doc)
+        measurement_doc["_id"] = ins.inserted_id
     except PyMongoError as e:
         raise DatabaseError({"code": "measurement_insert_error", "message": f"Failed to insert measurement: {str(e)}"}, 500)
 
     triggered_alerts = []
     try:
-        triggered_alerts = evaluate_measurement_alerts(device_id=device_id, measurement=measurement_doc)
+        prof = get_user_profile(g.user_id_auth)
+        pathology_ctx = (prof.get("pathology") or "").strip() or None
+        triggered_alerts = evaluate_measurement_alerts(
+            device_id=device_id, measurement=measurement_doc, pathology=pathology_ctx
+        )
     except PyMongoError as e:
         logger.warning("Alert evaluation failed for device %s: %s", device_id, e)
 
@@ -536,6 +708,63 @@ def submit_patient_measurement():
             "contributing_variables": ml_result.get("ml_contributing_variables", []),
             "skipped": ml_result.get("ml_skipped", False),
         } if ml_result else None,
+    }), 201
+
+
+@app.route("/api/patient/alerts", methods=["POST"])
+@requires_auth
+@requires_role("patient")
+def patient_trigger_manual_alert():
+    """Patient manually triggers a critical alert via the app button."""
+    device_id = get_device_id(g.user_id_auth)
+    if not device_id:
+        raise DatabaseError({"code": "device_not_found", "message": "No device record found"}, 404)
+    payload = request.get_json(silent=True) or {}
+    message = str(payload.get("message") or "").strip()[:500] or None
+
+    result = create_manual_alert(
+        device_id=device_id,
+        patient_user_id_auth=g.user_id_auth,
+        message=message,
+    )
+    if not result["created"]:
+        reason = result["reason"]
+        if reason == "cooldown":
+            wait = result.get("wait_seconds") or 0
+            return jsonify({
+                "code": "rate_limited",
+                "message": f"Veuillez patienter {wait} secondes avant de déclencher une nouvelle alerte.",
+                "wait_seconds": wait,
+            }), 429
+        return jsonify({
+            "code": "rate_limited",
+            "message": "Limite horaire d'alertes manuelles atteinte. Appelez le 15 en cas d'urgence réelle.",
+        }), 429
+
+    alert_id = result["alert_id"]
+    profile = get_user_profile(g.user_id_auth)
+    patient_name = profile.get("display_name") or profile.get("email") or "Un patient"
+
+    try:
+        from services.invitation_service import send_alert_emails_for_new_alert
+        send_alert_emails_for_new_alert(
+            device_id=device_id, metric="manual", operator="manual",
+            value=0, threshold=0, patient_name=patient_name,
+        )
+    except Exception as exc:
+        logger.warning("Manual alert email send failed: %s", exc)
+
+    try:
+        from services.webpush_service import send_manual_alert_push_notifications
+        send_manual_alert_push_notifications(
+            device_id=device_id, patient_name=patient_name, patient_message=message,
+        )
+    except Exception as exc:
+        logger.warning("Manual alert push send failed: %s", exc)
+
+    return jsonify({
+        "message": "Alerte envoyée. Votre médecin et votre aidant ont été notifiés.",
+        "alert_id": alert_id,
     }), 201
 
 
@@ -804,30 +1033,133 @@ def get_caregiver_alerts():
     alerts = []
     for alert in cursor:
         out = format_alert_for_caregiver(dict(alert))
+        out.pop("_id", None)
+        _sanitize_alert_dict(out)
         oid = alert.get("_id")
         out["alert_id"] = str(oid) if oid is not None else None
-        out.pop("_id", None)
-        for k in ("created_at", "updated_at", "resolved_at", "first_breach_at", "last_breach_at", "caregiver_resolution_at"):
-            v = out.get(k)
+        for k, v in list(out.items()):
             if isinstance(v, datetime):
                 out[k] = datetime_to_iso_utc(v)
         auth_id = patient_by_device.get(alert.get("device_id"))
         out["patient_id"] = id_by_auth.get(auth_id, auth_id) if auth_id else None
         out["doctor_status"] = alert.get("doctor_status", "PENDING")
         out["caregiver_resolution_comment"] = alert.get("caregiver_resolution_comment")
+        out["caregiver_seen_patient"] = alert.get("caregiver_seen_patient")
+        out["alert_source"] = alert.get("alert_source", "threshold")
+        out["patient_message"] = alert.get("patient_message")
+        _finalize_alert_api_payload(dict(alert), out, auth_id, include_patient_address=False)
         alerts.append(out)
     return jsonify({"caregiver_id": caregiver_user_id_auth, "status_filter": status, "count": len(alerts), "alerts": alerts}), 200
+
+
+@app.route("/api/doctor/alerts/<alert_id>", methods=["GET"])
+@requires_auth
+@requires_role("doctor", "superuser", "medecin")
+def get_doctor_alert(alert_id: str):
+    """Return a single alert with measurement context snapshot."""
+    try:
+        oid = ObjectId(alert_id)
+    except Exception:
+        return jsonify({"code": "invalid_id", "message": "alert_id is not a valid ObjectId"}), 400
+    alert_doc = get_medical_db().alerts.find_one({"_id": oid})
+    if not alert_doc:
+        return jsonify({"code": "not_found", "message": "Alerte introuvable"}), 404
+    device_id = alert_doc.get("device_id")
+    patient_ids = get_assigned_patient_ids_for_doctor(g.user_id_auth)
+    device_by_patient = {pid: get_device_id(pid) for pid in patient_ids if get_device_id(pid)}
+    if device_id not in device_by_patient.values():
+        return jsonify({"code": "forbidden", "message": "Cette alerte ne concerne pas un de vos patients"}), 403
+    patient_by_device = {did: pid for pid, did in device_by_patient.items()}
+    auth_id = patient_by_device.get(device_id)
+
+    out = format_alert_for_doctor(dict(alert_doc))
+    out["alert_id"] = alert_id
+    out.pop("_id", None)
+    for k, v in list(out.items()):
+        if isinstance(v, datetime):
+            out[k] = datetime_to_iso_utc(v)
+    out["patient_id"] = str(get_user_db_id(auth_id) or auth_id) if auth_id else None
+    out["doctor_status"] = alert_doc.get("doctor_status", "PENDING")
+    out["caregiver_resolution_comment"] = alert_doc.get("caregiver_resolution_comment")
+    _finalize_alert_api_payload(alert_doc, out, auth_id, include_patient_address=True)
+
+    # Triggering measurement context
+    measurement_context = None
+    measurement_id = alert_doc.get("measurement_id")
+    if measurement_id:
+        try:
+            m_doc = get_medical_db().measurements.find_one({"_id": measurement_id})
+            if m_doc:
+                measurement_context = {
+                    "measurement_id": str(measurement_id),
+                    "measured_at": datetime_to_iso_utc(m_doc["measured_at"]) if isinstance(m_doc.get("measured_at"), datetime) else None,
+                    "heart_rate": m_doc.get("heart_rate"),
+                    "spo2": m_doc.get("spo2"),
+                    "temperature": m_doc.get("temperature"),
+                    "signal_quality": m_doc.get("signal_quality"),
+                    "status": m_doc.get("status"),
+                }
+        except Exception as exc:
+            logger.warning("Failed to fetch measurement context for alert %s: %s", alert_id, exc)
+    if not measurement_context and device_id:
+        # Fallback: last 5 measurements around alert creation
+        try:
+            cutoff = alert_doc.get("created_at") or datetime.now(timezone.utc)
+            recent = list(get_medical_db().measurements.find(
+                {"device_id": device_id, "measured_at": {"$lte": cutoff}},
+                sort=[("measured_at", -1)], limit=5,
+                projection={"_id": 1, "measured_at": 1, "heart_rate": 1, "spo2": 1,
+                            "temperature": 1, "signal_quality": 1, "status": 1},
+            ))
+            measurement_context = [
+                {
+                    "measurement_id": str(r["_id"]),
+                    "measured_at": datetime_to_iso_utc(r["measured_at"]) if isinstance(r.get("measured_at"), datetime) else None,
+                    "heart_rate": r.get("heart_rate"), "spo2": r.get("spo2"),
+                    "temperature": r.get("temperature"), "signal_quality": r.get("signal_quality"),
+                    "status": r.get("status"),
+                }
+                for r in recent
+            ]
+        except Exception as exc:
+            logger.warning("Failed to fetch recent measurements for alert %s: %s", alert_id, exc)
+    out["measurement_context"] = measurement_context
+
+    # Alert events (audit trail)
+    try:
+        events = list(get_medical_db().alert_events.find(
+            {"medical_alert_id": alert_id},
+            sort=[("created_at", 1)],
+            projection={"_id": 0},
+        ))
+        for ev in events:
+            if isinstance(ev.get("created_at"), datetime):
+                ev["created_at"] = datetime_to_iso_utc(ev["created_at"])
+        out["alert_events"] = events
+    except Exception as exc:
+        logger.warning("Failed to fetch alert_events for %s: %s", alert_id, exc)
+        out["alert_events"] = []
+
+    return jsonify(out), 200
 
 
 @app.route("/api/doctor/alerts/<alert_id>", methods=["PATCH"])
 @requires_auth
 @requires_role("doctor", "superuser", "medecin")
 def patch_doctor_alert(alert_id: str):
-    """Validate or reject a threshold alert."""
+    """Validate or reject an alert, log emergency escalation, and/or add a clinical note."""
     payload = request.get_json(silent=True) or {}
     doctor_status = str(payload.get("doctor_status") or "").strip().upper()
-    if doctor_status not in ("VALIDATED", "REJECTED"):
+    esc_raw = payload.get("emergency_escalation")
+    has_escalation = isinstance(esc_raw, dict) and str(esc_raw.get("type") or "").strip() != ""
+    doctor_note = str(payload.get("note") or "").strip()[:2000] or None
+    if doctor_status and doctor_status not in ("VALIDATED", "REJECTED"):
         return jsonify({"code": "invalid_payload", "message": "doctor_status must be 'VALIDATED' or 'REJECTED'"}), 400
+    if not doctor_status and not has_escalation and not doctor_note:
+        return jsonify({
+            "code": "invalid_payload",
+            "message": "Provide doctor_status (VALIDATED/REJECTED), emergency_escalation { type }, and/or note",
+        }), 400
     try:
         oid = ObjectId(alert_id)
     except Exception:
@@ -841,29 +1173,83 @@ def patch_doctor_alert(alert_id: str):
     if device_id not in device_by_patient.values():
         return jsonify({"code": "forbidden", "message": "Cette alerte ne concerne pas un de vos patients"}), 403
     now = datetime.now(timezone.utc)
-    update = {"doctor_status": doctor_status, "updated_at": now}
-    if doctor_status == "VALIDATED":
-        update["validated_by"] = g.user_id_auth
-        update["validated_at"] = now
-    else:
-        update["rejected_by"] = g.user_id_auth
-        update["rejected_at"] = now
-    get_medical_db().alerts.update_one({"_id": oid}, {"$set": update})
-    return jsonify({"message": "Alerte mise à jour", "alert_id": alert_id, "doctor_status": doctor_status,
-                    "validated_at" if doctor_status == "VALIDATED" else "rejected_at": datetime_to_iso_utc(now)}), 200
+    response: Dict[str, Any] = {"message": "Alerte mise à jour", "alert_id": alert_id}
+    if doctor_status:
+        update = {"doctor_status": doctor_status, "updated_at": now}
+        if doctor_status == "VALIDATED":
+            update["validated_by"] = g.user_id_auth
+            update["validated_at"] = now
+        else:
+            update["rejected_by"] = g.user_id_auth
+            update["rejected_at"] = now
+        if doctor_note:
+            update["doctor_note"] = doctor_note
+            update["doctor_note_at"] = now
+        get_medical_db().alerts.update_one({"_id": oid}, {"$set": update})
+        event_type = "doctor_validated" if doctor_status == "VALIDATED" else "doctor_rejected"
+        write_alert_event(
+            medical_alert_id=alert_id,
+            event_type=event_type,
+            actor_user_id_auth=g.user_id_auth,
+            actor_role="doctor",
+            payload={"doctor_status": doctor_status, "note": doctor_note},
+        )
+        response["doctor_status"] = doctor_status
+        response["validated_at" if doctor_status == "VALIDATED" else "rejected_at"] = datetime_to_iso_utc(now)
+    elif doctor_note:
+        get_medical_db().alerts.update_one(
+            {"_id": oid},
+            {"$set": {"doctor_note": doctor_note, "doctor_note_at": now, "updated_at": now}},
+        )
+        write_alert_event(
+            medical_alert_id=alert_id,
+            event_type="doctor_note",
+            actor_user_id_auth=g.user_id_auth,
+            actor_role="doctor",
+            payload={"note": doctor_note},
+        )
+    if has_escalation:
+        etype = str(esc_raw.get("type") or "samu").strip().lower()[:64]
+        entry = {"at": now, "by": g.user_id_auth, "type": etype}
+        get_medical_db().alerts.update_one(
+            {"_id": oid},
+            {"$push": {"emergency_escalations": entry}, "$set": {"updated_at": now}},
+        )
+        write_alert_event(
+            medical_alert_id=alert_id,
+            event_type="doctor_escalation",
+            actor_user_id_auth=g.user_id_auth,
+            actor_role="doctor",
+            payload={"escalation_type": etype},
+        )
+        response["emergency_escalation_logged"] = {"type": etype, "at": datetime_to_iso_utc(now)}
+    return jsonify(response), 200
 
 
 @app.route("/api/caregiver/alerts/<alert_id>", methods=["PATCH"])
 @requires_auth
 @requires_role("caregiver", "aidant")
 def patch_caregiver_alert(alert_id: str):
-    """Add caregiver resolution comment when emergency is resolved."""
+    """
+    Record caregiver intervention on an alert.
+    New fields (retrocompat - old clients sending only resolution_comment still work):
+      seen_patient_since_alert: bool - caregiver physically saw the patient since the alert
+      resolution_comment: str (optional when seen_patient_since_alert is provided)
+    """
     payload = request.get_json(silent=True) or {}
     comment = str(payload.get("resolution_comment") or "").strip()
-    if not comment:
-        return jsonify({"code": "invalid_payload", "message": "resolution_comment est requis"}), 400
-    if len(comment) > 1000:
-        return jsonify({"code": "invalid_payload", "message": "Le commentaire ne doit pas dépasser 1000 caractères"}), 400
+    seen_raw = payload.get("seen_patient_since_alert")
+
+    # Retrocompat: old clients send only resolution_comment
+    has_seen = seen_raw is not None
+    seen_bool: Optional[bool] = bool(seen_raw) if has_seen else None
+
+    if not comment and not has_seen:
+        return jsonify({"code": "invalid_payload",
+                        "message": "Fournir resolution_comment et/ou seen_patient_since_alert"}), 400
+    if comment and len(comment) > 1000:
+        return jsonify({"code": "invalid_payload",
+                        "message": "Le commentaire ne doit pas dépasser 1000 caractères"}), 400
     try:
         oid = ObjectId(alert_id)
     except Exception:
@@ -883,32 +1269,67 @@ def patch_caregiver_alert(alert_id: str):
     now = datetime.now(timezone.utc)
     date_str = now.strftime("%d/%m/%Y")
     time_str = now.strftime("%H:%M")
-    resolution_text = f"Urgence résolue, l'aidant de {patient_name} est intervenu le {date_str} à {time_str} : {comment}"
-    get_medical_db().alerts.update_one(
-        {"_id": oid},
-        {"$set": {
-            "caregiver_resolution_comment": resolution_text,
-            "caregiver_resolution_at": now,
-            "caregiver_resolution_by": g.user_id_auth,
-            "updated_at": now,
-        }}
-    )
-    # Enregistrer le commentaire dans Vitalio_Identity.alerts
-    identity_alert_doc = {
+
+    update_fields: Dict[str, Any] = {"updated_at": now}
+    if comment:
+        resolution_text = f"Urgence résolue, l'aidant de {patient_name} est intervenu le {date_str} à {time_str} : {comment}"
+        update_fields["caregiver_resolution_comment"] = resolution_text
+        update_fields["caregiver_resolution_at"] = now
+        update_fields["caregiver_resolution_by"] = g.user_id_auth
+    else:
+        resolution_text = None
+
+    if has_seen:
+        update_fields["caregiver_seen_patient"] = seen_bool
+        update_fields["caregiver_seen_at"] = now
+        if not update_fields.get("caregiver_resolution_at"):
+            update_fields["caregiver_resolution_at"] = now
+            update_fields["caregiver_resolution_by"] = g.user_id_auth
+
+    get_medical_db().alerts.update_one({"_id": oid}, {"$set": update_fields})
+
+    # Mirror last caregiver action in Vitalio_Identity.alerts (unique index on medical_alert_id)
+    identity_update: Dict[str, Any] = {
         "medical_alert_id": str(oid),
-        "caregiverComment": resolution_text,
         "author": "caregiver",
         "createdAt": now,
         "caregiver_user_id_auth": g.user_id_auth,
     }
+    if resolution_text:
+        identity_update["caregiverComment"] = resolution_text
+    if has_seen:
+        identity_update["caregiver_seen_patient"] = seen_bool
+        identity_update["caregiver_seen_at"] = now
     get_identity_db().alerts.update_one(
         {"medical_alert_id": str(oid)},
-        {"$set": identity_alert_doc},
+        {"$set": identity_update},
         upsert=True,
     )
-    return jsonify({"message": "Commentaire enregistré", "alert_id": alert_id,
-                    "caregiver_resolution_comment": resolution_text,
-                    "caregiver_resolution_at": datetime_to_iso_utc(now)}), 200
+
+    # Audit event
+    event_type = "caregiver_seen_patient" if has_seen else "caregiver_comment"
+    write_alert_event(
+        medical_alert_id=alert_id,
+        event_type=event_type,
+        actor_user_id_auth=g.user_id_auth,
+        actor_role="caregiver",
+        payload={
+            "seen_patient_since_alert": seen_bool,
+            "comment": comment or None,
+        },
+    )
+
+    resp: Dict[str, Any] = {
+        "message": "Action enregistrée",
+        "alert_id": alert_id,
+        "caregiver_resolution_at": datetime_to_iso_utc(now),
+    }
+    if resolution_text:
+        resp["caregiver_resolution_comment"] = resolution_text
+    if has_seen:
+        resp["caregiver_seen_patient"] = seen_bool
+        resp["caregiver_seen_at"] = datetime_to_iso_utc(now)
+    return jsonify(resp), 200
 
 
 @app.route("/api/caregiver/invitations/accept", methods=["POST"])
@@ -1052,7 +1473,7 @@ def get_doctor_patient_trends(patient_id: str):
 
 @app.route("/api/doctor/alerts", methods=["GET"])
 @requires_auth
-@requires_role("doctor")
+@requires_role("doctor", "superuser", "medecin")
 def get_doctor_alerts():
     doctor_user_id_auth = g.user_id_auth
     status = (request.args.get("status", default="OPEN", type=str) or "OPEN").strip().upper()
@@ -1073,15 +1494,44 @@ def get_doctor_alerts():
     alerts = []
     for alert in cursor:
         out = format_alert_for_doctor(dict(alert))
+        out.pop("_id", None)
+        _sanitize_alert_dict(out)
         out["alert_id"] = str(alert["_id"]) if alert.get("_id") else None
-        for k in ("created_at", "updated_at", "resolved_at", "first_breach_at", "last_breach_at", "validated_at", "caregiver_resolution_at"):
-            v = out.get(k)
+        for k, v in list(out.items()):
             if isinstance(v, datetime):
                 out[k] = datetime_to_iso_utc(v)
         auth_id = patient_by_device.get(alert.get("device_id"))
         out["patient_id"] = id_by_auth.get(auth_id, auth_id) if auth_id else None
         out["doctor_status"] = alert.get("doctor_status", "PENDING")
         out["caregiver_resolution_comment"] = alert.get("caregiver_resolution_comment")
+        out["caregiver_seen_patient"] = alert.get("caregiver_seen_patient")
+        out["alert_source"] = alert.get("alert_source", "threshold")
+        out["patient_message"] = alert.get("patient_message")
+        out["doctor_note"] = alert.get("doctor_note")
+        # Inline measurement snapshot for threshold alerts (avoids extra round-trip)
+        measurement_snapshot = None
+        m_id = alert.get("measurement_id")
+        if m_id:
+            try:
+                m_doc = get_medical_db().measurements.find_one(
+                    {"_id": m_id},
+                    projection={"_id": 1, "measured_at": 1, "heart_rate": 1, "spo2": 1,
+                                "temperature": 1, "signal_quality": 1, "status": 1},
+                )
+                if m_doc:
+                    measurement_snapshot = {
+                        "measurement_id": str(m_id),
+                        "measured_at": datetime_to_iso_utc(m_doc["measured_at"]) if isinstance(m_doc.get("measured_at"), datetime) else None,
+                        "heart_rate": m_doc.get("heart_rate"),
+                        "spo2": m_doc.get("spo2"),
+                        "temperature": m_doc.get("temperature"),
+                        "signal_quality": m_doc.get("signal_quality"),
+                        "status": m_doc.get("status"),
+                    }
+            except Exception:
+                pass
+        out["measurement_snapshot"] = measurement_snapshot
+        _finalize_alert_api_payload(dict(alert), out, auth_id, include_patient_address=True)
         alerts.append(out)
     return jsonify({"doctor_id": doctor_user_id_auth, "status_filter": status, "count": len(alerts), "alerts": alerts}), 200
 
@@ -1110,15 +1560,26 @@ def doctor_patient_alert_thresholds(patient_id: str):
     except (TypeError, ValueError):
         return jsonify({"code": "invalid_payload", "message": "consecutive_breaches must be an integer >= 1"}), 400
     pathology = payload.get("pathology")
+    if pathology is not None and isinstance(pathology, str):
+        pathology = pathology.strip() or None
     enabled = bool(payload.get("enabled", True))
     now = datetime.now(timezone.utc)
-    collection.update_one(
-        {"scope": "patient", "device_id": device_id},
-        {"$set": {"scope": "patient", "patient_user_id_auth": patient_id, "device_id": device_id, "pathology": pathology,
-                  "thresholds": thresholds, "consecutive_breaches": consecutive, "enabled": enabled,
-                  "updated_by": g.user_id_auth, "updated_at": now}, "$setOnInsert": {"created_at": now}},
-        upsert=True
-    )
+    try:
+        collection.delete_many({"scope": "patient", "device_id": device_id})
+        collection.insert_one({
+            "scope": "patient",
+            "patient_user_id_auth": patient_id,
+            "device_id": device_id,
+            "pathology": pathology,
+            "thresholds": thresholds,
+            "consecutive_breaches": consecutive,
+            "enabled": enabled,
+            "updated_by": g.user_id_auth,
+            "updated_at": now,
+            "created_at": now,
+        })
+    except PyMongoError as e:
+        raise DatabaseError({"code": "alert_thresholds_save_error", "message": str(e)}, 500)
     updated_rule = collection.find_one({"scope": "patient", "device_id": device_id}, projection={"_id": 0}) or {}
     return jsonify({"message": "Patient alert thresholds saved", "patient_id": patient_id, "device_id": device_id, "rule": updated_rule}), 200
 
@@ -1224,6 +1685,11 @@ def get_patient_profile_for_doctor(patient_id: str):
             "sex": profile.get("sex"),
             "medical_history": profile.get("medical_history"),
             "onboarding_completed": profile.get("onboarding_completed", False),
+            "address_line1": profile.get("address_line1") or "",
+            "address_line2": profile.get("address_line2") or "",
+            "postal_code": profile.get("postal_code") or "",
+            "city": profile.get("city") or "",
+            "country": profile.get("country") or "",
         }
     }), 200
 
@@ -1297,10 +1763,13 @@ def ml_model_info():
 def list_ml_anomalies():
     doctor_user_id_auth = g.user_id_auth
     role = get_current_user_role()
-    patient_ids = None
+    allowed_devices: Optional[List[str]] = None
     if role != "superuser":
         patient_ids = get_assigned_patient_ids_for_doctor(doctor_user_id_auth)
         if not patient_ids:
+            return jsonify({"anomalies": [], "count": 0}), 200
+        allowed_devices = [d for d in (get_device_id(p) for p in patient_ids) if d]
+        if not allowed_devices:
             return jsonify({"anomalies": [], "count": 0}), 200
     status_filter = request.args.get("status")
     device_id = request.args.get("device_id")
@@ -1309,14 +1778,17 @@ def list_ml_anomalies():
     to_date = request.args.get("to_date")
     limit = min(int(request.args.get("limit", "50")), 200)
     query: Dict[str, Any] = {}
-    if patient_ids is not None:
-        query["user_id_auth"] = {"$in": patient_ids}
+    if device_id:
+        if allowed_devices is not None and device_id not in allowed_devices:
+            return jsonify({"anomalies": [], "count": 0}), 200
+        query["device_id"] = device_id
+    elif allowed_devices is not None:
+        # device_id filtre les anomalies même si user_id_auth manque sur le document (bug fréquent)
+        query["device_id"] = {"$in": allowed_devices}
     if status_filter in ("pending", "validated", "rejected"):
         query["status"] = status_filter
     if severity in ("critical", "warning"):
         query["anomaly_level"] = severity
-    if device_id:
-        query["device_id"] = device_id
     if from_date or to_date:
         date_q: Dict[str, Any] = {}
         if from_date:
@@ -1363,9 +1835,14 @@ def validate_ml_anomaly(anomaly_id: str):
     if not anomaly_doc:
         return jsonify({"code": "not_found", "message": "Anomaly not found"}), 404
     role = get_current_user_role()
-    if role != "superuser" and anomaly_doc.get("user_id_auth"):
+    if role != "superuser":
         patient_ids = get_assigned_patient_ids_for_doctor(g.user_id_auth)
-        if anomaly_doc["user_id_auth"] not in patient_ids:
+        allowed_devices = {d for p in patient_ids if (d := get_device_id(p))}
+        uid = anomaly_doc.get("user_id_auth")
+        dev = anomaly_doc.get("device_id")
+        if uid and uid not in patient_ids:
+            return jsonify({"code": "forbidden", "message": "This anomaly belongs to a patient not assigned to you"}), 403
+        if not uid and dev not in allowed_devices:
             return jsonify({"code": "forbidden", "message": "This anomaly belongs to a patient not assigned to you"}), 403
     now = datetime.now(timezone.utc)
     get_medical_db().ml_anomalies.update_one(
@@ -1381,8 +1858,36 @@ def validate_ml_anomaly(anomaly_id: str):
             )
         except PyMongoError:
             logger.warning("Failed to propagate validation to measurement %s", measurement_id)
-    return jsonify({"message": f"Anomaly {new_status}", "anomaly_id": anomaly_id, "status": new_status,
-                    "validated_by": g.user_id_auth, "validated_at": datetime_to_iso_utc(now)}), 200
+    audit_alert_id = None
+    audit_mode = None
+    if new_status == "validated":
+        try:
+            aid, audit_mode = create_or_merge_alert_for_validated_ml(
+                dict(anomaly_doc), oid, g.user_id_auth
+            )
+            if aid is not None:
+                audit_alert_id = str(aid)
+        except Exception as e:
+            logger.warning("ML validated → alerts audit failed: %s", e)
+    # Déclencher le réentraînement ML en arrière-plan (validated/rejected servent au feedback)
+    def _retrain_in_background():
+        try:
+            do_ml_retrain(days=30, trigger="ml_validation_feedback")
+        except Exception as e:
+            logger.warning("Background ML retrain after validation failed: %s", e)
+    threading.Thread(target=_retrain_in_background, daemon=True).start()
+    body: Dict[str, Any] = {
+        "message": f"Anomaly {new_status}",
+        "anomaly_id": anomaly_id,
+        "status": new_status,
+        "validated_by": g.user_id_auth,
+        "validated_at": datetime_to_iso_utc(now),
+    }
+    if audit_alert_id:
+        body["audit_alert_id"] = audit_alert_id
+    if audit_mode:
+        body["audit_alert_mode"] = audit_mode
+    return jsonify(body), 200
 
 
 @app.route("/api/admin/ml/retrain", methods=["POST"])
@@ -1392,34 +1897,14 @@ def retrain_ml_model():
     payload = request.get_json(silent=True) or {}
     days, contamination = int(payload.get("days", 30)), float(payload.get("contamination", 0.05))
     n_estimators = int(payload.get("n_estimators", 150))
-    cutoff = datetime.now(timezone.utc) - timedelta(days=max(days, 1))
     try:
-        measurements = list(get_medical_db().measurements.find(
-            {"status": "VALID", "measured_at": {"$gte": cutoff}},
-            projection={"_id": 0, "heart_rate": 1, "spo2": 1, "temperature": 1, "signal_quality": 1, "status": 1}
-        ).limit(50000))
+        meta = do_ml_retrain(
+            days=days, contamination=contamination, n_estimators=n_estimators, trigger="manual"
+        )
     except PyMongoError as e:
         raise DatabaseError({"code": "training_data_error", "message": str(e)}, 500)
-    validated_anomalies = []
-    try:
-        validated_anomalies = list(get_medical_db().ml_anomalies.find(
-            {"status": {"$in": ["validated", "rejected"]}}, projection={"_id": 0}
-        ).limit(10000))
-    except PyMongoError:
-        pass
-    try:
-        meta = ml_module.train_model(measurements=measurements, validated_anomalies=validated_anomalies,
-                                     contamination=contamination, n_estimators=n_estimators)
     except ValueError as e:
         return jsonify({"code": "training_error", "message": str(e)}), 400
-    try:
-        get_medical_db().ml_model_versions.insert_one({
-            "version": meta["version"], "trained_at": meta["trained_at"], "n_samples": meta["n_samples"],
-            "contamination": meta["contamination"], "n_estimators": meta["n_estimators"],
-            "created_at": datetime.now(timezone.utc),
-        })
-    except PyMongoError:
-        pass
     return jsonify({"message": "Model retrained successfully", **meta}), 200
 
 
@@ -1467,9 +1952,21 @@ def ml_bootstrap():
         raise DatabaseError({"code": "bootstrap_training_data_error", "message": str(e)}, 500)
     validated_anomalies = []
     try:
-        validated_anomalies = list(get_medical_db().ml_anomalies.find(
-            {"status": {"$in": ["validated", "rejected"]}}, projection={"_id": 0}
+        raw_anomalies = list(get_medical_db().ml_anomalies.find(
+            {"status": {"$in": ["validated", "rejected"]}},
+            projection={"_id": 0, "measurement_id": 1, "status": 1}
         ).limit(10000))
+        for a in raw_anomalies:
+            if a.get("measurement"):
+                validated_anomalies.append(a)
+            elif a.get("measurement_id"):
+                m = get_medical_db().measurements.find_one(
+                    {"_id": a["measurement_id"]},
+                    projection={"heart_rate": 1, "spo2": 1, "temperature": 1, "signal_quality": 1, "status": 1}
+                )
+                if m:
+                    a["measurement"] = m
+                    validated_anomalies.append(a)
     except PyMongoError:
         pass
     try:
@@ -1543,6 +2040,10 @@ def update_ml_thresholds():
     if normal_max is None and warning_max is None:
         return jsonify({"code": "invalid_payload", "message": "Provide normal_max and/or warning_max"}), 400
     ml_module.configure_thresholds(normal_max=normal_max, warning_max=warning_max)
+    try:
+        save_ml_thresholds_to_db()
+    except PyMongoError as e:
+        logger.warning("Could not persist ml_thresholds: %s", e)
     return jsonify({"message": "Thresholds updated", **ml_module.get_model_info()}), 200
 
 
@@ -1637,7 +2138,21 @@ def get_patient_ml_analysis(patient_id: str):
         for key, val in doc.items():
             if isinstance(val, datetime):
                 doc[key] = datetime_to_iso_utc(val)
+    threshold_alert_docs: List[Dict[str, Any]] = []
+    try:
+        threshold_alert_docs = list(get_medical_db().alerts.find(
+            {"device_id": {"$in": device_ids}, "created_at": {"$gte": cutoff}, "metric": {"$ne": "ml_anomaly"}},
+        ).sort("created_at", -1).limit(400))
+    except Exception:
+        threshold_alert_docs = []
+    for doc in threshold_alert_docs:
+        for key, val in doc.items():
+            if isinstance(val, datetime):
+                doc[key] = datetime_to_iso_utc(val)
     result = ml_module.analyze_patient_vitals(measurements, ml_scores=ml_decisions_list, anomaly_records=anomaly_records)
+    result["anomaly_summary"] = _build_combined_anomaly_summary_for_analysis(
+        anomaly_records, threshold_alert_docs
+    )
     if include_forecast and len(measurements) >= 3:
         try:
             result["forecast"] = ml_module.forecast_vitals(measurements, horizon=forecast_horizon, history_window_hours=48)
@@ -1655,6 +2170,56 @@ def get_patient_ml_analysis(patient_id: str):
         pass
     return jsonify(result), 200
 
+@app.route("/api/device/measurements", methods=["POST"])
+def submit_device_measurement():
+    """Route sans auth pour l'ESP32 - vérification par device_id"""
+    payload = request.get_json(silent=True) or {}
+    
+    device_id = str(payload.get("device_id") or "").strip()
+    if not device_id:
+        return jsonify({"code": "missing_device_id", "message": "device_id requis"}), 400
+
+    # Vérifier que le device_id existe en base
+    device_doc = get_medical_db().measurements.find_one({"device_id": device_id})
+    identity_doc = get_identity_db().users.find_one({"device_id": device_id})
+    
+    if not device_doc and not identity_doc:
+        return jsonify({"code": "unknown_device", "message": "device_id inconnu"}), 403
+
+    try:
+        normalized = normalize_patient_measurement_payload(payload)
+    except ValueError as e:
+        return jsonify({"code": "invalid_payload", "message": str(e)}), 400
+
+    measurement_doc = {
+        "device_id": device_id,
+        "measured_at": normalized["measured_at"],
+        "heart_rate": normalized["heart_rate"],
+        "spo2": normalized["spo2"],
+        "temperature": normalized["temperature"],
+        "signal_quality": normalized["signal_quality"],
+        "source": "esp32",
+        "status": normalized["status"],
+        "validation_reasons": normalized["reasons"],
+    }
+
+    try:
+        ins = get_medical_db().measurements.insert_one(measurement_doc)
+        measurement_doc["_id"] = ins.inserted_id
+    except PyMongoError as e:
+        return jsonify({"code": "insert_error", "message": str(e)}), 500
+
+    # ML scoring
+    try:
+        run_ml_scoring(device_id=device_id, measurement_doc=measurement_doc)
+    except Exception as e:
+        logger.warning("ML scoring failed: %s", e)
+
+    return jsonify({
+        "message": "Mesure enregistree",
+        "device_id": device_id,
+        "measurement_id": str(ins.inserted_id),
+    }), 201
 
 # ============================================================================
 # MAIN
@@ -1675,3 +2240,4 @@ if __name__ == "__main__":
         port=int(os.getenv("FLASK_PORT", 5000)),
         debug=os.getenv("FLASK_DEBUG", "False").lower() == "true"
     )
+

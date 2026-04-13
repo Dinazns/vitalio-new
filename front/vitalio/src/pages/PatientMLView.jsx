@@ -215,7 +215,7 @@ export default function PatientMLView() {
                       {weeklyData.summary.risk_level === 'moderate' && 'Surveillance'}
                       {weeklyData.summary.risk_level === 'low' && 'Normal'}
                       {weeklyData.summary.risk_level === 'minimal' && 'Rassurant'}
-                      {weeklyData.summary.risk_level === 'unknown' && '—'}
+                      {weeklyData.summary.risk_level === 'unknown' && '-'}
                     </span>
                     {weeklyData.summary.recommended_action && (
                       <p className="ml-ai-recommendation">{weeklyData.summary.recommended_action}</p>

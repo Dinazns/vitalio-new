@@ -1,5 +1,19 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
+export async function getVapidPublicKey() {
+  const res = await fetch(`${API_URL}/api/push/vapid-public-key`)
+  if (!res.ok) throw new Error('Failed to get VAPID key')
+  const data = await res.json()
+  return data.vapid_public_key || ''
+}
+
+export async function registerPushSubscription(accessToken, subscription) {
+  return apiRequest('/api/me/push-subscribe', accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ subscription }),
+  })
+}
+
 export async function apiRequest(endpoint, accessToken, options = {}) {
   const url = `${API_URL}${endpoint}`
   
@@ -101,17 +115,44 @@ export async function getCaregiverAlerts(accessToken, params = {}) {
   return apiRequest(`/api/caregiver/alerts${q ? `?${q}` : ''}`, accessToken, { method: 'GET' })
 }
 
-export async function patchDoctorAlert(accessToken, alertId, doctorStatus) {
+export async function patchDoctorAlert(accessToken, alertId, payload) {
+  const body =
+    typeof payload === 'string'
+      ? { doctor_status: payload }
+      : {
+          ...(payload.doctor_status != null ? { doctor_status: payload.doctor_status } : {}),
+          ...(payload.emergency_escalation
+            ? { emergency_escalation: payload.emergency_escalation }
+            : {}),
+        }
   return apiRequest(`/api/doctor/alerts/${encodeURIComponent(alertId)}`, accessToken, {
     method: 'PATCH',
-    body: JSON.stringify({ doctor_status: doctorStatus }),
+    body: JSON.stringify(body),
   })
 }
 
-export async function patchCaregiverAlert(accessToken, alertId, resolutionComment) {
+export async function patchCaregiverAlert(accessToken, alertId, payload) {
+  // Supports both legacy string (resolution_comment only) and new structured payload
+  const body = typeof payload === 'string'
+    ? { resolution_comment: payload }
+    : {
+        ...(payload.resolution_comment != null ? { resolution_comment: payload.resolution_comment } : {}),
+        ...(payload.seen_patient_since_alert != null ? { seen_patient_since_alert: payload.seen_patient_since_alert } : {}),
+      }
   return apiRequest(`/api/caregiver/alerts/${encodeURIComponent(alertId)}`, accessToken, {
     method: 'PATCH',
-    body: JSON.stringify({ resolution_comment: resolutionComment }),
+    body: JSON.stringify(body),
+  })
+}
+
+export async function getDoctorAlert(accessToken, alertId) {
+  return apiRequest(`/api/doctor/alerts/${encodeURIComponent(alertId)}`, accessToken, { method: 'GET' })
+}
+
+export async function triggerManualAlert(accessToken, message = '') {
+  return apiRequest('/api/patient/alerts', accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ message }),
   })
 }
 

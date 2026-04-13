@@ -10,6 +10,7 @@ import {
   Home,
 } from 'lucide-react'
 import { getCaregiverAlerts } from '../services/api'
+import PushPermissionBanner from './PushPermissionBanner'
 
 const ROLE_DISPLAY = { caregiver: 'Aidant', aidant: 'Aidant' }
 
@@ -125,7 +126,10 @@ export default function CaregiverLayout({ children }) {
         </div>
       </aside>
 
-      <main className="caregiver-layout-main"><Outlet /></main>
+      <main className="caregiver-layout-main">
+        <PushPermissionBanner getAccessTokenSilently={getAccessTokenSilently} />
+        <Outlet />
+      </main>
     </div>
   )
 }

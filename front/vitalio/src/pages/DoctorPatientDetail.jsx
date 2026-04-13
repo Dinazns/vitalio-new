@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import { ArrowLeft, BrainCircuit, Heart, Mail, PhoneCall, Thermometer, User, Users, Wind } from 'lucide-react'
+import { ArrowLeft, BrainCircuit, Copy, Heart, Mail, PhoneCall, Thermometer, User, Users, Wind } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import {
   createDoctorFeedback,
@@ -16,6 +16,12 @@ import DoctorLayout from '../components/DoctorLayout'
 function formatDay(timestamp) {
   if (!timestamp) return ''
   return new Date(timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+}
+
+function formatPatientAddressLines(p) {
+  if (!p) return []
+  const line3 = [p.postal_code, p.city].filter(Boolean).join(' ').trim()
+  return [p.address_line1, p.address_line2, line3, p.country].filter((x) => x && String(x).trim())
 }
 
 function computeAge(birthdate, ageFromProfile) {
@@ -206,6 +212,35 @@ export default function DoctorPatientDetail() {
                         </div>
                       </div>
                       <div>
+                        <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem' }}>Urgences - adresse &amp; SAMU</h4>
+                        <p style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', color: '#64748b' }}>
+                          À utiliser si vous devez orienter les secours vers le domicile du patient.
+                        </p>
+                        {formatPatientAddressLines(patientProfile).length > 0 ? (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
+                            <p style={{ margin: 0, lineHeight: 1.5, flex: '1 1 200px' }}>
+                              {formatPatientAddressLines(patientProfile).join(', ')}
+                            </p>
+                            <button
+                              type="button"
+                              className="doctor-btn doctor-btn-secondary"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                              onClick={() => {
+                                const t = formatPatientAddressLines(patientProfile).join(', ')
+                                navigator.clipboard.writeText(t).catch(() => {})
+                              }}
+                            >
+                              <Copy size={16} /> Copier l&apos;adresse
+                            </button>
+                            <a href="tel:15" className="doctor-btn doctor-btn-primary" style={{ textDecoration: 'none' }}>
+                              <PhoneCall size={16} /> 15 (SAMU)
+                            </a>
+                          </div>
+                        ) : (
+                          <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.875rem' }}>Adresse non renseignée par le patient.</p>
+                        )}
+                      </div>
+                      <div>
                         <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem' }}>Antécédents médicaux</h4>
                         <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{patientProfile.medical_history || 'Non renseigné'}</p>
                       </div>
@@ -393,7 +428,6 @@ export default function DoctorPatientDetail() {
                       <th>Date</th>
                       <th>Sévérité</th>
                       <th>Message</th>
-                      <th>Médecin</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -402,7 +436,6 @@ export default function DoctorPatientDetail() {
                         <td>{item.created_at ? new Date(item.created_at).toLocaleString('fr-FR') : '-'}</td>
                         <td>{item.severity || '-'}</td>
                         <td>{item.message || '-'}</td>
-                        <td>{item.doctor_user_id_auth || '-'}</td>
                       </tr>
                     ))}
                     {!feedback.length && (

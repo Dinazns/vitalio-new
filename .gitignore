@@ -16,6 +16,7 @@ mosquitto/data/*
 mosquitto/log/*
 !mosquitto/log/.gitkeep
 
+**/vapid_private.pem
 __pycache__/
 *.py[cod]
 *$py.class

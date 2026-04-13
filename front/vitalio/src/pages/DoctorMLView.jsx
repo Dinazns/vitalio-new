@@ -15,6 +15,13 @@ import {
   ArrowRight,
   Heart,
   Phone,
+  Copy,
+  Ambulance,
+  UserCheck,
+  Siren,
+  Activity,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { getMLModelInfo, getMLAnomalies, getDoctorAlerts, getDoctorPatients, patchDoctorAlert, apiRequest } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
@@ -47,6 +54,68 @@ const formatTime = (iso) => {
   if (!iso) return ''
   const d = new Date(iso)
   return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
+function formatPostalAddress(addr) {
+  if (!addr || typeof addr !== 'object') return ''
+  const parts = [
+    addr.address_line1,
+    addr.address_line2,
+    [addr.postal_code, addr.city].filter(Boolean).join(' ').trim(),
+    addr.country,
+  ].filter((p) => p && String(p).trim())
+  return parts.join(', ')
+}
+
+function VitalEmergencyActions({ alert, patientName, tokenGetter, onEscalated, onNotify }) {
+  const addr = alert.patient_address
+  const addressText = formatPostalAddress(addr)
+  const copyAddress = async () => {
+    if (!addressText) {
+      onNotify?.({ message: 'Aucune adresse enregistrée pour ce patient', type: 'error' })
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(addressText)
+      onNotify?.({ message: 'Adresse copiée', type: 'success' })
+    } catch {
+      onNotify?.({ message: 'Copie impossible', type: 'error' })
+    }
+  }
+  const logSamu = async () => {
+    if (!alert.alert_id) return
+    try {
+      const token = await tokenGetter()
+      await patchDoctorAlert(token, alert.alert_id, { emergency_escalation: { type: 'samu' } })
+      onNotify?.({ message: 'Escalade SAMU enregistrée dans le dossier', type: 'success' })
+      onEscalated?.()
+    } catch (e) {
+      onNotify?.({ message: e.message || 'Échec enregistrement', type: 'error' })
+    }
+  }
+  return (
+    <div className="ml-emergency-actions">
+      <a className="ml-emergency-tel" href="tel:15">
+        <Phone size={14} /> 15 (SAMU)
+      </a>
+      {addressText ? (
+        <>
+          <span className="ml-emergency-address" title={addressText}>
+            {patientName ? `${patientName} - ` : ''}
+            {addressText}
+          </span>
+          <button type="button" className="ml-filter-btn" onClick={copyAddress} title="Copier l'adresse">
+            <Copy size={12} /> Copier
+          </button>
+        </>
+      ) : (
+        <span className="ml-emergency-address ml-emergency-address--empty">Adresse non renseignée</span>
+      )}
+      <button type="button" className="ml-retrain-btn" style={{ fontSize: '0.8rem', padding: '0.35rem 0.6rem' }} onClick={logSamu}>
+        <Ambulance size={14} /> Journaliser appel urgences
+      </button>
+    </div>
+  )
 }
 
 function Toast({ message, type, onClose }) {
@@ -111,6 +180,7 @@ export default function DoctorMLView() {
   const [retraining, setRetraining] = useState(false)
   const [retrainResult, setRetrainResult] = useState(null)
   const [expandedAnomaly, setExpandedAnomaly] = useState(null)
+  const [expandedMeasurement, setExpandedMeasurement] = useState(null)
   const [toast, setToast] = useState(null)
 
   const patientNames = React.useMemo(() => {
@@ -153,6 +223,12 @@ export default function DoctorMLView() {
 
   useEffect(() => { loadData() }, [loadData])
 
+  // Rafraîchissement périodique pour afficher les nouvelles alertes (web push, MQTT, etc.)
+  useEffect(() => {
+    const interval = setInterval(loadData, 30000)
+    return () => clearInterval(interval)
+  }, [loadData])
+
   // Notification navigateur au chargement si des alertes ouvertes (une fois par montage)
   const hasNotifiedRef = React.useRef(false)
   useEffect(() => {
@@ -186,7 +262,7 @@ export default function DoctorMLView() {
     try {
       setValidatingId(anomalyId)
       const token = await getAccessTokenSilently()
-      await apiRequest(`/api/doctor/ml-anomalies/${anomalyId}`, token, {
+      const res = await apiRequest(`/api/doctor/ml-anomalies/${anomalyId}`, token, {
         method: 'PATCH',
         body: JSON.stringify({ status: newStatus }),
       })
@@ -197,10 +273,18 @@ export default function DoctorMLView() {
             : a
         )
       )
+      const auditHint =
+        newStatus === 'validated' && res?.audit_alert_id
+          ? ` - dossier alerte #${String(res.audit_alert_id).slice(-6)}`
+          : ''
       setToast({
-        message: newStatus === 'validated' ? 'Alerte confirmée avec succès' : 'Alerte classée comme non pertinente',
+        message:
+          (newStatus === 'validated' ? 'Alerte confirmée avec succès' : 'Alerte classée comme non pertinente') + auditHint,
         type: 'success',
       })
+      if (newStatus === 'validated' && res?.audit_alert_id) {
+        loadData()
+      }
     } catch (e) {
       setToast({ message: e.message || 'Erreur lors du traitement', type: 'error' })
     } finally {
@@ -212,7 +296,7 @@ export default function DoctorMLView() {
     try {
       setValidatingVitalId(alertId)
       const token = await getAccessTokenSilently()
-      await patchDoctorAlert(token, alertId, doctorStatus)
+      await patchDoctorAlert(token, alertId, { doctor_status: doctorStatus })
       setVitalAlerts((prev) =>
         prev.map((a) =>
           (a.alert_id === alertId) ? { ...a, doctor_status: doctorStatus } : a
@@ -339,10 +423,11 @@ export default function DoctorMLView() {
                         <tr>
                           <th>Date</th>
                           <th>Patient</th>
-                          <th>Type de défaillance</th>
+                          <th>Type</th>
                           <th>Valeur / Seuil</th>
+                          <th>Contexte mesure</th>
                           <th>Statut médecin</th>
-                          <th>Commentaire aidant</th>
+                          <th>Aidant</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -353,60 +438,160 @@ export default function DoctorMLView() {
                           const patientName = patientNames[a.patient_id] || a.patient_id || '-'
                           const value = a.latest_value ?? a.value ?? '-'
                           const threshold = a.threshold ?? '-'
+                          const rowKey = a.alert_id || `${a.device_id}-${a.metric}`
+                          const isManual = a.alert_source === 'manual'
+                          const snap = a.measurement_snapshot
+                          const isMeasExpanded = expandedMeasurement === rowKey
                           return (
-                            <tr key={a.alert_id || a.device_id + a.metric}>
-                              <td>{formatTime(a.created_at || a.last_breach_at)}</td>
-                              <td>{patientName}</td>
-                              <td>{a.medical_label || a.metric}</td>
-                              <td className="ml-table-mono">{value} / {threshold}</td>
-                              <td>
-                                <span className="ml-level-badge" style={{ background: dsCfg.bg, color: dsCfg.color }}>
-                                  {dsCfg.label}
-                                </span>
-                              </td>
-                              <td className="ml-alert-comment">
-                                {a.caregiver_resolution_comment || '-'}
-                              </td>
-                              <td>
-                                <div className="ml-action-btns" style={{ flexWrap: 'wrap', gap: '0.35rem' }}>
-                                  {(docStatus === 'PENDING') && (
-                                    <>
-                                      <button
-                                        className="ml-action-btn ml-action-btn--validate"
-                                        onClick={() => handleValidateVital(a.alert_id, 'VALIDATED')}
-                                        disabled={validatingVitalId === a.alert_id}
-                                        title="Valider l'alerte"
-                                      >
-                                        <ThumbsUp size={15} />
-                                      </button>
-                                      <button
-                                        className="ml-action-btn ml-action-btn--reject"
-                                        onClick={() => handleValidateVital(a.alert_id, 'REJECTED')}
-                                        disabled={validatingVitalId === a.alert_id}
-                                        title="Rejeter l'alerte"
-                                      >
-                                        <ThumbsDown size={15} />
-                                      </button>
-                                    </>
+                            <React.Fragment key={rowKey}>
+                              <tr className={isManual ? 'ml-vital-row--manual' : ''}>
+                                <td>
+                                  {formatTime(a.created_at || a.last_breach_at)}
+                                  {isManual && (
+                                    <span className="ml-source-badge ml-source-badge--manual" title="Déclenchée manuellement par le patient">
+                                      <Siren size={12} /> Patient
+                                    </span>
                                   )}
-                                  {docStatus === 'VALIDATED' && (
-                                    <span className="ml-table-validated">Validée</span>
+                                </td>
+                                <td>{patientName}</td>
+                                <td>
+                                  {isManual
+                                    ? <><Siren size={14} style={{ verticalAlign: 'middle' }} /> {a.medical_label || 'Alerte patient'}</>
+                                    : (a.medical_label || a.metric)
+                                  }
+                                  {isManual && a.patient_message && (
+                                    <p className="ml-patient-message">« {a.patient_message} »</p>
                                   )}
-                                  {docStatus === 'REJECTED' && (
-                                    <span className="ml-table-validated">Rejetée</span>
-                                  )}
-                                  {a.patient_id && (
+                                </td>
+                                <td className="ml-table-mono">
+                                  {isManual ? '-' : `${value} / ${threshold}`}
+                                </td>
+                                <td>
+                                  {snap && !isManual ? (
                                     <button
-                                      className="ml-action-btn ml-action-btn--contact"
-                                      onClick={() => navigate(`/doctor/patient/${encodeURIComponent(a.patient_id)}`)}
-                                      title="Prendre contact (voir patient, aidant)"
+                                      className="ml-filter-btn"
+                                      style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                                      onClick={() => setExpandedMeasurement(isMeasExpanded ? null : rowKey)}
+                                      title="Voir contexte mesure déclenchante"
                                     >
-                                      <Phone size={15} />
+                                      <Activity size={13} />
+                                      {isMeasExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                                     </button>
+                                  ) : <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>-</span>}
+                                </td>
+                                <td>
+                                  <span className="ml-level-badge" style={{ background: dsCfg.bg, color: dsCfg.color }}>
+                                    {dsCfg.label}
+                                  </span>
+                                  {a.doctor_note && (
+                                    <p className="ml-doctor-note" title={a.doctor_note}>📝 {a.doctor_note.slice(0, 60)}{a.doctor_note.length > 60 ? '…' : ''}</p>
                                   )}
-                                </div>
-                              </td>
-                            </tr>
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                    <span
+                                      className={`ml-aidant-badge ${a.caregiver_intervened ? 'ml-aidant-badge--yes' : 'ml-aidant-badge--no'}`}
+                                      title={a.caregiver_intervened ? 'Aidant a laissé un commentaire' : "Pas d'intervention aidant enregistrée"}
+                                    >
+                                      <UserCheck size={15} />
+                                      {a.caregiver_intervened ? 'Intervenu' : 'En attente'}
+                                    </span>
+                                    {a.caregiver_seen_patient != null && (
+                                      <span
+                                        className={`ml-aidant-badge ${a.caregiver_seen_patient ? 'ml-aidant-badge--yes' : 'ml-aidant-badge--no'}`}
+                                        title="Aidant a-t-il vu le patient en personne depuis l'alerte ?"
+                                      >
+                                        {a.caregiver_seen_patient ? '👁 Vu en personne' : '👁 Pas vu en personne'}
+                                      </span>
+                                    )}
+                                    {a.caregiver_resolution_comment && (
+                                      <p className="ml-alert-comment">{a.caregiver_resolution_comment}</p>
+                                    )}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="ml-action-btns" style={{ flexWrap: 'wrap', gap: '0.35rem' }}>
+                                    {(docStatus === 'PENDING') && (
+                                      <>
+                                        <button
+                                          className="ml-action-btn ml-action-btn--validate"
+                                          onClick={() => handleValidateVital(a.alert_id, 'VALIDATED')}
+                                          disabled={validatingVitalId === a.alert_id}
+                                          title="Valider - alerte cliniquement retenue"
+                                        >
+                                          <ThumbsUp size={15} />
+                                        </button>
+                                        <button
+                                          className="ml-action-btn ml-action-btn--reject"
+                                          onClick={() => handleValidateVital(a.alert_id, 'REJECTED')}
+                                          disabled={validatingVitalId === a.alert_id}
+                                          title="Rejeter - faux positif / artefact"
+                                        >
+                                          <ThumbsDown size={15} />
+                                        </button>
+                                      </>
+                                    )}
+                                    {docStatus === 'VALIDATED' && (
+                                      <span className="ml-table-validated">Validée</span>
+                                    )}
+                                    {docStatus === 'REJECTED' && (
+                                      <span className="ml-table-validated">Rejetée</span>
+                                    )}
+                                    {a.patient_id && (
+                                      <button
+                                        className="ml-action-btn ml-action-btn--contact"
+                                        onClick={() => navigate(`/doctor/patient/${encodeURIComponent(a.patient_id)}`)}
+                                        title="Prendre contact (voir patient, aidant)"
+                                      >
+                                        <Phone size={15} />
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                              {isMeasExpanded && snap && (
+                                <tr className="ml-measurement-context-row">
+                                  <td colSpan={8}>
+                                    <div className="ml-measurement-context">
+                                      <strong><Activity size={14} /> Mesure déclenchante</strong>
+                                      <span className="ml-meas-ts">{formatTime(snap.measured_at)}</span>
+                                      <span className="ml-meas-item">FC : <strong>{snap.heart_rate ?? '-'} bpm</strong></span>
+                                      <span className="ml-meas-item">SpO₂ : <strong>{snap.spo2 ?? '-'} %</strong></span>
+                                      <span className="ml-meas-item">Temp. : <strong>{snap.temperature ?? '-'} °C</strong></span>
+                                      <span className="ml-meas-item">Qualité signal : <strong>{snap.signal_quality ?? '-'}</strong></span>
+                                      {snap.status && snap.status !== 'VALID' && (
+                                        <span className="ml-meas-item ml-meas-item--warn">Statut mesure : {snap.status}</span>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                              {a.status === 'OPEN' && (
+                                <tr className="ml-vital-emergency-row">
+                                  <td colSpan={8}>
+                                    <VitalEmergencyActions
+                                      alert={a}
+                                      patientName={patientName}
+                                      tokenGetter={getAccessTokenSilently}
+                                      onEscalated={loadData}
+                                      onNotify={setToast}
+                                    />
+                                    {Array.isArray(a.emergency_escalations) && a.emergency_escalations.length > 0 && (
+                                      <div className="ml-escalation-log">
+                                        <strong>Escalades :</strong>
+                                        {' '}
+                                        {a.emergency_escalations.map((e, i) => (
+                                          <span key={i}>
+                                            {e.type} ({e.at ? formatTime(e.at) : '?'})
+                                            {i < a.emergency_escalations.length - 1 ? ' · ' : ''}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
                           )
                         })}
                       </tbody>
