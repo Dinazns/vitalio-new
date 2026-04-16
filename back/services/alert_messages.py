@@ -18,7 +18,22 @@ def format_alert_for_doctor(alert: Dict[str, Any]) -> Dict[str, Any]:
         return f"{x:.1f}" if isinstance(x, (int, float)) else str(x)
 
     # Terminologie médicale, valeurs précises, recommandation clinique
-    if metric == "heart_rate":
+    if metric == "ml_anomaly":
+        out["medical_label"] = "Anomalie ML (validée)"
+        ds = alert.get("dossier_summary") or ""
+        sev = alert.get("ml_severity") or alert.get("severity") or ""
+        out["medical_description"] = (
+            (str(ds) + (" " if ds and sev else "")) + (f"Gravité : {sev}" if sev else "")
+        ).strip() or "Anomalie détectée par le modèle, validée par le médecin."
+    elif metric == "manual":
+        out["medical_label"] = "Alerte déclenchée par le patient"
+        msg = alert.get("patient_message") or ""
+        out["medical_description"] = (
+            "Le patient a déclenché manuellement une alerte via l'application."
+            + (f" Message : {msg}" if msg else "")
+            + " Vérifier l'état clinique, contacter le patient ou l'aidant."
+        )
+    elif metric == "heart_rate":
         if operator == "lt":
             out["medical_label"] = "Bradycardie"
             out["medical_description"] = (
@@ -70,7 +85,23 @@ def format_alert_for_caregiver(alert: Dict[str, Any]) -> Dict[str, Any]:
     def _v(x):
         return f"{x:.0f}" if isinstance(x, (int, float)) else str(x)
 
-    if metric == "heart_rate":
+    if metric == "manual":
+        msg = alert.get("patient_message") or ""
+        out["summary"] = "Votre proche a demandé de l'aide"
+        out["lay_description"] = (
+            "La personne a appuyé sur le bouton d'alerte dans l'application."
+            + (f" Son message : « {msg} »" if msg else "")
+            + " Contactez-la dès que possible pour vérifier son état."
+            " Si elle ne répond pas ou si vous êtes inquiet, appelez le 15."
+        )
+    elif metric == "ml_anomaly":
+        out["summary"] = "Le système a détecté une anomalie sur les constantes"
+        out["lay_description"] = (
+            str(alert.get("dossier_summary") or "Les mesures semblent inhabituelles pour cette personne. ")
+            + "Le médecin a confirmé le signalement. Si la personne va mal, appelez le 15. "
+            "Sinon indiquez que la situation est résolue."
+        )
+    elif metric == "heart_rate":
         if operator == "lt":
             out["summary"] = "Le pouls (battements du cœur) est très bas"
             out["lay_description"] = (

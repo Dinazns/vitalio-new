@@ -11,6 +11,7 @@ import {
   Stethoscope,
 } from 'lucide-react'
 import { getDoctorAlerts } from '../services/api'
+import PushPermissionBanner from './PushPermissionBanner'
 
 const NAV_ITEMS = [
   { to: '/doctor', icon: LayoutDashboard, label: 'Patients', end: true },
@@ -47,7 +48,11 @@ export default function DoctorLayout({ children }) {
       }
     }
     load()
-    return () => { mounted = false }
+    const t = setInterval(load, 30000)
+    return () => {
+      mounted = false
+      clearInterval(t)
+    }
   }, [getAccessTokenSilently])
 
   const handleLogout = () => {
@@ -117,7 +122,10 @@ export default function DoctorLayout({ children }) {
         </div>
       </aside>
 
-      <main className="doctor-layout-main">{children}</main>
+      <main className="doctor-layout-main">
+        <PushPermissionBanner getAccessTokenSilently={getAccessTokenSilently} />
+        {children}
+      </main>
     </div>
   )
 }

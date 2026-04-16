@@ -18035,3 +18035,2297 @@ To fix this, use `chmod 0700 /mosquitto/passwd`.
 2026-03-20 09:35:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
 2026-03-20 09:36:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1576, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
 2026-03-20 09:36:04: Sending PUBACK to SIM-ESP32-001 (m1576, rc0)
+2026-03-20 09:36:32: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:36:32: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:36:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1577, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:36:34: Sending PUBACK to SIM-ESP32-001 (m1577, rc0)
+2026-03-20 09:36:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:37:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1578, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:37:04: Sending PUBACK to SIM-ESP32-001 (m1578, rc0)
+2026-03-20 09:37:32: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:37:32: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:37:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1579, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:37:34: Sending PUBACK to SIM-ESP32-001 (m1579, rc0)
+2026-03-20 09:37:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:38:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1580, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:38:04: Sending PUBACK to SIM-ESP32-001 (m1580, rc0)
+2026-03-20 09:38:32: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:38:32: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:38:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1581, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:38:34: Sending PUBACK to SIM-ESP32-001 (m1581, rc0)
+2026-03-20 09:38:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:39:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1582, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:39:04: Sending PUBACK to SIM-ESP32-001 (m1582, rc0)
+2026-03-20 09:39:32: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:39:32: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:39:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1583, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:39:34: Sending PUBACK to SIM-ESP32-001 (m1583, rc0)
+2026-03-20 09:39:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:40:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1584, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:40:04: Sending PUBACK to SIM-ESP32-001 (m1584, rc0)
+2026-03-20 09:40:32: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:40:32: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:40:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1585, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:40:34: Sending PUBACK to SIM-ESP32-001 (m1585, rc0)
+2026-03-20 09:40:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:41:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1586, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:41:04: Sending PUBACK to SIM-ESP32-001 (m1586, rc0)
+2026-03-20 09:41:33: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:41:33: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:41:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1587, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:41:34: Sending PUBACK to SIM-ESP32-001 (m1587, rc0)
+2026-03-20 09:41:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:42:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1588, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:42:04: Sending PUBACK to SIM-ESP32-001 (m1588, rc0)
+2026-03-20 09:42:33: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:42:33: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:42:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1589, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:42:34: Sending PUBACK to SIM-ESP32-001 (m1589, rc0)
+2026-03-20 09:42:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:43:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1590, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:43:04: Sending PUBACK to SIM-ESP32-001 (m1590, rc0)
+2026-03-20 09:43:33: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:43:33: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:43:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1591, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:43:34: Sending PUBACK to SIM-ESP32-001 (m1591, rc0)
+2026-03-20 09:43:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:44:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1592, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:44:04: Sending PUBACK to SIM-ESP32-001 (m1592, rc0)
+2026-03-20 09:44:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1593, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:44:34: Sending PUBACK to SIM-ESP32-001 (m1593, rc0)
+2026-03-20 09:44:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:44:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:44:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:45:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1594, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:45:04: Sending PUBACK to SIM-ESP32-001 (m1594, rc0)
+2026-03-20 09:45:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1595, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:45:34: Sending PUBACK to SIM-ESP32-001 (m1595, rc0)
+2026-03-20 09:45:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:45:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:45:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:46:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1596, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:46:04: Sending PUBACK to SIM-ESP32-001 (m1596, rc0)
+2026-03-20 09:46:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1597, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:46:34: Sending PUBACK to SIM-ESP32-001 (m1597, rc0)
+2026-03-20 09:46:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:46:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:46:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:47:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1598, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:47:04: Sending PUBACK to SIM-ESP32-001 (m1598, rc0)
+2026-03-20 09:47:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1599, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:47:34: Sending PUBACK to SIM-ESP32-001 (m1599, rc0)
+2026-03-20 09:47:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:47:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:47:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:48:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1600, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:48:04: Sending PUBACK to SIM-ESP32-001 (m1600, rc0)
+2026-03-20 09:48:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1601, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:48:34: Sending PUBACK to SIM-ESP32-001 (m1601, rc0)
+2026-03-20 09:48:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:48:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:48:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:49:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1602, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:49:04: Sending PUBACK to SIM-ESP32-001 (m1602, rc0)
+2026-03-20 09:49:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1603, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:49:34: Sending PUBACK to SIM-ESP32-001 (m1603, rc0)
+2026-03-20 09:49:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:49:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:49:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:50:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1604, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:50:04: Sending PUBACK to SIM-ESP32-001 (m1604, rc0)
+2026-03-20 09:50:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1605, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:50:34: Sending PUBACK to SIM-ESP32-001 (m1605, rc0)
+2026-03-20 09:50:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:50:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:50:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:51:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1606, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:51:04: Sending PUBACK to SIM-ESP32-001 (m1606, rc0)
+2026-03-20 09:51:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1607, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:51:34: Sending PUBACK to SIM-ESP32-001 (m1607, rc0)
+2026-03-20 09:51:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:51:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:51:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:52:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1608, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:52:04: Sending PUBACK to SIM-ESP32-001 (m1608, rc0)
+2026-03-20 09:52:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1609, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:52:34: Sending PUBACK to SIM-ESP32-001 (m1609, rc0)
+2026-03-20 09:52:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:52:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:52:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:53:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1610, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:53:04: Sending PUBACK to SIM-ESP32-001 (m1610, rc0)
+2026-03-20 09:53:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1611, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:53:34: Sending PUBACK to SIM-ESP32-001 (m1611, rc0)
+2026-03-20 09:53:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:53:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:53:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:54:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1612, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:54:04: Sending PUBACK to SIM-ESP32-001 (m1612, rc0)
+2026-03-20 09:54:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1613, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:54:34: Sending PUBACK to SIM-ESP32-001 (m1613, rc0)
+2026-03-20 09:54:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:54:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:54:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:55:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1614, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 09:55:04: Sending PUBACK to SIM-ESP32-001 (m1614, rc0)
+2026-03-20 09:55:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1615, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:55:34: Sending PUBACK to SIM-ESP32-001 (m1615, rc0)
+2026-03-20 09:55:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:55:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:55:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:56:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1616, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:56:04: Sending PUBACK to SIM-ESP32-001 (m1616, rc0)
+2026-03-20 09:56:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1617, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:56:34: Sending PUBACK to SIM-ESP32-001 (m1617, rc0)
+2026-03-20 09:56:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:56:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:56:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:57:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1618, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:57:04: Sending PUBACK to SIM-ESP32-001 (m1618, rc0)
+2026-03-20 09:57:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1619, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:57:34: Sending PUBACK to SIM-ESP32-001 (m1619, rc0)
+2026-03-20 09:57:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:57:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:58:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:58:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1620, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:58:04: Sending PUBACK to SIM-ESP32-001 (m1620, rc0)
+2026-03-20 09:58:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1621, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:58:34: Sending PUBACK to SIM-ESP32-001 (m1621, rc0)
+2026-03-20 09:58:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:58:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 09:59:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 09:59:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1622, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 09:59:04: Sending PUBACK to SIM-ESP32-001 (m1622, rc0)
+2026-03-20 09:59:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1623, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 09:59:34: Sending PUBACK to SIM-ESP32-001 (m1623, rc0)
+2026-03-20 09:59:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 09:59:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:00:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:00:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1624, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:00:04: Sending PUBACK to SIM-ESP32-001 (m1624, rc0)
+2026-03-20 10:00:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1625, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:00:34: Sending PUBACK to SIM-ESP32-001 (m1625, rc0)
+2026-03-20 10:00:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:00:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:01:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:01:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1626, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:01:04: Sending PUBACK to SIM-ESP32-001 (m1626, rc0)
+2026-03-20 10:01:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1627, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:01:34: Sending PUBACK to SIM-ESP32-001 (m1627, rc0)
+2026-03-20 10:01:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:01:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:02:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1628, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:02:04: Sending PUBACK to SIM-ESP32-001 (m1628, rc0)
+2026-03-20 10:02:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:02:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1629, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:02:34: Sending PUBACK to SIM-ESP32-001 (m1629, rc0)
+2026-03-20 10:02:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:02:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:03:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1630, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:03:04: Sending PUBACK to SIM-ESP32-001 (m1630, rc0)
+2026-03-20 10:03:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:03:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1631, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:03:34: Sending PUBACK to SIM-ESP32-001 (m1631, rc0)
+2026-03-20 10:03:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:03:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:04:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1632, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:04:04: Sending PUBACK to SIM-ESP32-001 (m1632, rc0)
+2026-03-20 10:04:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:04:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1633, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:04:34: Sending PUBACK to SIM-ESP32-001 (m1633, rc0)
+2026-03-20 10:04:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:04:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:05:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1634, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:05:04: Sending PUBACK to SIM-ESP32-001 (m1634, rc0)
+2026-03-20 10:05:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:05:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1635, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:05:34: Sending PUBACK to SIM-ESP32-001 (m1635, rc0)
+2026-03-20 10:05:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:05:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:06:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1636, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:06:04: Sending PUBACK to SIM-ESP32-001 (m1636, rc0)
+2026-03-20 10:06:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:06:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1637, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:06:34: Sending PUBACK to SIM-ESP32-001 (m1637, rc0)
+2026-03-20 10:06:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:06:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:07:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1638, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:07:04: Sending PUBACK to SIM-ESP32-001 (m1638, rc0)
+2026-03-20 10:07:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:07:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1639, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:07:34: Sending PUBACK to SIM-ESP32-001 (m1639, rc0)
+2026-03-20 10:07:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:07:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:08:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1640, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:08:04: Sending PUBACK to SIM-ESP32-001 (m1640, rc0)
+2026-03-20 10:08:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:08:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1641, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:08:34: Sending PUBACK to SIM-ESP32-001 (m1641, rc0)
+2026-03-20 10:08:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:08:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:09:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1642, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:09:04: Sending PUBACK to SIM-ESP32-001 (m1642, rc0)
+2026-03-20 10:09:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:09:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1643, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:09:34: Sending PUBACK to SIM-ESP32-001 (m1643, rc0)
+2026-03-20 10:09:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:09:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:10:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1644, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:10:04: Sending PUBACK to SIM-ESP32-001 (m1644, rc0)
+2026-03-20 10:10:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:10:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1645, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:10:34: Sending PUBACK to SIM-ESP32-001 (m1645, rc0)
+2026-03-20 10:10:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:10:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:11:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1646, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:11:04: Sending PUBACK to SIM-ESP32-001 (m1646, rc0)
+2026-03-20 10:11:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:11:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1647, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:11:34: Sending PUBACK to SIM-ESP32-001 (m1647, rc0)
+2026-03-20 10:11:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:11:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:12:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1648, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:12:04: Sending PUBACK to SIM-ESP32-001 (m1648, rc0)
+2026-03-20 10:12:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:12:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1649, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:12:34: Sending PUBACK to SIM-ESP32-001 (m1649, rc0)
+2026-03-20 10:12:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:12:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:13:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1650, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:13:04: Sending PUBACK to SIM-ESP32-001 (m1650, rc0)
+2026-03-20 10:13:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:13:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1651, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:13:34: Sending PUBACK to SIM-ESP32-001 (m1651, rc0)
+2026-03-20 10:13:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:13:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:14:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1652, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:14:04: Sending PUBACK to SIM-ESP32-001 (m1652, rc0)
+2026-03-20 10:14:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:14:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1653, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:14:34: Sending PUBACK to SIM-ESP32-001 (m1653, rc0)
+2026-03-20 10:14:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:14:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:15:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1654, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:15:04: Sending PUBACK to SIM-ESP32-001 (m1654, rc0)
+2026-03-20 10:15:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:15:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1655, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:15:34: Sending PUBACK to SIM-ESP32-001 (m1655, rc0)
+2026-03-20 10:15:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:15:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:16:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1656, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:16:04: Sending PUBACK to SIM-ESP32-001 (m1656, rc0)
+2026-03-20 10:16:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:16:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1657, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:16:34: Sending PUBACK to SIM-ESP32-001 (m1657, rc0)
+2026-03-20 10:16:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:16:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:17:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1658, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:17:04: Sending PUBACK to SIM-ESP32-001 (m1658, rc0)
+2026-03-20 10:17:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:17:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1659, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:17:34: Sending PUBACK to SIM-ESP32-001 (m1659, rc0)
+2026-03-20 10:17:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:17:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:18:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1660, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:18:04: Sending PUBACK to SIM-ESP32-001 (m1660, rc0)
+2026-03-20 10:18:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:18:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1661, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:18:34: Sending PUBACK to SIM-ESP32-001 (m1661, rc0)
+2026-03-20 10:18:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:18:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:19:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1662, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:19:04: Sending PUBACK to SIM-ESP32-001 (m1662, rc0)
+2026-03-20 10:19:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:19:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1663, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:19:34: Sending PUBACK to SIM-ESP32-001 (m1663, rc0)
+2026-03-20 10:19:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:19:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:20:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1664, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:20:04: Sending PUBACK to SIM-ESP32-001 (m1664, rc0)
+2026-03-20 10:20:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:20:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1665, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:20:34: Sending PUBACK to SIM-ESP32-001 (m1665, rc0)
+2026-03-20 10:20:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:20:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:21:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1666, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:21:04: Sending PUBACK to SIM-ESP32-001 (m1666, rc0)
+2026-03-20 10:21:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:21:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1667, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:21:34: Sending PUBACK to SIM-ESP32-001 (m1667, rc0)
+2026-03-20 10:21:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:21:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:22:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1668, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:22:04: Sending PUBACK to SIM-ESP32-001 (m1668, rc0)
+2026-03-20 10:22:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:22:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1669, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:22:34: Sending PUBACK to SIM-ESP32-001 (m1669, rc0)
+2026-03-20 10:22:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:22:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:23:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1670, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:23:04: Sending PUBACK to SIM-ESP32-001 (m1670, rc0)
+2026-03-20 10:23:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:23:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1671, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:23:34: Sending PUBACK to SIM-ESP32-001 (m1671, rc0)
+2026-03-20 10:23:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:23:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:24:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1672, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:24:04: Sending PUBACK to SIM-ESP32-001 (m1672, rc0)
+2026-03-20 10:24:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:24:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1673, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:24:34: Sending PUBACK to SIM-ESP32-001 (m1673, rc0)
+2026-03-20 10:24:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:24:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:25:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1674, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:25:04: Sending PUBACK to SIM-ESP32-001 (m1674, rc0)
+2026-03-20 10:25:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:25:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1675, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:25:34: Sending PUBACK to SIM-ESP32-001 (m1675, rc0)
+2026-03-20 10:25:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:25:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:26:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1676, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:26:04: Sending PUBACK to SIM-ESP32-001 (m1676, rc0)
+2026-03-20 10:26:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:26:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1677, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:26:34: Sending PUBACK to SIM-ESP32-001 (m1677, rc0)
+2026-03-20 10:26:34: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:26:34: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:27:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1678, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:27:04: Sending PUBACK to SIM-ESP32-001 (m1678, rc0)
+2026-03-20 10:27:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:27:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1679, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:27:35: Sending PUBACK to SIM-ESP32-001 (m1679, rc0)
+2026-03-20 10:27:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:27:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:28:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1680, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:28:05: Sending PUBACK to SIM-ESP32-001 (m1680, rc0)
+2026-03-20 10:28:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:28:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1681, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:28:35: Sending PUBACK to SIM-ESP32-001 (m1681, rc0)
+2026-03-20 10:28:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:28:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:29:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1682, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:29:05: Sending PUBACK to SIM-ESP32-001 (m1682, rc0)
+2026-03-20 10:29:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:29:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1683, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:29:35: Sending PUBACK to SIM-ESP32-001 (m1683, rc0)
+2026-03-20 10:29:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:29:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:30:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1684, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:30:05: Sending PUBACK to SIM-ESP32-001 (m1684, rc0)
+2026-03-20 10:30:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:30:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1685, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:30:35: Sending PUBACK to SIM-ESP32-001 (m1685, rc0)
+2026-03-20 10:30:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:30:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:31:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1686, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:31:05: Sending PUBACK to SIM-ESP32-001 (m1686, rc0)
+2026-03-20 10:31:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:31:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1687, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:31:35: Sending PUBACK to SIM-ESP32-001 (m1687, rc0)
+2026-03-20 10:31:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:31:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:32:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1688, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:32:05: Sending PUBACK to SIM-ESP32-001 (m1688, rc0)
+2026-03-20 10:32:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:32:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1689, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:32:35: Sending PUBACK to SIM-ESP32-001 (m1689, rc0)
+2026-03-20 10:32:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:32:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:33:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1690, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:33:05: Sending PUBACK to SIM-ESP32-001 (m1690, rc0)
+2026-03-20 10:33:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1691, 'vitalio/dev/SIM-ESP32-001/measurements', ... (208 bytes))
+2026-03-20 10:33:35: Sending PUBACK to SIM-ESP32-001 (m1691, rc0)
+2026-03-20 10:33:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:33:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:33:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:34:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1692, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:34:05: Sending PUBACK to SIM-ESP32-001 (m1692, rc0)
+2026-03-20 10:34:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1693, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:34:35: Sending PUBACK to SIM-ESP32-001 (m1693, rc0)
+2026-03-20 10:34:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:34:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:34:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:35:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1694, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:35:05: Sending PUBACK to SIM-ESP32-001 (m1694, rc0)
+2026-03-20 10:35:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1695, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:35:35: Sending PUBACK to SIM-ESP32-001 (m1695, rc0)
+2026-03-20 10:35:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:35:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:35:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:36:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1696, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:36:05: Sending PUBACK to SIM-ESP32-001 (m1696, rc0)
+2026-03-20 10:36:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1697, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:36:35: Sending PUBACK to SIM-ESP32-001 (m1697, rc0)
+2026-03-20 10:36:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:36:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:36:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:37:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1698, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:37:05: Sending PUBACK to SIM-ESP32-001 (m1698, rc0)
+2026-03-20 10:37:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1699, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:37:35: Sending PUBACK to SIM-ESP32-001 (m1699, rc0)
+2026-03-20 10:37:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:37:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:37:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:38:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1700, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:38:05: Sending PUBACK to SIM-ESP32-001 (m1700, rc0)
+2026-03-20 10:38:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1701, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:38:35: Sending PUBACK to SIM-ESP32-001 (m1701, rc0)
+2026-03-20 10:38:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:38:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:38:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:39:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1702, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:39:05: Sending PUBACK to SIM-ESP32-001 (m1702, rc0)
+2026-03-20 10:39:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1703, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:39:35: Sending PUBACK to SIM-ESP32-001 (m1703, rc0)
+2026-03-20 10:39:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:39:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:39:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:40:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1704, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:40:05: Sending PUBACK to SIM-ESP32-001 (m1704, rc0)
+2026-03-20 10:40:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1705, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:40:35: Sending PUBACK to SIM-ESP32-001 (m1705, rc0)
+2026-03-20 10:40:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:40:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:40:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:41:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1706, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:41:05: Sending PUBACK to SIM-ESP32-001 (m1706, rc0)
+2026-03-20 10:41:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1707, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:41:35: Sending PUBACK to SIM-ESP32-001 (m1707, rc0)
+2026-03-20 10:41:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:41:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:41:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:42:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1708, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:42:05: Sending PUBACK to SIM-ESP32-001 (m1708, rc0)
+2026-03-20 10:42:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1709, 'vitalio/dev/SIM-ESP32-001/measurements', ... (208 bytes))
+2026-03-20 10:42:35: Sending PUBACK to SIM-ESP32-001 (m1709, rc0)
+2026-03-20 10:42:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:42:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:42:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:43:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1710, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:43:05: Sending PUBACK to SIM-ESP32-001 (m1710, rc0)
+2026-03-20 10:43:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1711, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:43:35: Sending PUBACK to SIM-ESP32-001 (m1711, rc0)
+2026-03-20 10:43:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:43:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:43:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:44:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1712, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:44:05: Sending PUBACK to SIM-ESP32-001 (m1712, rc0)
+2026-03-20 10:44:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1713, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:44:35: Sending PUBACK to SIM-ESP32-001 (m1713, rc0)
+2026-03-20 10:44:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:44:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:44:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:45:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1714, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:45:05: Sending PUBACK to SIM-ESP32-001 (m1714, rc0)
+2026-03-20 10:45:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1715, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:45:35: Sending PUBACK to SIM-ESP32-001 (m1715, rc0)
+2026-03-20 10:45:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:45:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:45:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:46:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1716, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:46:05: Sending PUBACK to SIM-ESP32-001 (m1716, rc0)
+2026-03-20 10:46:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1717, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:46:35: Sending PUBACK to SIM-ESP32-001 (m1717, rc0)
+2026-03-20 10:46:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:46:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:46:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:47:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1718, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:47:05: Sending PUBACK to SIM-ESP32-001 (m1718, rc0)
+2026-03-20 10:47:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1719, 'vitalio/dev/SIM-ESP32-001/measurements', ... (208 bytes))
+2026-03-20 10:47:35: Sending PUBACK to SIM-ESP32-001 (m1719, rc0)
+2026-03-20 10:47:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:47:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:47:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:48:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1720, 'vitalio/dev/SIM-ESP32-001/measurements', ... (204 bytes))
+2026-03-20 10:48:05: Sending PUBACK to SIM-ESP32-001 (m1720, rc0)
+2026-03-20 10:48:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1721, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:48:35: Sending PUBACK to SIM-ESP32-001 (m1721, rc0)
+2026-03-20 10:48:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:48:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:48:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:49:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1722, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:49:05: Sending PUBACK to SIM-ESP32-001 (m1722, rc0)
+2026-03-20 10:49:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1723, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:49:35: Sending PUBACK to SIM-ESP32-001 (m1723, rc0)
+2026-03-20 10:49:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:49:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:49:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:50:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1724, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:50:05: Sending PUBACK to SIM-ESP32-001 (m1724, rc0)
+2026-03-20 10:50:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1725, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:50:35: Sending PUBACK to SIM-ESP32-001 (m1725, rc0)
+2026-03-20 10:50:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:50:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:50:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:51:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1726, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:51:05: Sending PUBACK to SIM-ESP32-001 (m1726, rc0)
+2026-03-20 10:51:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1727, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:51:35: Sending PUBACK to SIM-ESP32-001 (m1727, rc0)
+2026-03-20 10:51:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:51:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:51:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:52:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1728, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:52:05: Sending PUBACK to SIM-ESP32-001 (m1728, rc0)
+2026-03-20 10:52:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1729, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:52:35: Sending PUBACK to SIM-ESP32-001 (m1729, rc0)
+2026-03-20 10:52:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:52:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:52:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:53:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1730, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:53:05: Sending PUBACK to SIM-ESP32-001 (m1730, rc0)
+2026-03-20 10:53:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1731, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:53:35: Sending PUBACK to SIM-ESP32-001 (m1731, rc0)
+2026-03-20 10:53:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:53:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:53:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:54:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1732, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:54:05: Sending PUBACK to SIM-ESP32-001 (m1732, rc0)
+2026-03-20 10:54:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1733, 'vitalio/dev/SIM-ESP32-001/measurements', ... (208 bytes))
+2026-03-20 10:54:35: Sending PUBACK to SIM-ESP32-001 (m1733, rc0)
+2026-03-20 10:54:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:54:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:54:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:55:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1734, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:55:05: Sending PUBACK to SIM-ESP32-001 (m1734, rc0)
+2026-03-20 10:55:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1735, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:55:35: Sending PUBACK to SIM-ESP32-001 (m1735, rc0)
+2026-03-20 10:55:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:55:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:55:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:56:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1736, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:56:05: Sending PUBACK to SIM-ESP32-001 (m1736, rc0)
+2026-03-20 10:56:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1737, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:56:35: Sending PUBACK to SIM-ESP32-001 (m1737, rc0)
+2026-03-20 10:56:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:56:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:56:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:57:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1738, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:57:05: Sending PUBACK to SIM-ESP32-001 (m1738, rc0)
+2026-03-20 10:57:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1739, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:57:35: Sending PUBACK to SIM-ESP32-001 (m1739, rc0)
+2026-03-20 10:57:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:57:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:57:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:58:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1740, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:58:05: Sending PUBACK to SIM-ESP32-001 (m1740, rc0)
+2026-03-20 10:58:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1741, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 10:58:35: Sending PUBACK to SIM-ESP32-001 (m1741, rc0)
+2026-03-20 10:58:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:58:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 10:59:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 10:59:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1742, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 10:59:05: Sending PUBACK to SIM-ESP32-001 (m1742, rc0)
+2026-03-20 10:59:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1743, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 10:59:35: Sending PUBACK to SIM-ESP32-001 (m1743, rc0)
+2026-03-20 10:59:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 10:59:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:00:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:00:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1744, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:00:05: Sending PUBACK to SIM-ESP32-001 (m1744, rc0)
+2026-03-20 11:00:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1745, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:00:35: Sending PUBACK to SIM-ESP32-001 (m1745, rc0)
+2026-03-20 11:00:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:00:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:01:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:01:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1746, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:01:05: Sending PUBACK to SIM-ESP32-001 (m1746, rc0)
+2026-03-20 11:01:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1747, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:01:35: Sending PUBACK to SIM-ESP32-001 (m1747, rc0)
+2026-03-20 11:01:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:01:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:02:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:02:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1748, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:02:05: Sending PUBACK to SIM-ESP32-001 (m1748, rc0)
+2026-03-20 11:02:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1749, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:02:35: Sending PUBACK to SIM-ESP32-001 (m1749, rc0)
+2026-03-20 11:02:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:02:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:03:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:03:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1750, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:03:05: Sending PUBACK to SIM-ESP32-001 (m1750, rc0)
+2026-03-20 11:03:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1751, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:03:35: Sending PUBACK to SIM-ESP32-001 (m1751, rc0)
+2026-03-20 11:03:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:03:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:04:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:04:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1752, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:04:05: Sending PUBACK to SIM-ESP32-001 (m1752, rc0)
+2026-03-20 11:04:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1753, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:04:35: Sending PUBACK to SIM-ESP32-001 (m1753, rc0)
+2026-03-20 11:04:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:04:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:05:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1754, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:05:05: Sending PUBACK to SIM-ESP32-001 (m1754, rc0)
+2026-03-20 11:05:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:05:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1755, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:05:35: Sending PUBACK to SIM-ESP32-001 (m1755, rc0)
+2026-03-20 11:05:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:05:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:06:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1756, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:06:05: Sending PUBACK to SIM-ESP32-001 (m1756, rc0)
+2026-03-20 11:06:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:06:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1757, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:06:35: Sending PUBACK to SIM-ESP32-001 (m1757, rc0)
+2026-03-20 11:06:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:06:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:07:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1758, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:07:05: Sending PUBACK to SIM-ESP32-001 (m1758, rc0)
+2026-03-20 11:07:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:07:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1759, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:07:35: Sending PUBACK to SIM-ESP32-001 (m1759, rc0)
+2026-03-20 11:07:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:07:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:08:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1760, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:08:05: Sending PUBACK to SIM-ESP32-001 (m1760, rc0)
+2026-03-20 11:08:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:08:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1761, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:08:35: Sending PUBACK to SIM-ESP32-001 (m1761, rc0)
+2026-03-20 11:08:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:08:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:09:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1762, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:09:05: Sending PUBACK to SIM-ESP32-001 (m1762, rc0)
+2026-03-20 11:09:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:09:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1763, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:09:35: Sending PUBACK to SIM-ESP32-001 (m1763, rc0)
+2026-03-20 11:09:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:09:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:10:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1764, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:10:05: Sending PUBACK to SIM-ESP32-001 (m1764, rc0)
+2026-03-20 11:10:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:10:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1765, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:10:35: Sending PUBACK to SIM-ESP32-001 (m1765, rc0)
+2026-03-20 11:10:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:10:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:11:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1766, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:11:05: Sending PUBACK to SIM-ESP32-001 (m1766, rc0)
+2026-03-20 11:11:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:11:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1767, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:11:35: Sending PUBACK to SIM-ESP32-001 (m1767, rc0)
+2026-03-20 11:11:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:11:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:12:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1768, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:12:05: Sending PUBACK to SIM-ESP32-001 (m1768, rc0)
+2026-03-20 11:12:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:12:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1769, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:12:35: Sending PUBACK to SIM-ESP32-001 (m1769, rc0)
+2026-03-20 11:12:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:12:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:13:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1770, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:13:05: Sending PUBACK to SIM-ESP32-001 (m1770, rc0)
+2026-03-20 11:13:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:13:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1771, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:13:35: Sending PUBACK to SIM-ESP32-001 (m1771, rc0)
+2026-03-20 11:13:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:13:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:14:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1772, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:14:05: Sending PUBACK to SIM-ESP32-001 (m1772, rc0)
+2026-03-20 11:14:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:14:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1773, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:14:35: Sending PUBACK to SIM-ESP32-001 (m1773, rc0)
+2026-03-20 11:14:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:14:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:15:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1774, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:15:05: Sending PUBACK to SIM-ESP32-001 (m1774, rc0)
+2026-03-20 11:15:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:15:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1775, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:15:35: Sending PUBACK to SIM-ESP32-001 (m1775, rc0)
+2026-03-20 11:15:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:15:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:16:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1776, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:16:05: Sending PUBACK to SIM-ESP32-001 (m1776, rc0)
+2026-03-20 11:16:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:16:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1777, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:16:35: Sending PUBACK to SIM-ESP32-001 (m1777, rc0)
+2026-03-20 11:16:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:16:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:17:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1778, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:17:05: Sending PUBACK to SIM-ESP32-001 (m1778, rc0)
+2026-03-20 11:17:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:17:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1779, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:17:35: Sending PUBACK to SIM-ESP32-001 (m1779, rc0)
+2026-03-20 11:17:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:17:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:18:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1780, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:18:05: Sending PUBACK to SIM-ESP32-001 (m1780, rc0)
+2026-03-20 11:18:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:18:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1781, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:18:35: Sending PUBACK to SIM-ESP32-001 (m1781, rc0)
+2026-03-20 11:18:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:18:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:19:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1782, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:19:05: Sending PUBACK to SIM-ESP32-001 (m1782, rc0)
+2026-03-20 11:19:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:19:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1783, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:19:35: Sending PUBACK to SIM-ESP32-001 (m1783, rc0)
+2026-03-20 11:19:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:19:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:20:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1784, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:20:05: Sending PUBACK to SIM-ESP32-001 (m1784, rc0)
+2026-03-20 11:20:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:20:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1785, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:20:35: Sending PUBACK to SIM-ESP32-001 (m1785, rc0)
+2026-03-20 11:20:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:20:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:21:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1786, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:21:05: Sending PUBACK to SIM-ESP32-001 (m1786, rc0)
+2026-03-20 11:21:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:21:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1787, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:21:35: Sending PUBACK to SIM-ESP32-001 (m1787, rc0)
+2026-03-20 11:21:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:21:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:22:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1788, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:22:05: Sending PUBACK to SIM-ESP32-001 (m1788, rc0)
+2026-03-20 11:22:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:22:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1789, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:22:35: Sending PUBACK to SIM-ESP32-001 (m1789, rc0)
+2026-03-20 11:22:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:22:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:23:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1790, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:23:05: Sending PUBACK to SIM-ESP32-001 (m1790, rc0)
+2026-03-20 11:23:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:23:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1791, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:23:35: Sending PUBACK to SIM-ESP32-001 (m1791, rc0)
+2026-03-20 11:23:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:23:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:24:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1792, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:24:05: Sending PUBACK to SIM-ESP32-001 (m1792, rc0)
+2026-03-20 11:24:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:24:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1793, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:24:35: Sending PUBACK to SIM-ESP32-001 (m1793, rc0)
+2026-03-20 11:24:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:24:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:25:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1794, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:25:05: Sending PUBACK to SIM-ESP32-001 (m1794, rc0)
+2026-03-20 11:25:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:25:35: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1795, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:25:35: Sending PUBACK to SIM-ESP32-001 (m1795, rc0)
+2026-03-20 11:25:35: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:25:35: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:26:05: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1796, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:26:05: Sending PUBACK to SIM-ESP32-001 (m1796, rc0)
+2026-03-20 11:26:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:26:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1797, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:26:36: Sending PUBACK to SIM-ESP32-001 (m1797, rc0)
+2026-03-20 11:26:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:26:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:27:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1798, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:27:06: Sending PUBACK to SIM-ESP32-001 (m1798, rc0)
+2026-03-20 11:27:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:27:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1799, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:27:36: Sending PUBACK to SIM-ESP32-001 (m1799, rc0)
+2026-03-20 11:27:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:27:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:28:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1800, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:28:06: Sending PUBACK to SIM-ESP32-001 (m1800, rc0)
+2026-03-20 11:28:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:28:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1801, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:28:36: Sending PUBACK to SIM-ESP32-001 (m1801, rc0)
+2026-03-20 11:28:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:28:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:29:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1802, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:29:06: Sending PUBACK to SIM-ESP32-001 (m1802, rc0)
+2026-03-20 11:29:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:29:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1803, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:29:36: Sending PUBACK to SIM-ESP32-001 (m1803, rc0)
+2026-03-20 11:29:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:29:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:30:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1804, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:30:06: Sending PUBACK to SIM-ESP32-001 (m1804, rc0)
+2026-03-20 11:30:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:30:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1805, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:30:36: Sending PUBACK to SIM-ESP32-001 (m1805, rc0)
+2026-03-20 11:30:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:30:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:31:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1806, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:31:06: Sending PUBACK to SIM-ESP32-001 (m1806, rc0)
+2026-03-20 11:31:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:31:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1807, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:31:36: Sending PUBACK to SIM-ESP32-001 (m1807, rc0)
+2026-03-20 11:31:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:31:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:32:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1808, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:32:06: Sending PUBACK to SIM-ESP32-001 (m1808, rc0)
+2026-03-20 11:32:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:32:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1809, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:32:36: Sending PUBACK to SIM-ESP32-001 (m1809, rc0)
+2026-03-20 11:32:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:32:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:33:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1810, 'vitalio/dev/SIM-ESP32-001/measurements', ... (204 bytes))
+2026-03-20 11:33:06: Sending PUBACK to SIM-ESP32-001 (m1810, rc0)
+2026-03-20 11:33:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:33:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1811, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:33:36: Sending PUBACK to SIM-ESP32-001 (m1811, rc0)
+2026-03-20 11:33:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:33:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:34:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1812, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:34:06: Sending PUBACK to SIM-ESP32-001 (m1812, rc0)
+2026-03-20 11:34:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:34:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1813, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:34:36: Sending PUBACK to SIM-ESP32-001 (m1813, rc0)
+2026-03-20 11:34:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:34:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:35:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1814, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:35:06: Sending PUBACK to SIM-ESP32-001 (m1814, rc0)
+2026-03-20 11:35:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:35:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1815, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 11:35:36: Sending PUBACK to SIM-ESP32-001 (m1815, rc0)
+2026-03-20 11:35:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:35:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:36:06: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1816, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:36:06: Sending PUBACK to SIM-ESP32-001 (m1816, rc0)
+2026-03-20 11:36:36: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1817, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:36:36: Sending PUBACK to SIM-ESP32-001 (m1817, rc0)
+2026-03-20 11:36:36: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:36:36: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:36:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 11:55:22: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:55:22: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:55:22: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1818, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 11:55:22: Sending PUBACK to SIM-ESP32-001 (m1818, rc0)
+2026-03-20 11:59:09: Received PINGREQ from SIM-ESP32-001
+2026-03-20 11:59:09: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 11:59:09: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1819, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 11:59:09: Sending PUBACK to SIM-ESP32-001 (m1819, rc0)
+2026-03-20 12:31:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1820, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:31:34: Sending PUBACK to SIM-ESP32-001 (m1820, rc0)
+2026-03-20 12:31:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:32:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1821, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 12:32:04: Sending PUBACK to SIM-ESP32-001 (m1821, rc0)
+2026-03-20 12:32:04: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:32:04: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:32:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1822, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 12:32:34: Sending PUBACK to SIM-ESP32-001 (m1822, rc0)
+2026-03-20 12:33:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:33:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1823, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:33:04: Sending PUBACK to SIM-ESP32-001 (m1823, rc0)
+2026-03-20 12:33:04: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:33:04: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:33:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1824, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 12:33:34: Sending PUBACK to SIM-ESP32-001 (m1824, rc0)
+2026-03-20 12:34:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:34:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1825, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:34:04: Sending PUBACK to SIM-ESP32-001 (m1825, rc0)
+2026-03-20 12:34:04: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:34:04: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:34:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1826, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:34:34: Sending PUBACK to SIM-ESP32-001 (m1826, rc0)
+2026-03-20 12:35:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:35:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1827, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 12:35:04: Sending PUBACK to SIM-ESP32-001 (m1827, rc0)
+2026-03-20 12:35:04: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:35:04: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:35:34: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1828, 'vitalio/dev/SIM-ESP32-001/measurements', ... (205 bytes))
+2026-03-20 12:35:34: Sending PUBACK to SIM-ESP32-001 (m1828, rc0)
+2026-03-20 12:36:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:36:04: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1829, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:36:04: Sending PUBACK to SIM-ESP32-001 (m1829, rc0)
+2026-03-20 12:36:04: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:36:04: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:36:32: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:36:32: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:36:32: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1830, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:36:32: Sending PUBACK to SIM-ESP32-001 (m1830, rc0)
+2026-03-20 12:38:10: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1831, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 12:38:10: Sending PUBACK to SIM-ESP32-001 (m1831, rc0)
+2026-03-20 12:38:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:38:40: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1832, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 12:38:40: Sending PUBACK to SIM-ESP32-001 (m1832, rc0)
+2026-03-20 12:38:40: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:38:40: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:39:10: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1833, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:39:10: Sending PUBACK to SIM-ESP32-001 (m1833, rc0)
+2026-03-20 12:39:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:39:40: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1834, 'vitalio/dev/SIM-ESP32-001/measurements', ... (207 bytes))
+2026-03-20 12:39:40: Sending PUBACK to SIM-ESP32-001 (m1834, rc0)
+2026-03-20 12:39:40: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:39:40: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:40:10: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1835, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:40:10: Sending PUBACK to SIM-ESP32-001 (m1835, rc0)
+2026-03-20 12:40:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-03-20 12:40:40: Received PUBLISH from SIM-ESP32-001 (d0, q1, r0, m1836, 'vitalio/dev/SIM-ESP32-001/measurements', ... (206 bytes))
+2026-03-20 12:40:40: Sending PUBACK to SIM-ESP32-001 (m1836, rc0)
+2026-03-20 12:40:40: Received PINGREQ from SIM-ESP32-001
+2026-03-20 12:40:40: Sending PINGRESP to SIM-ESP32-001
+2026-03-20 12:40:44: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-03-20 12:40:44: Client SIM-ESP32-001 closed its connection.
+2026-03-20 12:41:02: mosquitto version 2.0.22 terminating
+2026-03-20 12:41:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:34:09: mosquitto version 2.0.22 starting
+2026-04-14 22:34:09: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:34:09: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:34:09: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:34:09: mosquitto version 2.0.22 running
+2026-04-14 22:35:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:35:17: New connection from 172.19.0.1:35392 on port 8883.
+2026-04-14 22:35:17: New client connected from 172.19.0.1:35392 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:35:17: No will message specified.
+2026-04-14 22:35:17: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:35:17: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:35:17: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:35:17: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:35:17: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:36:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:36:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:36:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:37:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:37:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:37:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:38:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:38:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:38:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:39:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:39:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:39:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:40:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:40:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:40:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:41:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:41:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:41:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:42:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:42:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:42:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:43:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:43:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:43:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:44:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:44:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:44:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:45:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:45:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:45:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:46:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:46:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:46:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:47:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:47:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:47:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:48:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:48:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:48:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:48:56: New connection from 172.19.0.1:44974 on port 8883.
+2026-04-14 22:48:56: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:48:56: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:48:58: New connection from 172.19.0.1:44978 on port 8883.
+2026-04-14 22:48:58: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:48:58: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:01: New connection from 172.19.0.1:53022 on port 8883.
+2026-04-14 22:49:01: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:49:01: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:06: New connection from 172.19.0.1:53038 on port 8883.
+2026-04-14 22:49:06: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:49:06: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:09: New connection from 172.19.0.1:53054 on port 8883.
+2026-04-14 22:49:09: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:49:09: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:49:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:49:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:50:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:50:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:50:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:51:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:51:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:51:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:52:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:52:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:52:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:53:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:53:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:53:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:54:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:54:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:54:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:55:22: mosquitto version 2.0.22 terminating
+2026-04-14 22:55:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:55:35: mosquitto version 2.0.22 starting
+2026-04-14 22:55:35: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:55:35: Warning: File /mosquitto/passwd has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/passwd`.
+2026-04-14 22:55:35: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:55:35: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:55:35: mosquitto version 2.0.22 running
+2026-04-14 22:55:35: New connection from 172.19.0.1:39490 on port 8883.
+2026-04-14 22:55:35: New client connected from 172.19.0.1:39490 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:55:35: No will message specified.
+2026-04-14 22:55:35: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:55:35: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:55:35: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:55:35: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:55:35: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:56:05: mosquitto version 2.0.22 terminating
+2026-04-14 22:56:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:56:06: mosquitto version 2.0.22 starting
+2026-04-14 22:56:06: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:56:06: Warning: File /mosquitto/passwd has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/passwd`.
+2026-04-14 22:56:06: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:56:06: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:56:06: mosquitto version 2.0.22 running
+2026-04-14 22:56:08: New connection from 172.19.0.1:48350 on port 8883.
+2026-04-14 22:56:08: New client connected from 172.19.0.1:48350 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:56:08: No will message specified.
+2026-04-14 22:56:08: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:56:08: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:56:08: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:56:08: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:56:08: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:57:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:57:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:57:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:57:45: mosquitto version 2.0.22 terminating
+2026-04-14 22:57:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:57:46: mosquitto version 2.0.22 starting
+2026-04-14 22:57:46: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:57:46: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:57:46: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:57:46: mosquitto version 2.0.22 running
+2026-04-14 22:57:48: New connection from 172.19.0.1:44720 on port 8883.
+2026-04-14 22:57:48: New client connected from 172.19.0.1:44720 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:57:48: No will message specified.
+2026-04-14 22:57:48: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:57:48: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:57:48: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:57:48: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:57:48: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:58:08: New connection from ::1:39750 on port 8883.
+2026-04-14 22:58:08: New client connected from ::1:39750 as auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 (p2, c1, k60, u'vitalio').
+2026-04-14 22:58:08: No will message specified.
+2026-04-14 22:58:08: Sending CONNACK to auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 (0, 0)
+2026-04-14 22:58:08: Received PUBLISH from auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 22:58:08: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 22:58:08: Received DISCONNECT from auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725
+2026-04-14 22:58:08: Client auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 disconnected.
+2026-04-14 22:58:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:58:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:58:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:59:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:59:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:59:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:00:02: New connection from ::1:57802 on port 8883.
+2026-04-14 23:00:02: New client connected from ::1:57802 as auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 (p2, c1, k60, u'vitalio').
+2026-04-14 23:00:02: No will message specified.
+2026-04-14 23:00:02: Sending CONNACK to auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 (0, 0)
+2026-04-14 23:00:02: Received PUBLISH from auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:00:02: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:00:02: Received DISCONNECT from auto-48C08BF2-2146-B476-9CF9-85C5A80CA837
+2026-04-14 23:00:02: Client auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 disconnected.
+2026-04-14 23:00:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:00:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:00:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:01:15: New connection from ::1:33452 on port 8883.
+2026-04-14 23:01:15: New client connected from ::1:33452 as auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A (p2, c1, k60, u'vitalio').
+2026-04-14 23:01:15: No will message specified.
+2026-04-14 23:01:15: Sending CONNACK to auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A (0, 0)
+2026-04-14 23:01:15: Received PUBLISH from auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:01:15: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:01:15: Received DISCONNECT from auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A
+2026-04-14 23:01:15: Client auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A disconnected.
+2026-04-14 23:01:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:01:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:01:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:02:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:02:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:02:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:03:03: New connection from ::1:38556 on port 8883.
+2026-04-14 23:03:03: New client connected from ::1:38556 as auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C (p2, c1, k60, u'vitalio').
+2026-04-14 23:03:03: No will message specified.
+2026-04-14 23:03:03: Sending CONNACK to auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C (0, 0)
+2026-04-14 23:03:03: Received PUBLISH from auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (139 bytes))
+2026-04-14 23:03:03: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (139 bytes))
+2026-04-14 23:03:04: Received DISCONNECT from auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C
+2026-04-14 23:03:04: Client auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C disconnected.
+2026-04-14 23:03:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:03:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:03:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:04:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:04:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:04:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:05:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:05:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:05:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:06:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:06:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:06:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:07:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:07:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:07:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:08:54: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:08:54: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:08:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:09:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:09:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:09:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:10:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:10:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:10:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:11:56: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:11:56: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:12:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:12:03: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-14 23:12:03: Client VitalIO_API_Subscriber closed its connection.
+2026-04-14 23:12:47: mosquitto version 2.0.22 terminating
+2026-04-14 23:12:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:03:05: mosquitto version 2.0.22 starting
+2026-04-16 08:03:05: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-16 08:03:05: Opening ipv4 listen socket on port 8883.
+2026-04-16 08:03:05: Opening ipv6 listen socket on port 8883.
+2026-04-16 08:03:05: mosquitto version 2.0.22 running
+2026-04-16 08:03:26: New connection from 172.19.0.1:36932 on port 8883.
+2026-04-16 08:03:26: New client connected from 172.19.0.1:36932 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 08:03:26: No will message specified.
+2026-04-16 08:03:26: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 08:03:26: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 08:03:26: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 08:03:26: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 08:03:26: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 08:04:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:04:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:04:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:05:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:05:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:05:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:06:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:06:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:06:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:07:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:07:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:07:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:08:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:08:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:08:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:09:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:09:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:09:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:10:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:10:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:10:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:11:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:11:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:11:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:12:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:12:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:12:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:13:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:13:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:13:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:14:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:14:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:14:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:15:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:15:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:15:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:16:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:16:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:16:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:17:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:17:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:17:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:18:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:18:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:18:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:19:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:19:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:19:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:20:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:20:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:20:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:21:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:21:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:21:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:22:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:22:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:22:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:23:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:23:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:23:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:24:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:24:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:24:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:25:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:25:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:25:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:26:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:26:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:26:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:27:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:27:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:27:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:28:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:28:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:28:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:29:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:29:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:29:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:30:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:30:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:30:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:31:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:31:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:31:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:32:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:32:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:32:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:33:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:33:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:33:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:34:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:34:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:34:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:35:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:35:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:35:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:36:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:36:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:36:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:37:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:37:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:37:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:38:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:38:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:38:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:39:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:39:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:39:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:40:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:40:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:40:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:41:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:41:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:41:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:42:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:42:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:42:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:43:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:43:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:43:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:44:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:44:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:44:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:45:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:45:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:45:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:46:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:46:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:46:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:47:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:47:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:47:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:48:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:48:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:48:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:49:43: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 08:49:43: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 08:49:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:50:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:51:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:52:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:53:21: New connection from 172.19.0.1:37884 on port 8883.
+2026-04-16 08:53:21: New client connected from 172.19.0.1:37884 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 08:53:21: No will message specified.
+2026-04-16 08:53:21: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 08:53:21: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 08:53:21: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 08:53:21: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 08:53:21: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 08:53:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:54:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:54:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:54:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:55:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:55:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:55:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:56:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:56:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:56:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:57:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:57:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:57:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:58:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:58:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:58:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:59:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:59:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:59:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:00:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:00:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:01:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:01:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:01:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:02:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:02:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:02:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:03:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:03:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:03:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:04:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:04:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:04:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:05:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:05:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:05:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:06:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:06:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:06:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:07:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:07:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:07:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:08:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:08:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:08:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:09:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:09:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:09:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:10:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:10:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:10:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:11:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:11:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:11:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:12:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:12:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:12:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:13:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:13:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:13:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:14:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:14:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:14:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:15:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:15:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:15:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:16:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:16:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:16:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:17:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:17:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:17:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:18:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:18:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:18:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:19:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:19:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:19:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:20:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:20:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:20:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:21:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:21:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:21:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:22:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:22:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:22:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:23:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:23:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:23:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:24:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:24:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:24:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:25:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:25:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:25:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:26:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:26:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:26:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:28:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:28:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:28:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:29:02: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 09:29:02: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 09:29:17: New connection from 172.19.0.1:41610 on port 8883.
+2026-04-16 09:29:17: New client connected from 172.19.0.1:41610 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 09:29:17: No will message specified.
+2026-04-16 09:29:17: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 09:29:17: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 09:29:17: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 09:29:17: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 09:29:17: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 09:29:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:30:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:30:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:30:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:31:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:31:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:31:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:32:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:32:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:32:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:33:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:33:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:33:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:34:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:34:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:34:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:35:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:35:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:35:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:36:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:36:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:36:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:37:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:37:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:37:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:38:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:38:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:39:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:39:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:39:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:40:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:40:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:40:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:41:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:41:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:41:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:42:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:42:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:42:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:43:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:43:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:43:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:44:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:44:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:44:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:45:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:45:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:45:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:46:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:46:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:46:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:47:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:47:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:47:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:48:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:48:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:48:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:49:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:49:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:49:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:50:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:50:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:50:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:51:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:51:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:51:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:52:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:52:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:52:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:53:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:53:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:53:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:54:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:54:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:54:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:55:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:55:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:55:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:56:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:56:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:56:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:57:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:57:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:57:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:57:47: New connection from ::1:52784 on port 8883.
+2026-04-16 09:57:47: New client connected from ::1:52784 as auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 (p2, c1, k60, u'vitalio').
+2026-04-16 09:57:47: No will message specified.
+2026-04-16 09:57:47: Sending CONNACK to auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 (0, 0)
+2026-04-16 09:57:47: Received PUBLISH from auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-16 09:57:47: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-16 09:57:47: Received DISCONNECT from auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5
+2026-04-16 09:57:47: Client auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 disconnected.
+2026-04-16 09:58:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:58:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:58:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:59:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:59:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:59:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:00:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:00:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:00:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:01:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:01:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:01:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:02:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:02:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:02:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:03:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:03:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:03:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:04:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:04:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:04:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:05:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:05:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:05:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:06:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:06:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:06:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:07:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:07:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:07:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:08:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:08:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:08:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:09:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:09:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:09:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:10:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:10:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:10:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:11:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:11:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:11:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:12:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:12:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:12:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:13:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:13:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:13:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:14:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:14:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:14:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:15:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:15:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:15:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:16:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:16:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:16:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:17:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:17:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:17:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:18:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:18:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:18:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:19:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:19:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:19:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:20:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:20:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:20:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:21:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:21:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:21:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:22:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:22:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:22:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:23:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:23:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:23:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:24:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:24:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:24:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:25:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:25:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:25:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:26:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:26:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:26:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:27:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:27:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:27:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:28:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:28:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:28:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:29:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:29:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:29:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:30:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:30:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:03:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:04:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:04:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:04:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:05:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:05:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:05:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:06:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:06:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:06:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:07:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:07:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:07:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:08:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:08:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:08:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:09:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:09:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:09:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:10:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:10:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:10:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:11:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:11:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:11:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:12:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:12:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:12:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:13:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:13:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:13:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:14:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:14:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:14:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:15:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:15:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:15:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:16:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:16:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:16:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:17:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:17:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:17:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:18:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:18:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:18:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:19:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:19:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:19:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:20:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:20:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:20:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:21:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:21:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:21:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:22:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:22:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:22:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:23:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:23:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:23:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:24:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:24:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:24:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:25:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:25:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:25:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:26:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:26:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:26:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:27:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:27:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:27:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:28:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:28:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:28:27: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 11:28:27: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 11:28:42: New connection from 172.19.0.1:43692 on port 8883.
+2026-04-16 11:28:42: New client connected from 172.19.0.1:43692 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 11:28:42: No will message specified.
+2026-04-16 11:28:42: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 11:28:42: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 11:28:42: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 11:28:42: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 11:28:42: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 11:28:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:29:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:29:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:29:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:30:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:30:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:30:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:31:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:31:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:31:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:32:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:32:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:32:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:33:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:33:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:34:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:34:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:34:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:35:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:35:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:35:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:36:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:36:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:36:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:37:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:37:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:37:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:38:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:38:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:38:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:39:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:39:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:39:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:40:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:40:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:40:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:41:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:41:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:41:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:42:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:42:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:42:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:43:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:43:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:43:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:44:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:44:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:44:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:45:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:45:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:45:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:46:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:46:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:46:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:47:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:47:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:47:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:48:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:48:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:48:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:49:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:49:54: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:49:54: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:50:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:50:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:50:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:51:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:51:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:51:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:52:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:52:56: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:52:56: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:53:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:53:56: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:53:56: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:53:59: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 11:53:59: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 11:54:14: New connection from 172.19.0.1:51830 on port 8883.
+2026-04-16 11:54:14: New client connected from 172.19.0.1:51830 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 11:54:14: No will message specified.
+2026-04-16 11:54:14: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 11:54:14: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 11:54:14: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 11:54:14: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 11:54:14: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 11:54:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:55:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:55:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:55:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:56:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:56:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:56:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:57:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:57:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:57:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:58:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:58:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:58:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:59:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:59:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:59:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:00:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:00:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:00:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:01:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:01:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:01:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:02:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:02:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:02:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:03:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:03:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:03:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:04:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:04:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:04:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:05:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:05:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:05:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:06:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:06:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:06:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:07:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:07:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:07:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:08:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:08:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:08:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:09:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:09:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:09:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:10:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:10:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:10:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:11:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:11:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:11:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:12:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:12:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:12:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:13:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:13:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:13:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:14:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:14:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:14:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:15:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:15:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:15:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:16:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:16:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:16:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:17:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:17:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:17:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:18:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:18:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:18:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:19:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:19:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:19:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:20:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:20:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:20:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:21:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:21:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:21:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:22:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:22:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:22:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:23:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:23:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:23:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:24:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:24:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:24:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:25:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:25:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:25:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:26:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:26:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:26:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:27:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:27:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:27:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:28:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:28:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:28:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:29:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:29:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:29:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:30:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:30:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:30:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:31:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:31:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:31:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:32:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:32:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:32:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:33:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:33:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:33:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:34:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:34:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:35:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:35:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:35:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:36:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:36:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:36:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:37:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:37:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:37:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:38:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:38:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:38:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:38:45: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 12:38:45: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 12:39:03: New connection from 172.19.0.1:45564 on port 8883.
+2026-04-16 12:39:04: New client connected from 172.19.0.1:45564 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 12:39:04: No will message specified.
+2026-04-16 12:39:04: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 12:39:04: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 12:39:04: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 12:39:04: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 12:39:04: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 12:39:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:40:04: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:40:04: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:40:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:41:05: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:41:05: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:41:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:42:05: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:42:05: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:42:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:43:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:43:06: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:43:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:44:07: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:44:07: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:44:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:45:07: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:45:07: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:45:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:46:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:46:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:46:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:47:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:47:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:47:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:48:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:48:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:48:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:49:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:49:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:49:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:50:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:50:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:50:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:51:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:51:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:51:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:52:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:52:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:52:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:53:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:53:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:53:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:54:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:54:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:54:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:55:07: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 12:55:07: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 12:55:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:55:27: New connection from 172.19.0.1:40068 on port 8883.
+2026-04-16 12:55:27: New client connected from 172.19.0.1:40068 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 12:55:27: No will message specified.
+2026-04-16 12:55:27: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 12:55:27: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 12:55:27: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 12:55:27: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 12:55:27: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 12:56:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:56:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:56:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:57:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:57:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:57:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:58:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:58:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:58:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:59:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:59:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:59:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:00:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:00:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:00:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:01:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:01:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:01:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:02:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:02:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:02:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:03:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:03:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:03:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:04:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:04:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:04:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:05:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:05:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:05:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:06:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:06:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:06:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:07:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:07:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:07:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:08:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:08:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:08:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:09:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:09:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:09:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:10:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:10:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:10:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:11:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:11:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:11:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:12:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:12:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:12:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:13:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:13:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:13:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:14:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:14:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:14:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:15:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:15:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:15:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:16:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:16:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:16:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:17:02: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:17:02: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:17:35: New connection from 172.19.0.1:53352 on port 8883.
+2026-04-16 13:17:35: New client connected from 172.19.0.1:53352 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 13:17:35: No will message specified.
+2026-04-16 13:17:35: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 13:17:35: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 13:17:35: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 13:17:35: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 13:17:35: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 13:17:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:18:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:18:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:18:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:19:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:19:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:19:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:20:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:20:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:20:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:21:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:21:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:21:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:22:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:22:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:22:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:23:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:23:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:23:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:24:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:24:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:24:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:25:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:25:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:25:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:26:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:26:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:26:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:27:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:27:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:27:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:27:52: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:27:52: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:28:05: New connection from 172.19.0.1:39132 on port 8883.
+2026-04-16 13:28:05: New client connected from 172.19.0.1:39132 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 13:28:05: No will message specified.
+2026-04-16 13:28:05: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 13:28:05: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 13:28:05: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 13:28:05: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 13:28:05: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 13:28:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:29:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:29:06: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:29:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:30:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:30:06: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:30:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:31:07: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:31:07: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:31:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:32:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:32:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:32:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:33:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:33:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:33:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:34:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:34:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:34:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:35:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:35:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:35:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:36:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:36:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:37:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:37:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:37:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:38:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:38:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:38:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:39:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:39:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:39:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:40:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:40:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:40:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:41:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:41:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:41:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:42:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:42:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:42:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:43:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:43:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:43:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:44:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:44:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:44:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:45:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:45:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:45:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:46:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:46:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:46:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:47:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:47:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:47:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:48:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:48:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:48:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:49:02: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:49:02: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:49:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:49:16: New connection from 172.19.0.1:43110 on port 8883.
+2026-04-16 13:49:16: New client connected from 172.19.0.1:43110 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 13:49:16: No will message specified.
+2026-04-16 13:49:16: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 13:49:16: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 13:49:16: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 13:49:16: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 13:49:16: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 13:50:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:50:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:50:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:51:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:51:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:51:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:52:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:52:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:52:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:53:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:53:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:53:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:54:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:54:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:54:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:55:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:55:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:55:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:56:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:56:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:56:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:56:52: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:56:52: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:57:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:58:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:59:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:00:08: New connection from 172.19.0.1:59040 on port 8883.
+2026-04-16 14:00:08: New client connected from 172.19.0.1:59040 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 14:00:08: No will message specified.
+2026-04-16 14:00:08: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 14:00:08: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 14:00:08: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 14:00:08: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 14:00:08: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 14:00:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:01:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:01:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:01:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:02:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:02:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:02:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:03:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:03:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:03:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:04:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:04:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:04:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:05:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:05:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:05:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:06:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:06:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:06:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:07:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:07:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:07:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:08:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:08:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:08:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:09:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:09:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:09:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:10:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:10:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:10:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:11:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:11:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:11:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:12:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:12:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:12:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:13:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:13:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:13:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:14:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:14:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:14:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:15:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:15:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:15:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:16:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:16:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:16:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:17:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:17:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:17:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:18:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:18:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:18:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:19:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:19:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:19:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:20:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:20:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:20:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:21:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:21:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:21:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:22:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:22:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:22:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:23:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:23:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:23:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:24:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:24:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:24:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:25:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:25:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:25:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:26:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:26:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:26:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:27:00: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 14:27:00: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 14:27:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:28:01: New connection from 172.19.0.1:54594 on port 8883.
+2026-04-16 14:28:01: New client connected from 172.19.0.1:54594 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 14:28:01: No will message specified.
+2026-04-16 14:28:01: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 14:28:01: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 14:28:01: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 14:28:01: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 14:28:01: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 14:28:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:29:02: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:29:02: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:29:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:30:02: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:30:02: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:30:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:31:03: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:31:03: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:31:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:32:04: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:32:04: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:32:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:33:04: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:33:04: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:33:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:34:05: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:34:05: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:34:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:35:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:35:06: Sending PINGRESP to VitalIO_API_Subscriber

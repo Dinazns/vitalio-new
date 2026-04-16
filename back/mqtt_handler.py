@@ -18,6 +18,8 @@ from database import get_medical_db
 from services.measurement_service import validate_measurement_payload_mqtt
 from services.alert_service import evaluate_measurement_alerts
 from services.ml_service import run_ml_scoring
+from services.ml_retrain_scheduler import schedule_retrain_after_new_measurement
+from services.user_service import get_patient_id_from_device, get_user_profile
 
 _mqtt_client: Optional[mqtt.Client] = None
 _mqtt_thread: Optional[threading.Thread] = None
@@ -59,9 +61,20 @@ def on_mqtt_message(client, userdata, msg):
         }
 
         try:
-            get_medical_db().measurements.insert_one(measurement_doc)
+            ins = get_medical_db().measurements.insert_one(measurement_doc)
+            measurement_doc["_id"] = ins.inserted_id
             print(f"Measurement inserted for device {device_id} (status: {validation['status']})")
-            durable_alerts = evaluate_measurement_alerts(device_id=device_id, measurement=measurement_doc)
+            pathology_ctx = None
+            pid = get_patient_id_from_device(device_id)
+            if pid:
+                try:
+                    prof = get_user_profile(pid)
+                    pathology_ctx = (prof.get("pathology") or "").strip() or None
+                except Exception:
+                    pathology_ctx = None
+            durable_alerts = evaluate_measurement_alerts(
+                device_id=device_id, measurement=measurement_doc, pathology=pathology_ctx
+            )
             if durable_alerts:
                 print(
                     f"Durable alert(s) for {device_id}: "
@@ -73,6 +86,11 @@ def on_mqtt_message(client, userdata, msg):
                     print(f"ML {ml_res['ml_level']} for {device_id}: score={ml_res['ml_score']}")
             except Exception as ml_err:
                 print(f"Warning: ML scoring failed for device {device_id}: {ml_err}")
+            if measurement_doc.get("status") == "VALID":
+                try:
+                    schedule_retrain_after_new_measurement(device_id)
+                except Exception as sched_err:
+                    print(f"Warning: schedule ML retrain after MQTT measurement failed: {sched_err}")
         except PyMongoError as db_error:
             print(f"Error inserting measurement for device {device_id}: {str(db_error)}")
 

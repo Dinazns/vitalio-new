@@ -54,3 +54,7 @@ SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "charldevlin@gmail.com")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+
+# Web Push (VAPID keys - generate with: py -m vapid --gen)
+VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY", "")
+VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY", "")

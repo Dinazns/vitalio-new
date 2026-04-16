@@ -3,6 +3,8 @@ JWT authentication, role resolution, and decorators for the VitalIO API.
 """
 import logging
 import re
+import threading
+import time
 from functools import wraps
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
@@ -17,6 +19,14 @@ from database import get_identity_db, get_medical_db
 from exceptions import AuthError, DatabaseError
 
 logger = logging.getLogger(__name__)
+
+# JWKS in-memory cache, avoids a network round-trip on every request and
+# makes the server resilient to brief Auth0 / DNS outages.
+_JWKS_CACHE: Optional[Dict[str, Any]] = None
+_JWKS_CACHE_TS: float = 0.0
+_JWKS_CACHE_TTL: float = 3600.0          # refresh every hour
+_JWKS_FETCH_TIMEOUT: float = 5.0         # abort slow DNS/network after 5 s
+_jwks_lock = threading.Lock()
 
 
 def get_token_auth_header() -> str:
@@ -42,16 +52,43 @@ def get_token_auth_header() -> str:
 
 
 def get_jwks() -> Dict[str, Any]:
-    """Fetch Auth0 JWKS for JWT signature verification."""
-    try:
-        jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
-        jwks_response = urlopen(jwks_url)
-        return json.loads(jwks_response.read())
-    except Exception as e:
-        raise AuthError({
-            "code": "jwks_fetch_error",
-            "message": f"Failed to fetch JWKS: {str(e)}"
-        }, 500)
+    """
+    Return Auth0 JWKS, using an in-memory cache (TTL = 1 h).
+    On network failure the stale cache is returned so a brief DNS outage
+    does not take down the entire API.  Only raises AuthError when there
+    is no usable cache at all.
+    """
+    global _JWKS_CACHE, _JWKS_CACHE_TS
+
+    now = time.monotonic()
+
+    # Fast path: cache is fresh, no lock needed
+    if _JWKS_CACHE is not None and (now - _JWKS_CACHE_TS) < _JWKS_CACHE_TTL:
+        return _JWKS_CACHE
+
+    with _jwks_lock:
+        now = time.monotonic()
+        if _JWKS_CACHE is not None and (now - _JWKS_CACHE_TS) < _JWKS_CACHE_TTL:
+            return _JWKS_CACHE
+
+        try:
+            jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+            jwks_response = urlopen(jwks_url, timeout=_JWKS_FETCH_TIMEOUT)
+            fresh = json.loads(jwks_response.read())
+            _JWKS_CACHE = fresh
+            _JWKS_CACHE_TS = time.monotonic()
+            return _JWKS_CACHE
+        except Exception as exc:
+            if _JWKS_CACHE is not None:
+                logger.warning(
+                    "JWKS refresh failed (%s); using stale cache (age=%.0fs)",
+                    exc, now - _JWKS_CACHE_TS,
+                )
+                return _JWKS_CACHE
+            raise AuthError({
+                "code": "jwks_fetch_error",
+                "message": f"Failed to fetch JWKS: {str(exc)}"
+            }, 500)
 
 
 def get_rsa_key(token: str, jwks: Dict[str, Any]) -> Optional[Dict[str, str]]:
@@ -137,6 +174,32 @@ def _extract_profile_from_jwt(jwt_payload: Dict[str, Any], user_id_auth: str) ->
     }
 
 
+def _extract_role_from_jwt(jwt_payload: Optional[Dict[str, Any]]) -> str:
+    """Extract and normalize role from JWT claims. Returns canonical role for DB storage."""
+    if not jwt_payload:
+        return "patient"
+    ns = "https://vitalio.app/"
+    role_raw = (
+        jwt_payload.get(AUTH0_ROLE_CLAIM)
+        or jwt_payload.get(f"{ns}role")
+        or jwt_payload.get("role")
+        or jwt_payload.get("roles")
+        or jwt_payload.get(f"{ns}roles")
+    )
+    if isinstance(role_raw, list):
+        role_raw = role_raw[0] if role_raw else ""
+    role = str(role_raw or "").strip().lower()
+    if role in ("medecin", "médecin", "superuser"):
+        return "doctor"
+    if role in ("aidant", "family"):
+        return "caregiver"
+    if role == "user":
+        return "patient"
+    if role in ("patient", "doctor", "caregiver", "admin"):
+        return role
+    return "patient"
+
+
 def get_or_create_user(auth0_sub: str, jwt_payload: Optional[Dict[str, Any]] = None) -> str:
     """Resolve or create user in Vitalio_Identity.users. Returns user_id_auth."""
     if not auth0_sub:
@@ -149,10 +212,11 @@ def get_or_create_user(auth0_sub: str, jwt_payload: Optional[Dict[str, Any]] = N
         if jwt_payload:
             profile = _extract_profile_from_jwt(jwt_payload, auth0_sub)
         email = profile.get("email") or (jwt_payload.get("email") if jwt_payload else None)
+        role = _extract_role_from_jwt(jwt_payload)
         doc = {
             "user_id_auth": auth0_sub,
             "email": email,
-            "role": "patient",
+            "role": role,
             "display_name": profile.get("display_name") or auth0_sub,
             "first_name": profile.get("first_name"),
             "last_name": profile.get("last_name"),

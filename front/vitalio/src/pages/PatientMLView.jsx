@@ -10,6 +10,7 @@ import {
   Activity,
   Info,
   Sparkles,
+  History,
 } from 'lucide-react'
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, Cell, LabelList,
@@ -76,6 +77,15 @@ export default function PatientMLView() {
     load()
     return () => { mounted = false }
   }, [getAccessTokenSilently])
+
+  const weeklyMlByTimestamp = useMemo(() => {
+    const map = new Map()
+    for (const m of weeklyData?.measurements || []) {
+      const key = m.timestamp || m.measured_at
+      if (key) map.set(key, m)
+    }
+    return map
+  }, [weeklyData])
 
   const mlData = useMemo(() => {
     const withScore = measurements
@@ -145,8 +155,33 @@ export default function PatientMLView() {
         temperature: m.temperature != null ? Number(m.temperature) : null,
       }))
 
-    return { scoreSeries, counts, vitalSeries, anomalies, total: withScore.length, summaryBars, weekSeries }
-  }, [measurements])
+    const measurementHistory = measurements
+      .filter((m) => m.timestamp || m.measured_at)
+      .filter((m) => m.heart_rate != null || m.spo2 != null || m.temperature != null)
+      .map((m) => {
+        const ts = m.timestamp || m.measured_at
+        const fromWeek = weeklyMlByTimestamp.get(ts)
+        return {
+          ...m,
+          ts,
+          ml_score: m.ml_score ?? fromWeek?.ml_score,
+          ml_level: m.ml_level ?? fromWeek?.ml_level,
+        }
+      })
+    const historyHasMl = measurementHistory.some((m) => m.ml_score != null)
+
+    return {
+      scoreSeries,
+      counts,
+      vitalSeries,
+      anomalies,
+      total: withScore.length,
+      summaryBars,
+      weekSeries,
+      measurementHistory,
+      historyHasMl,
+    }
+  }, [measurements, weeklyMlByTimestamp])
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null
@@ -205,8 +240,8 @@ export default function PatientMLView() {
 
             {weeklyData?.summary && (
               <section className="ml-panel ml-panel--ai-summary">
-                <h2><Sparkles size={18} /> Résumé par l'IA</h2>
-                <p className="ml-panel-sub">Analyse automatique de vos mesures de la semaine.</p>
+                <h2><Sparkles size={18} /> Résumé automatique de vos mesures cette semaine</h2>
+                <p className="ml-panel-sub">Analyse automatique, rédigée en mots simples pour vous aider à comprendre vos mesures de la semaine.</p>
                 <div className="ml-ai-summary-content">
                   <p className="ml-ai-summary-text">{weeklyData.summary.text}</p>
                   <div className="ml-ai-summary-actions">
@@ -215,7 +250,7 @@ export default function PatientMLView() {
                       {weeklyData.summary.risk_level === 'moderate' && 'Surveillance'}
                       {weeklyData.summary.risk_level === 'low' && 'Normal'}
                       {weeklyData.summary.risk_level === 'minimal' && 'Rassurant'}
-                      {weeklyData.summary.risk_level === 'unknown' && '—'}
+                      {weeklyData.summary.risk_level === 'unknown' && '-'}
                     </span>
                     {weeklyData.summary.recommended_action && (
                       <p className="ml-ai-recommendation">{weeklyData.summary.recommended_action}</p>
@@ -225,7 +260,62 @@ export default function PatientMLView() {
               </section>
             )}
 
-            
+            {mlData.measurementHistory.length > 0 && (
+              <section className="ml-panel">
+                <h2><History size={18} /> Historique des mesures</h2>
+                <p className="ml-panel-sub">
+                  Vos enregistrements les plus récents (jusqu&apos;à 100). Les scores IA correspondent aux mesures des 7 derniers jours lorsqu&apos;ils sont disponibles.
+                </p>
+                <div className="ml-anomaly-table-wrap">
+                  <table className="ml-anomaly-table">
+                    <thead>
+                      <tr>
+                        <th>Date et heure</th>
+                        <th>FC (bpm)</th>
+                        <th>SpO2 (%)</th>
+                        <th>Temp. (°C)</th>
+                        {mlData.historyHasMl && (
+                          <>
+                            <th>Score IA</th>
+                            <th>Niveau</th>
+                          </>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mlData.measurementHistory.map((m, i) => {
+                        const lvl = m.ml_level || 'normal'
+                        const cfg = mlData.historyHasMl && m.ml_score != null
+                          ? (LEVEL_CONFIG[lvl] || LEVEL_CONFIG.normal)
+                          : null
+                        return (
+                          <tr key={`${m.ts}-${i}`}>
+                            <td>{formatTime(m.ts)}</td>
+                            <td>{m.heart_rate ?? '-'}</td>
+                            <td>{m.spo2 ?? '-'}</td>
+                            <td>{m.temperature != null ? Number(m.temperature).toFixed(1) : '-'}</td>
+                            {mlData.historyHasMl && (
+                              <>
+                                <td>{m.ml_score != null ? Number(m.ml_score).toFixed(3) : '-'}</td>
+                                <td>
+                                  {m.ml_score != null && cfg ? (
+                                    <span className="ml-level-badge" style={{ background: cfg.bg, color: cfg.color }}>
+                                      {cfg.label}
+                                    </span>
+                                  ) : (
+                                    '-'
+                                  )}
+                                </td>
+                              </>
+                            )}
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
 
             {mlData.scoreSeries.length === 0 && (
               <div className="ml-panel ml-panel--info">

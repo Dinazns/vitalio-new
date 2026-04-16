@@ -917,3 +917,30 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+// Synthèse narrative détaillée (équipe soignante)
+.pml-clinical-narrative-inner {
+  margin-top: 0.65rem;
+}
+
+.pml-clinical-narrative-body {
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #334155;
+  white-space: pre-line;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.pml-clinical-narrative-action {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e40af;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}

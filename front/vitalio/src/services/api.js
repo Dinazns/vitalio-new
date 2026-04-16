@@ -1,5 +1,19 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
+export async function getVapidPublicKey() {
+  const res = await fetch(`${API_URL}/api/push/vapid-public-key`)
+  if (!res.ok) throw new Error('Failed to get VAPID key')
+  const data = await res.json()
+  return data.vapid_public_key || ''
+}
+
+export async function registerPushSubscription(accessToken, subscription) {
+  return apiRequest('/api/me/push-subscribe', accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ subscription }),
+  })
+}
+
 export async function apiRequest(endpoint, accessToken, options = {}) {
   const url = `${API_URL}${endpoint}`
   
@@ -54,6 +68,54 @@ export async function completeOnboarding(accessToken, payload) {
   })
 }
 
+/** Phrase exacte attendue par l’API pour effacer toutes les données patient. */
+export const DELETE_PATIENT_DATA_CONFIRM = 'SUPPRIMER_MES_DONNEES'
+
+export async function deletePatientAccountData(accessToken) {
+  return apiRequest('/api/me/account-data', accessToken, {
+    method: 'DELETE',
+    body: JSON.stringify({ confirm: DELETE_PATIENT_DATA_CONFIRM }),
+  })
+}
+
+/**
+ * Télécharge l’export JSON des données VitalIO du patient.
+ * @returns {{ blob: Blob, filename: string }}
+ */
+export async function downloadPatientDataExport(accessToken) {
+  const url = `${API_URL}/api/me/export-data`
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}))
+    throw new Error(errData.message || `HTTP Error: ${response.status}`)
+  }
+  const blob = await response.blob()
+  let filename = 'vitalio-export.json'
+  const cd = response.headers.get('Content-Disposition')
+  if (cd) {
+    const m = cd.match(/filename="([^"]+)"/)
+    if (m) filename = m[1]
+  }
+  return { blob, filename }
+}
+
+/** @returns {{ device_id: string | null, device_ids: string[] }} */
+export async function getPatientDevice(accessToken) {
+  return apiRequest('/api/me/device', accessToken, {
+    method: 'GET',
+  })
+}
+
+export async function enrollPatientDevice(accessToken, enrollmentCode) {
+  return apiRequest('/api/patient/enroll-device', accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ enrollment_code: enrollmentCode }),
+  })
+}
+
 export async function submitPatientMeasurement(accessToken, measurement) {
   return apiRequest('/api/me/measurements', accessToken, {
     method: 'POST',
@@ -67,15 +129,48 @@ export async function getDoctorPatients(accessToken) {
   })
 }
 
-export async function getDoctorPatientMeasurements(accessToken, patientId, days = 30) {
-  return apiRequest(`/api/doctor/patients/${encodeURIComponent(patientId)}/measurements?days=${days}`, accessToken, {
-    method: 'GET',
-  })
+export async function getDoctorPatientMeasurements(accessToken, patientId, days = 30, limit) {
+  const params = new URLSearchParams({ days: String(days) })
+  if (limit != null) {
+    params.set('limit', String(limit))
+  }
+  return apiRequest(
+    `/api/doctor/patients/${encodeURIComponent(patientId)}/measurements?${params.toString()}`,
+    accessToken,
+    { method: 'GET' },
+  )
 }
 
 export async function getDoctorPatientTrends(accessToken, patientId) {
   return apiRequest(`/api/doctor/patients/${encodeURIComponent(patientId)}/trends`, accessToken, {
     method: 'GET',
+  })
+}
+
+/** GET device mapping; returns null when no device (404 from API). */
+export async function getDoctorPatientDevice(accessToken, patientId) {
+  const url = `${API_URL}/api/doctor/patients/${encodeURIComponent(patientId)}/device`
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+  if (response.status === 404) {
+    const body = await response.json().catch(() => ({}))
+    if (body.code === 'no_device') return null
+  }
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || `HTTP Error: ${response.status}`)
+  }
+  return response.json()
+}
+
+export async function assignDoctorPatientDevice(accessToken, patientId, deviceId) {
+  return apiRequest(`/api/doctor/patients/${encodeURIComponent(patientId)}/device`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ device_id: deviceId }),
   })
 }
 
@@ -101,17 +196,44 @@ export async function getCaregiverAlerts(accessToken, params = {}) {
   return apiRequest(`/api/caregiver/alerts${q ? `?${q}` : ''}`, accessToken, { method: 'GET' })
 }
 
-export async function patchDoctorAlert(accessToken, alertId, doctorStatus) {
+export async function patchDoctorAlert(accessToken, alertId, payload) {
+  const body =
+    typeof payload === 'string'
+      ? { doctor_status: payload }
+      : {
+          ...(payload.doctor_status != null ? { doctor_status: payload.doctor_status } : {}),
+          ...(payload.emergency_escalation
+            ? { emergency_escalation: payload.emergency_escalation }
+            : {}),
+        }
   return apiRequest(`/api/doctor/alerts/${encodeURIComponent(alertId)}`, accessToken, {
     method: 'PATCH',
-    body: JSON.stringify({ doctor_status: doctorStatus }),
+    body: JSON.stringify(body),
   })
 }
 
-export async function patchCaregiverAlert(accessToken, alertId, resolutionComment) {
+export async function patchCaregiverAlert(accessToken, alertId, payload) {
+  // Supports both legacy string (resolution_comment only) and new structured payload
+  const body = typeof payload === 'string'
+    ? { resolution_comment: payload }
+    : {
+        ...(payload.resolution_comment != null ? { resolution_comment: payload.resolution_comment } : {}),
+        ...(payload.seen_patient_since_alert != null ? { seen_patient_since_alert: payload.seen_patient_since_alert } : {}),
+      }
   return apiRequest(`/api/caregiver/alerts/${encodeURIComponent(alertId)}`, accessToken, {
     method: 'PATCH',
-    body: JSON.stringify({ resolution_comment: resolutionComment }),
+    body: JSON.stringify(body),
+  })
+}
+
+export async function getDoctorAlert(accessToken, alertId) {
+  return apiRequest(`/api/doctor/alerts/${encodeURIComponent(alertId)}`, accessToken, { method: 'GET' })
+}
+
+export async function triggerManualAlert(accessToken, message = '') {
+  return apiRequest('/api/patient/alerts', accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ message }),
   })
 }
 

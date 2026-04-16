@@ -8,6 +8,7 @@ from pymongo.errors import PyMongoError
 from database import get_medical_db, get_identity_db
 from exceptions import DatabaseError
 from services.user_service import get_device_id, get_user_profile, get_user_db_id, datetime_to_iso_utc
+from services.alert_service import device_has_actionable_open_alert
 
 
 def get_latest_device_measurement(device_id: str) -> Optional[Dict[str, Any]]:
@@ -201,7 +202,11 @@ def list_latest_doctor_feedback(patient_user_id_auth: str, limit: int = 5) -> Li
         }, 500)
 
 
-def build_assigned_patients_payload(patient_ids: List[str]) -> List[Dict[str, Any]]:
+def build_assigned_patients_payload(
+    patient_ids: List[str],
+    *,
+    doctor_queue_alert_badge: bool = False,
+) -> List[Dict[str, Any]]:
     """Build patient cards (profile + latest measurements) for doctor/caregiver views."""
     patients = []
     for patient_user_id_auth in patient_ids:
@@ -211,6 +216,11 @@ def build_assigned_patients_payload(patient_ids: List[str]) -> List[Dict[str, An
         latest_measurement = get_latest_device_measurement(device_id) if device_id else None
         measured_at = latest_measurement.get("measured_at") if latest_measurement else None
         measured_at_iso = datetime_to_iso_utc(measured_at) if isinstance(measured_at, datetime) else None
+
+        if doctor_queue_alert_badge:
+            alert_flag = bool(device_id) and device_has_actionable_open_alert(device_id)
+        else:
+            alert_flag = compute_alert_indicator(latest_measurement)
 
         patients.append({
             "id": db_id or patient_user_id_auth,
@@ -224,7 +234,7 @@ def build_assigned_patients_payload(patient_ids: List[str]) -> List[Dict[str, An
                 "temperature": latest_measurement.get("temperature") if latest_measurement else None,
                 "status": latest_measurement.get("status") if latest_measurement else None,
             } if latest_measurement else None,
-            "alert": compute_alert_indicator(latest_measurement)
+            "alert": alert_flag,
         })
     return patients
 

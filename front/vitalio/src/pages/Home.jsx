@@ -4,7 +4,8 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { User, Stethoscope, Heart, Settings } from 'lucide-react';
 
 const ROLE_ROUTES = {
-  patient: '/patient',
+  patient: '/patient/bienvenue',
+  user: '/patient/bienvenue',
   doctor: '/doctor',
   medecin: '/doctor',
   superuser: '/doctor',
@@ -115,7 +116,7 @@ export default function Home() {
                     name="Robert (78 ans)"
                     description="Interface simplifiée. Gros boutons. SOS."
                     color="#10b981"
-                    path="/patient"
+                    path="/patient/bienvenue"
                 />
                 <PersonaCard
                     icon={Stethoscope}

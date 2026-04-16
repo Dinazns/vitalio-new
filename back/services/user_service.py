@@ -277,6 +277,8 @@ def get_user_profile(user_id_auth: str) -> Dict[str, Any]:
                 "phone": 1, "birthdate": 1,
                 "contact": 1, "picture": 1, "emergency_contact": 1,
                 "medical_history": 1, "onboarding_completed": 1,
+                "address_line1": 1, "address_line2": 1, "postal_code": 1, "city": 1, "country": 1,
+                "pathology": 1,
             }
         )
         return profile or {}
@@ -285,6 +287,17 @@ def get_user_profile(user_id_auth: str) -> Dict[str, Any]:
             "code": "user_profile_query_error",
             "message": f"Failed to query user profile: {str(e)}"
         }, 500)
+
+
+def get_address_dict_from_profile(profile: Optional[Dict[str, Any]]) -> Optional[Dict[str, str]]:
+    """Return normalized address fields if any line is set; else None."""
+    if not profile:
+        return None
+    keys = ("address_line1", "address_line2", "postal_code", "city", "country")
+    out = {k: str(profile.get(k) or "").strip() for k in keys}
+    if not any(out.values()):
+        return None
+    return out
 
 
 def _split_display_name(display_name: str) -> tuple:

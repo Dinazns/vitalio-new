@@ -1,10 +1,16 @@
 """
 VitalIO - Module de détection d'anomalies physiologiques par Machine Learning.
 
-Modèle : Isolation Forest (non supervisé)
+Modèle : Isolation Forest (non supervisé) sur les mesures « normales » + feedback médecin.
 Entrées : heart_rate, spo2, temperature, signal_quality
 Sorties : anomaly_score (0-1), anomaly_level (normal/warning/critical),
           contributing_variables, model_version
+
+Feedback (ml_anomalies rejected / validated) :
+  - rejected (FP) : sur-échantillonnés comme inliers dans fit(IF) uniquement.
+  - validated (TP) : banque d’exemplaires (global + optionnel par patient via user_id_auth) ;
+    à l’inférence, boost du score si proximité (noyau gaussien en espace normalisé),
+    sans mélanger les TP dans fit(IF).
 
 Forecasting v2 : Weighted Linear Regression + Mann-Kendall trend test +
   proper prediction intervals + clinical drift detection + confidence scoring.
@@ -45,6 +51,15 @@ DEFAULT_ML_THRESHOLDS={
     "warning_max":0.70,
 }
 
+# Doctor feedback - entraînement / inférence
+# Rejet (faux positif) : sur-échantillonner le vecteur comme inlier pour l’Isolation Forest uniquement.
+FP_INLIER_OVERSAMPLE_COPIES:int=3
+# Validation (vrai positif) : ne pas mélanger dans fit() ; banque d’exemplaires pour booster le score si proximité.
+TP_EXEMPLAR_MAX_GLOBAL:int=2000
+TP_EXEMPLAR_MAX_PER_PATIENT:int=500
+TP_DISTANCE_SIGMA:float=1.0  # unités normalisées (écart-type effectif du noyau gaussien)
+TP_BOOST_GAMMA:float=0.22   # plafond de boost ajouté au score IF [0,1]
+
 MODEL_DIR=os.path.join(os.path.dirname(__file__),"ml_models")
 DEFAULT_MODEL_PATH=os.path.join(MODEL_DIR,"isolation_forest_latest.joblib")
 
@@ -53,6 +68,9 @@ _model:Optional[IsolationForest]=None
 _model_version:str="v0.0.0"
 _model_trained_at:Optional[str]=None
 _ml_thresholds:Dict[str,float]=dict(DEFAULT_ML_THRESHOLDS)
+# Banque TP : chargée avec le modèle, mise à jour au réentraînement (pas dans fit IF).
+_tp_exemplars_global:np.ndarray=np.zeros((0,len(FEATURE_NAMES)))
+_tp_exemplars_by_patient:Dict[str,np.ndarray]={}
 
 def _ensure_model_dir():
     os.makedirs(MODEL_DIR,exist_ok=True)
@@ -61,12 +79,17 @@ def get_model_version()->str:
     return _model_version
 
 def get_model_info()->Dict[str,Any]:
+    n_pat=0 if not _tp_exemplars_by_patient else sum(
+        1 for _k,_arr in _tp_exemplars_by_patient.items() if isinstance(_arr,np.ndarray) and _arr.size>0
+    )
     return{
         "version":_model_version,
         "trained_at":_model_trained_at,
         "loaded": _model is not None,
         "thresholds":dict(_ml_thresholds),
         "features":list(FEATURE_NAMES),
+        "tp_exemplars_global":int(_tp_exemplars_global.shape[0]),
+        "tp_exemplars_patients":n_pat,
     }
 
 def configure_thresholds(normal_max:Optional[float]=None, warning_max:Optional[float]=None):
@@ -78,7 +101,7 @@ def configure_thresholds(normal_max:Optional[float]=None, warning_max:Optional[f
 
 def load_model(path:Optional[str]=None)->bool:
     """Load a serialised Isolation Forest model from disk. Returns True on success."""
-    global _model,_model_version,_model_trained_at
+    global _model,_model_version,_model_trained_at,_tp_exemplars_global,_tp_exemplars_by_patient
     path=path or DEFAULT_MODEL_PATH
     if not os.path.isfile(path):
         logger.info("No persisted ML model at %s - will need initial training",path)
@@ -89,6 +112,11 @@ def load_model(path:Optional[str]=None)->bool:
             _model=bundle["model"]
             _model_version=bundle.get("version","v0.0.0")
             _model_trained_at=bundle.get("trained_at")
+            _tp_exemplars_global=_coerce_tp_matrix(bundle.get("tp_exemplars_global"))
+            raw_by=bundle.get("tp_exemplars_by_patient") or {}
+            _tp_exemplars_by_patient={
+                str(k):_coerce_tp_matrix(v) for k,v in raw_by.items()
+            } if isinstance(raw_by,dict) else {}
         logger.info("ML model loaded: %s (trained %s)",_model_version,_model_trained_at)
         return True
     except Exception:
@@ -105,6 +133,8 @@ def save_model(path:Optional[str]=None):
         "trained_at":_model_trained_at,
         "features":list(FEATURE_NAMES),
         "thresholds":dict(_ml_thresholds),
+        "tp_exemplars_global":_tp_exemplars_global,
+        "tp_exemplars_by_patient":dict(_tp_exemplars_by_patient),
     }
     joblib.dump(bundle,path)
     logger.info("ML model saved: %s → %s",_model_version,path)
@@ -161,6 +191,59 @@ def _next_version()->str:
         parts=["0","0","1"]
     return "v"+".".join(parts)
 
+def _coerce_tp_matrix(raw:Any)->np.ndarray:
+    """N×len(FEATURE_NAMES) float matrix; empty if invalid."""
+    if raw is None:
+        return np.zeros((0,len(FEATURE_NAMES)))
+    try:
+        arr=np.asarray(raw,dtype=float)
+    except Exception:
+        return np.zeros((0,len(FEATURE_NAMES)))
+    if arr.size==0:
+        return np.zeros((0,len(FEATURE_NAMES)))
+    if arr.ndim==1:
+        if arr.shape[0]!=len(FEATURE_NAMES):
+            return np.zeros((0,len(FEATURE_NAMES)))
+        return arr.reshape(1,-1)
+    if arr.shape[1]!=len(FEATURE_NAMES):
+        return np.zeros((0,len(FEATURE_NAMES)))
+    return arr
+
+def _physio_span_array()->np.ndarray:
+    return np.array(
+        [(PHYSIOLOGICAL_RANGES[f][1]-PHYSIOLOGICAL_RANGES[f][0]) for f in FEATURE_NAMES],
+        dtype=float,
+    )
+
+def _max_tp_gaussian_weight(query_flat:np.ndarray, exemplars:np.ndarray)->float:
+    """Poids max exp(-‖(q-e)/s‖² / (2σ²)) sur les lignes d’exemplars."""
+    if exemplars is None or exemplars.size==0 or exemplars.shape[0]==0:
+        return 0.0
+    spans=np.maximum(_physio_span_array(),1e-6)
+    q=query_flat.reshape(1,-1)
+    diff=(exemplars-q)/spans
+    d2=np.sum(diff*diff,axis=1)
+    sig2=TP_DISTANCE_SIGMA*TP_DISTANCE_SIGMA
+    w=np.exp(-d2/(2.0*sig2))
+    return float(np.max(w))
+
+def _compute_tp_exemplar_boost(vec_flat:np.ndarray,user_id_auth:Optional[str])->float:
+    """Boost [0, TP_BOOST_GAMMA] selon proximité aux TP validés (global + patient)."""
+    global _tp_exemplars_global,_tp_exemplars_by_patient
+    w_g=_max_tp_gaussian_weight(vec_flat,_tp_exemplars_global)
+    w_p=0.0
+    if user_id_auth:
+        uid=str(user_id_auth).strip()
+        if uid and uid in _tp_exemplars_by_patient:
+            w_p=_max_tp_gaussian_weight(vec_flat,_tp_exemplars_by_patient[uid])
+    w=max(w_g,w_p)
+    return float(TP_BOOST_GAMMA*w)
+
+def _cap_tp_matrix_rows(mat:np.ndarray,max_rows:int)->np.ndarray:
+    if mat.shape[0]<=max_rows:
+        return mat
+    return mat[-max_rows:,:]
+
 def train_model(
     measurements:List[Dict[str,Any]],
     validated_anomalies:Optional[List[Dict[str,Any]]]=None,
@@ -170,11 +253,13 @@ def train_model(
 )->Dict[str,Any]:
     """
     Train (or retrain) the Isolation Forest on historical measurements.
-    Optionally incorporates human-validated anomalies for continual learning.
 
-    Returns metadata about the trained model.
+    Feedback médecin (validated_anomalies) :
+    - rejected (faux positif) : sur-échantillonnage comme inliers dans fit() uniquement.
+    - validated (vrai positif) : exclus du fit IF ; stockés comme banque d’exemplaires TP
+      pour l’inférence (boost de score si proximité), optionnellement par patient.
     """
-    global _model,_model_version,_model_trained_at
+    global _model,_model_version,_model_trained_at,_tp_exemplars_global,_tp_exemplars_by_patient
 
     rows:List[np.ndarray]=[]
     for m in measurements:
@@ -182,21 +267,28 @@ def train_model(
         if vec is not None:
             rows.append(vec.flatten())
 
+    tp_global_rows:List[np.ndarray]=[]
+    tp_by_patient:Dict[str,List[np.ndarray]]={}
+
     if validated_anomalies:
         for a in validated_anomalies:
-            status=a.get("status")
+            status=str(a.get("status") or "").strip().lower()
             m_data={feat: a.get(feat) for feat in FEATURE_NAMES}
-            if "measurement" in a:
+            if "measurement" in a and a["measurement"]:
                 m_data={feat: a["measurement"].get(feat) for feat in FEATURE_NAMES}
             vec,_=prepare_feature_vector(m_data)
             if vec is None:
                 continue
-            if status=="validated":
-                for _ in range(3):
-                    rows.append(vec.flatten())
-            elif status=="rejected":
-                for _ in range(2):
-                    rows.append(vec.flatten())
+            flat=vec.flatten()
+            if status=="rejected":
+                for _ in range(FP_INLIER_OVERSAMPLE_COPIES):
+                    rows.append(flat.copy())
+            elif status=="validated":
+                tp_global_rows.append(flat.copy())
+                uid=a.get("user_id_auth")
+                if uid is not None and str(uid).strip():
+                    u=str(uid).strip()
+                    tp_by_patient.setdefault(u,[]).append(flat.copy())
 
     if len(rows)<20:
         raise ValueError(f"Not enough valid samples to train ({len(rows)} < 20)")
@@ -213,10 +305,19 @@ def train_model(
     )
     model.fit(X)
 
+    tg=np.array(tp_global_rows) if tp_global_rows else np.zeros((0,len(FEATURE_NAMES)))
+    tg=_cap_tp_matrix_rows(tg,TP_EXEMPLAR_MAX_GLOBAL)
+    tpat:Dict[str,np.ndarray]={}
+    for uid,lst in tp_by_patient.items():
+        arr=np.array(lst) if lst else np.zeros((0,len(FEATURE_NAMES)))
+        tpat[uid]=_cap_tp_matrix_rows(arr,TP_EXEMPLAR_MAX_PER_PATIENT)
+
     with _lock:
         _model=model
         _model_version=_next_version()
         _model_trained_at=datetime.now(timezone.utc).isoformat()
+        _tp_exemplars_global=tg
+        _tp_exemplars_by_patient=tpat
 
     save_model()
 
@@ -227,8 +328,13 @@ def train_model(
         "n_features":X.shape[1],
         "contamination":effective_contamination,
         "n_estimators":n_estimators,
+        "n_tp_exemplars_global":int(_tp_exemplars_global.shape[0]),
+        "n_tp_exemplar_patients":len(_tp_exemplars_by_patient),
     }
-    logger.info("ML model trained: %s (%d samples)",_model_version,len(rows))
+    logger.info(
+        "ML model trained: %s (%d IF rows, %d TP exemplars global)",
+        _model_version,len(rows),_tp_exemplars_global.shape[0],
+    )
     return meta
 
 def _raw_score_to_normalized(raw_score:float)->float:
@@ -332,7 +438,10 @@ def score_measurement(measurement:Dict[str,Any])->Dict[str,Any]:
         result["ml_skip_reasons"]=[f"scoring_error: {exc}"]
         return result
 
-    score=_raw_score_to_normalized(raw)
+    base_score=_raw_score_to_normalized(raw)
+    uid=measurement.get("user_id_auth") or measurement.get("patient_user_id_auth")
+    tp_boost=_compute_tp_exemplar_boost(vec.flatten(),str(uid).strip() if uid else None)
+    score=round(min(1.0,max(0.0,base_score+tp_boost)),4)
     level=_score_to_level(score)
     contribs=_compute_contributing_variables(measurement)
 
@@ -343,6 +452,8 @@ def score_measurement(measurement:Dict[str,Any])->Dict[str,Any]:
 
     result.update({
         "ml_score":score,
+        "ml_if_base_score":base_score,
+        "ml_tp_exemplar_boost":round(tp_boost,4),
         "ml_level":level,
         "ml_contributing_variables":contribs,
         "ml_is_anomaly": level in ("warning","critical"),

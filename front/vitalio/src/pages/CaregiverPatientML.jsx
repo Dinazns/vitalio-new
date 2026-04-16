@@ -22,6 +22,7 @@ import {
   Layers,
   Clock,
   Crosshair,
+  FileText,
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -66,6 +67,7 @@ const RISK_CONFIG = {
   low:      { color: '#1d4ed8', bg: '#eff6ff', label: 'Risque faible' },
   moderate: { color: '#b45309', bg: '#fffbeb', label: 'Risque modéré' },
   high:     { color: '#b91c1c', bg: '#fef2f2', label: 'Risque élevé' },
+  unknown:  { color: '#64748b', bg: '#f1f5f9', label: 'Données insuffisantes' },
 }
 
 const formatTime = (iso) => {
@@ -398,6 +400,9 @@ export default function CaregiverPatientML() {
   const stats = vitalInfo.statistics || {}
   const trend = vitalInfo.trend || {}
   const cfg = VITAL_CONFIG[activeVital]
+  const clinicalNarrativeRisk = analysis?.clinical_narrative_summary
+    ? RISK_CONFIG[analysis.clinical_narrative_summary.risk_level] || RISK_CONFIG.minimal
+    : RISK_CONFIG.minimal
 
   return (
     <div className="caregiver-dashboard family-theme">
@@ -472,6 +477,27 @@ export default function CaregiverPatientML() {
                 />
               </div>
             </section>
+
+            {analysis.clinical_narrative_summary?.text && (
+              <section className="pml-panel pml-clinical-narrative">
+                <h2><FileText size={18} /> Synthèse narrative (usage clinique)</h2>
+                <p className="pml-panel-sub">
+                  Texte détaillé généré automatiquement sur la période sélectionnée (statistiques, tendances, anomalies).
+                  Le résumé affiché au patient est volontairement plus court et plus simple.
+                </p>
+                <div className="pml-clinical-narrative-inner">
+                  <span className="pml-badge" style={{ background: clinicalNarrativeRisk.bg, color: clinicalNarrativeRisk.color }}>
+                    {clinicalNarrativeRisk.label}
+                  </span>
+                  <div className="pml-clinical-narrative-body">{analysis.clinical_narrative_summary.text}</div>
+                  {analysis.clinical_narrative_summary.recommended_action && (
+                    <p className="pml-clinical-narrative-action">
+                      <ArrowRight size={14} /> {analysis.clinical_narrative_summary.recommended_action}
+                    </p>
+                  )}
+                </div>
+              </section>
+            )}
 
             {/* Répartition horaire des mesures (jour × heure) */}
             {hourlyDistributionByDay.rows.length > 0 && (
