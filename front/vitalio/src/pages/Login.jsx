@@ -1,16 +1,16 @@
-import React, { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { LogIn, UserPlus, AlertCircle } from 'lucide-react';
 import vitalioLogo from '../assets/vitalio-logo.png';
 
 const ROLE_ROUTES = {
-    patient: '/patient',
+    patient: '/patient/bienvenue',
     doctor: '/doctor',
     medecin: '/doctor',
     'médecin': '/doctor',
     superuser: '/doctor',
-    user: '/patient',
+    user: '/patient/bienvenue',
     caregiver: '/caregiver',
     aidant: '/caregiver',
     admin: '/admin',
@@ -58,6 +58,7 @@ function extractRole(user) {
 export default function Login() {
     const navigate = useNavigate();
     const hasRedirectedRef = useRef(false);
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
     const {
         isAuthenticated,
         isLoading,
@@ -138,7 +139,7 @@ export default function Login() {
                 picture: user.picture,
             }));
 
-            navigate(ROLE_ROUTES[roleForRouting] || '/patient');
+            navigate(ROLE_ROUTES[roleForRouting] || '/patient/bienvenue');
         } catch (error) {
             console.error('Error handling authenticated user:', error);
             hasRedirectedRef.current = false;
@@ -146,6 +147,7 @@ export default function Login() {
     };
 
     const handleLogin = () => {
+        if (!acceptedTerms) return;
         loginWithRedirect({
             authorizationParams: {
                 screen_hint: 'login',
@@ -154,6 +156,7 @@ export default function Login() {
     };
 
     const handleSignup = () => {
+        if (!acceptedTerms) return;
         loginWithRedirect({
             authorizationParams: {
                 screen_hint: 'signup',
@@ -181,7 +184,6 @@ export default function Login() {
                 <div className="login-card animate-fade-in">
                     <div className="login-logo-section">
                         <img src={vitalioLogo} alt="VitalIO Logo" className="login-logo" />
-                        <h1 className="login-title">VitalIO</h1>
                         <p className="login-subtitle">Connexion en cours...</p>
                     </div>
                 </div>
@@ -204,7 +206,6 @@ export default function Login() {
                 {}
                 <div className="login-logo-section">
                     <img src={vitalioLogo} alt="VitalIO Logo" className="login-logo" />
-                    <h1 className="login-title">VitalIO</h1>
                     <p className="login-subtitle">Plateforme de Télésurveillance Médicale</p>
                 </div>
 
@@ -218,11 +219,28 @@ export default function Login() {
                         </div>
                     )}
 
+                    <label className="login-terms">
+                        <input
+                            type="checkbox"
+                            checked={acceptedTerms}
+                            onChange={(e) => setAcceptedTerms(e.target.checked)}
+                            aria-describedby="login-terms-hint"
+                        />
+                        <span className="login-terms__label" id="login-terms-hint">
+                            J&apos;accepte les{' '}
+                            <Link to="/conditions-utilisation" className="login-terms__link">
+                                conditions d&apos;utilisation
+                            </Link>
+                            {' '}pour utiliser VitalIO.
+                        </span>
+                    </label>
+
                     {/* Signup Button (primary) */}
                     <button 
                         type="button"
                         onClick={handleSignup}
                         className="login-button"
+                        disabled={!acceptedTerms}
                     >
                         <UserPlus size={20} />
                         <span>S'inscrire</span>
@@ -232,6 +250,7 @@ export default function Login() {
                     <button 
                         type="button"
                         onClick={handleLogin}
+                        disabled={!acceptedTerms}
                         className="login-button login-button-secondary"
                     >
                         <LogIn size={20} />
@@ -239,7 +258,7 @@ export default function Login() {
                     </button>
 
                     <p className="login-hint">
-                        Créez un compte ou connectez-vous avec Auth0 pour accéder à VitalIO.
+                        Cochez la case ci-dessus, puis créez un compte ou connectez-vous avec Auth0.
                     </p>
                 </div>
 

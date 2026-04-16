@@ -296,6 +296,31 @@ def resolve_metric_alert(device_id: str, metric: str):
     )
 
 
+# Statuts médecin qui retirent l'alerte de la file « ouvertes » (rétrocompat : status encore OPEN en base).
+_DOCTOR_TRIAGE_DONE = frozenset(
+    {"VALIDATED", "REJECTED", "validated", "rejected"}
+)
+
+
+def open_alert_query_requires_doctor_triage() -> Dict[str, Any]:
+    """Fragment MongoDB : alerte OPEN encore à traiter côté médecin."""
+    return {"doctor_status": {"$nin": list(_DOCTOR_TRIAGE_DONE)}}
+
+
+def device_has_actionable_open_alert(device_id: Optional[str]) -> bool:
+    """True si une alerte OPEN nécessite encore une action médecin (file d'attente)."""
+    if not device_id:
+        return False
+    try:
+        doc = get_medical_db().alerts.find_one(
+            {"device_id": device_id, "status": "OPEN", **open_alert_query_requires_doctor_triage()},
+            projection={"_id": 1},
+        )
+        return doc is not None
+    except PyMongoError:
+        return False
+
+
 def _record_threshold_breach_event(
     device_id: str,
     measurement_id: Any,

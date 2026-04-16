@@ -18950,3 +18950,1382 @@ To fix this, use `chmod 0700 /mosquitto/passwd`.
 2026-03-20 12:40:44: Client SIM-ESP32-001 closed its connection.
 2026-03-20 12:41:02: mosquitto version 2.0.22 terminating
 2026-03-20 12:41:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:34:09: mosquitto version 2.0.22 starting
+2026-04-14 22:34:09: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:34:09: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:34:09: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:34:09: mosquitto version 2.0.22 running
+2026-04-14 22:35:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:35:17: New connection from 172.19.0.1:35392 on port 8883.
+2026-04-14 22:35:17: New client connected from 172.19.0.1:35392 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:35:17: No will message specified.
+2026-04-14 22:35:17: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:35:17: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:35:17: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:35:17: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:35:17: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:36:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:36:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:36:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:37:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:37:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:37:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:38:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:38:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:38:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:39:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:39:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:39:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:40:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:40:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:40:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:41:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:41:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:41:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:42:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:42:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:42:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:43:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:43:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:43:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:44:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:44:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:44:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:45:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:45:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:45:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:46:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:46:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:46:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:47:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:47:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:47:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:48:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:48:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:48:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:48:56: New connection from 172.19.0.1:44974 on port 8883.
+2026-04-14 22:48:56: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:48:56: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:48:58: New connection from 172.19.0.1:44978 on port 8883.
+2026-04-14 22:48:58: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:48:58: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:01: New connection from 172.19.0.1:53022 on port 8883.
+2026-04-14 22:49:01: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:49:01: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:06: New connection from 172.19.0.1:53038 on port 8883.
+2026-04-14 22:49:06: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:49:06: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:09: New connection from 172.19.0.1:53054 on port 8883.
+2026-04-14 22:49:09: OpenSSL Error[0]: error:0A000412:SSL routines::ssl/tls alert bad certificate
+2026-04-14 22:49:09: Client <unknown> disconnected: Protocol error.
+2026-04-14 22:49:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:49:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:49:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:50:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:50:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:50:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:51:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:51:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:51:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:52:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:52:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:52:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:53:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:53:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:53:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:54:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:54:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:54:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:55:22: mosquitto version 2.0.22 terminating
+2026-04-14 22:55:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:55:35: mosquitto version 2.0.22 starting
+2026-04-14 22:55:35: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:55:35: Warning: File /mosquitto/passwd has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/passwd`.
+2026-04-14 22:55:35: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:55:35: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:55:35: mosquitto version 2.0.22 running
+2026-04-14 22:55:35: New connection from 172.19.0.1:39490 on port 8883.
+2026-04-14 22:55:35: New client connected from 172.19.0.1:39490 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:55:35: No will message specified.
+2026-04-14 22:55:35: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:55:35: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:55:35: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:55:35: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:55:35: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:56:05: mosquitto version 2.0.22 terminating
+2026-04-14 22:56:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:56:06: mosquitto version 2.0.22 starting
+2026-04-14 22:56:06: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:56:06: Warning: File /mosquitto/passwd has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/passwd`.
+2026-04-14 22:56:06: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:56:06: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:56:06: mosquitto version 2.0.22 running
+2026-04-14 22:56:08: New connection from 172.19.0.1:48350 on port 8883.
+2026-04-14 22:56:08: New client connected from 172.19.0.1:48350 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:56:08: No will message specified.
+2026-04-14 22:56:08: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:56:08: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:56:08: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:56:08: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:56:08: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:57:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:57:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:57:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:57:45: mosquitto version 2.0.22 terminating
+2026-04-14 22:57:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:57:46: mosquitto version 2.0.22 starting
+2026-04-14 22:57:46: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-14 22:57:46: Opening ipv4 listen socket on port 8883.
+2026-04-14 22:57:46: Opening ipv6 listen socket on port 8883.
+2026-04-14 22:57:46: mosquitto version 2.0.22 running
+2026-04-14 22:57:48: New connection from 172.19.0.1:44720 on port 8883.
+2026-04-14 22:57:48: New client connected from 172.19.0.1:44720 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-14 22:57:48: No will message specified.
+2026-04-14 22:57:48: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-14 22:57:48: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-14 22:57:48: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-14 22:57:48: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-14 22:57:48: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-14 22:58:08: New connection from ::1:39750 on port 8883.
+2026-04-14 22:58:08: New client connected from ::1:39750 as auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 (p2, c1, k60, u'vitalio').
+2026-04-14 22:58:08: No will message specified.
+2026-04-14 22:58:08: Sending CONNACK to auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 (0, 0)
+2026-04-14 22:58:08: Received PUBLISH from auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 22:58:08: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 22:58:08: Received DISCONNECT from auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725
+2026-04-14 22:58:08: Client auto-285DB466-DDEA-E1B4-2AA2-F4F4743CD725 disconnected.
+2026-04-14 22:58:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:58:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:58:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 22:59:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 22:59:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 22:59:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:00:02: New connection from ::1:57802 on port 8883.
+2026-04-14 23:00:02: New client connected from ::1:57802 as auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 (p2, c1, k60, u'vitalio').
+2026-04-14 23:00:02: No will message specified.
+2026-04-14 23:00:02: Sending CONNACK to auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 (0, 0)
+2026-04-14 23:00:02: Received PUBLISH from auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:00:02: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:00:02: Received DISCONNECT from auto-48C08BF2-2146-B476-9CF9-85C5A80CA837
+2026-04-14 23:00:02: Client auto-48C08BF2-2146-B476-9CF9-85C5A80CA837 disconnected.
+2026-04-14 23:00:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:00:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:00:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:01:15: New connection from ::1:33452 on port 8883.
+2026-04-14 23:01:15: New client connected from ::1:33452 as auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A (p2, c1, k60, u'vitalio').
+2026-04-14 23:01:15: No will message specified.
+2026-04-14 23:01:15: Sending CONNACK to auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A (0, 0)
+2026-04-14 23:01:15: Received PUBLISH from auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:01:15: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-14 23:01:15: Received DISCONNECT from auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A
+2026-04-14 23:01:15: Client auto-9D895D26-AD6E-8396-3388-F17BF5EA0D8A disconnected.
+2026-04-14 23:01:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:01:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:01:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:02:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:02:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:02:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:03:03: New connection from ::1:38556 on port 8883.
+2026-04-14 23:03:03: New client connected from ::1:38556 as auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C (p2, c1, k60, u'vitalio').
+2026-04-14 23:03:03: No will message specified.
+2026-04-14 23:03:03: Sending CONNACK to auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C (0, 0)
+2026-04-14 23:03:03: Received PUBLISH from auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (139 bytes))
+2026-04-14 23:03:03: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (139 bytes))
+2026-04-14 23:03:04: Received DISCONNECT from auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C
+2026-04-14 23:03:04: Client auto-8443C1DD-4AD5-CF1F-40A2-21A77DD27E1C disconnected.
+2026-04-14 23:03:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:03:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:03:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:04:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:04:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:04:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:05:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:05:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:05:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:06:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:06:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:06:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:07:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:07:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:07:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:08:54: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:08:54: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:08:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:09:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:09:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:09:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:10:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:10:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:10:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:11:56: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-14 23:11:56: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-14 23:12:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-14 23:12:03: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-14 23:12:03: Client VitalIO_API_Subscriber closed its connection.
+2026-04-14 23:12:47: mosquitto version 2.0.22 terminating
+2026-04-14 23:12:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:03:05: mosquitto version 2.0.22 starting
+2026-04-16 08:03:05: Config loaded from /mosquitto/config/mosquitto.conf.
+2026-04-16 08:03:05: Opening ipv4 listen socket on port 8883.
+2026-04-16 08:03:05: Opening ipv6 listen socket on port 8883.
+2026-04-16 08:03:05: mosquitto version 2.0.22 running
+2026-04-16 08:03:26: New connection from 172.19.0.1:36932 on port 8883.
+2026-04-16 08:03:26: New client connected from 172.19.0.1:36932 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 08:03:26: No will message specified.
+2026-04-16 08:03:26: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 08:03:26: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 08:03:26: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 08:03:26: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 08:03:26: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 08:04:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:04:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:04:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:05:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:05:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:05:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:06:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:06:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:06:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:07:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:07:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:07:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:08:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:08:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:08:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:09:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:09:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:09:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:10:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:10:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:10:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:11:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:11:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:11:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:12:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:12:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:12:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:13:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:13:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:13:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:14:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:14:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:14:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:15:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:15:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:15:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:16:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:16:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:16:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:17:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:17:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:17:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:18:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:18:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:18:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:19:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:19:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:19:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:20:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:20:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:20:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:21:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:21:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:21:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:22:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:22:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:22:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:23:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:23:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:23:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:24:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:24:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:24:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:25:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:25:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:25:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:26:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:26:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:26:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:27:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:27:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:27:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:28:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:28:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:28:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:29:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:29:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:29:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:30:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:30:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:30:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:31:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:31:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:31:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:32:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:32:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:32:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:33:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:33:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:33:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:34:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:34:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:34:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:35:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:35:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:35:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:36:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:36:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:36:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:37:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:37:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:37:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:38:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:38:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:38:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:39:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:39:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:39:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:40:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:40:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:40:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:41:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:41:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:41:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:42:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:42:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:42:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:43:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:43:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:43:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:44:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:44:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:44:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:45:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:45:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:45:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:46:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:46:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:46:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:47:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:47:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:47:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:48:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:48:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:48:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:49:43: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 08:49:43: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 08:49:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:50:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:51:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:52:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:53:21: New connection from 172.19.0.1:37884 on port 8883.
+2026-04-16 08:53:21: New client connected from 172.19.0.1:37884 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 08:53:21: No will message specified.
+2026-04-16 08:53:21: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 08:53:21: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 08:53:21: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 08:53:21: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 08:53:21: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 08:53:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:54:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:54:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:54:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:55:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:55:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:55:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:56:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:56:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:56:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:57:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:57:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:57:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:58:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:58:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:58:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 08:59:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 08:59:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 08:59:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:00:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:00:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:01:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:01:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:01:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:02:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:02:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:02:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:03:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:03:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:03:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:04:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:04:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:04:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:05:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:05:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:05:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:06:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:06:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:06:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:07:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:07:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:07:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:08:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:08:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:08:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:09:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:09:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:09:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:10:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:10:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:10:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:11:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:11:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:11:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:12:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:12:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:12:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:13:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:13:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:13:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:14:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:14:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:14:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:15:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:15:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:15:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:16:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:16:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:16:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:17:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:17:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:17:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:18:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:18:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:18:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:19:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:19:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:19:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:20:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:20:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:20:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:21:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:21:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:21:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:22:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:22:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:22:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:23:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:23:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:23:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:24:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:24:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:24:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:25:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:25:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:25:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:26:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:26:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:26:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:28:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:28:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:28:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:29:02: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 09:29:02: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 09:29:17: New connection from 172.19.0.1:41610 on port 8883.
+2026-04-16 09:29:17: New client connected from 172.19.0.1:41610 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 09:29:17: No will message specified.
+2026-04-16 09:29:17: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 09:29:17: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 09:29:17: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 09:29:17: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 09:29:17: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 09:29:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:30:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:30:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:30:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:31:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:31:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:31:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:32:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:32:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:32:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:33:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:33:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:33:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:34:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:34:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:34:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:35:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:35:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:35:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:36:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:36:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:36:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:37:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:37:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:37:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:38:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:38:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:39:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:39:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:39:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:40:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:40:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:40:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:41:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:41:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:41:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:42:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:42:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:42:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:43:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:43:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:43:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:44:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:44:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:44:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:45:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:45:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:45:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:46:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:46:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:46:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:47:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:47:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:47:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:48:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:48:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:48:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:49:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:49:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:49:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:50:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:50:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:50:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:51:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:51:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:51:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:52:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:52:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:52:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:53:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:53:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:53:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:54:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:54:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:54:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:55:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:55:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:55:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:56:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:56:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:56:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:57:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:57:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:57:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:57:47: New connection from ::1:52784 on port 8883.
+2026-04-16 09:57:47: New client connected from ::1:52784 as auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 (p2, c1, k60, u'vitalio').
+2026-04-16 09:57:47: No will message specified.
+2026-04-16 09:57:47: Sending CONNACK to auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 (0, 0)
+2026-04-16 09:57:47: Received PUBLISH from auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-16 09:57:47: Sending PUBLISH to VitalIO_API_Subscriber (d0, q0, r0, m0, 'vitalio/dev/VITALIO-D8D096C4/measurements', ... (121 bytes))
+2026-04-16 09:57:47: Received DISCONNECT from auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5
+2026-04-16 09:57:47: Client auto-D3E6C1DB-0B1E-C9C3-F1D1-9DFD468548C5 disconnected.
+2026-04-16 09:58:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:58:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:58:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 09:59:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 09:59:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 09:59:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:00:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:00:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:00:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:01:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:01:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:01:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:02:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:02:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:02:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:03:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:03:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:03:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:04:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:04:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:04:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:05:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:05:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:05:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:06:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:06:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:06:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:07:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:07:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:07:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:08:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:08:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:08:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:09:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:09:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:09:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:10:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:10:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:10:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:11:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:11:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:11:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:12:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:12:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:12:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:13:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:13:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:13:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:14:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:14:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:14:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:15:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:15:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:15:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:16:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:16:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:16:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:17:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:17:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:17:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:18:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:18:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:18:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:19:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:19:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:19:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:20:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:20:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:20:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:21:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:21:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:21:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:22:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:22:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:22:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:23:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:23:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:23:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:24:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:24:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:24:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:25:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:25:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:25:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:26:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:26:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:26:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:27:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:27:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:27:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:28:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:28:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:28:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:29:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 10:29:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:29:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 10:30:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 10:30:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:03:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:04:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:04:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:04:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:05:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:05:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:05:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:06:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:06:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:06:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:07:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:07:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:07:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:08:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:08:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:08:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:09:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:09:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:09:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:10:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:10:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:10:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:11:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:11:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:11:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:12:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:12:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:12:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:13:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:13:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:13:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:14:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:14:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:14:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:15:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:15:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:15:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:16:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:16:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:16:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:17:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:17:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:17:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:18:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:18:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:18:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:19:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:19:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:19:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:20:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:20:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:20:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:21:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:21:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:21:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:22:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:22:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:22:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:23:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:23:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:23:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:24:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:24:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:24:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:25:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:25:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:25:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:26:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:26:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:26:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:27:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:27:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:27:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:28:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:28:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:28:27: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 11:28:27: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 11:28:42: New connection from 172.19.0.1:43692 on port 8883.
+2026-04-16 11:28:42: New client connected from 172.19.0.1:43692 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 11:28:42: No will message specified.
+2026-04-16 11:28:42: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 11:28:42: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 11:28:42: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 11:28:42: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 11:28:42: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 11:28:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:29:42: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:29:42: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:29:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:30:43: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:30:43: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:30:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:31:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:31:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:31:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:32:44: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:32:44: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:32:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:33:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:33:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:34:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:34:45: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:34:45: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:35:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:35:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:35:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:36:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:36:46: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:36:46: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:37:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:37:47: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:37:47: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:38:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:38:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:38:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:39:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:39:48: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:39:48: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:40:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:40:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:40:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:41:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:41:49: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:41:49: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:42:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:42:50: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:42:50: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:43:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:43:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:43:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:44:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:44:51: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:44:51: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:45:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:45:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:45:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:46:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:46:52: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:46:52: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:47:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:47:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:47:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:48:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:48:53: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:48:53: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:49:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:49:54: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:49:54: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:50:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:50:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:50:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:51:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:51:55: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:51:55: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:52:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:52:56: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:52:56: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:53:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:53:56: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:53:56: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:53:59: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 11:53:59: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 11:54:14: New connection from 172.19.0.1:51830 on port 8883.
+2026-04-16 11:54:14: New client connected from 172.19.0.1:51830 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 11:54:14: No will message specified.
+2026-04-16 11:54:14: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 11:54:14: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 11:54:14: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 11:54:14: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 11:54:14: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 11:54:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:55:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:55:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:55:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:56:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:56:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:56:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:57:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:57:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:57:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:58:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:58:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:58:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 11:59:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 11:59:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 11:59:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:00:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:00:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:00:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:01:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:01:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:01:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:02:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:02:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:02:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:03:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:03:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:03:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:04:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:04:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:04:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:05:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:05:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:05:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:06:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:06:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:06:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:07:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:07:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:07:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:08:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:08:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:08:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:09:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:09:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:09:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:10:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:10:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:10:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:11:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:11:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:11:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:12:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:12:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:12:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:13:25: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:13:25: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:13:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:14:26: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:14:26: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:14:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:15:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:15:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:15:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:16:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:16:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:16:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:17:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:17:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:17:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:18:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:18:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:18:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:19:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:19:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:19:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:20:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:20:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:20:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:21:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:21:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:21:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:22:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:22:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:22:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:23:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:23:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:23:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:24:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:24:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:24:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:25:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:25:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:25:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:26:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:26:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:26:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:27:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:27:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:27:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:28:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:28:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:28:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:29:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:29:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:29:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:30:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:30:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:30:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:31:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:31:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:31:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:32:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:32:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:32:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:33:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:33:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:33:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:34:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:34:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:35:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:35:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:35:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:36:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:36:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:36:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:37:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:37:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:37:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:38:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:38:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:38:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:38:45: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 12:38:45: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 12:39:03: New connection from 172.19.0.1:45564 on port 8883.
+2026-04-16 12:39:04: New client connected from 172.19.0.1:45564 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 12:39:04: No will message specified.
+2026-04-16 12:39:04: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 12:39:04: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 12:39:04: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 12:39:04: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 12:39:04: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 12:39:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:40:04: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:40:04: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:40:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:41:05: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:41:05: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:41:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:42:05: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:42:05: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:42:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:43:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:43:06: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:43:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:44:07: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:44:07: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:44:09: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:45:07: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:45:07: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:45:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:46:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:46:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:46:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:47:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:47:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:47:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:48:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:48:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:48:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:49:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:49:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:49:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:50:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:50:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:50:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:51:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:51:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:51:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:52:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:52:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:52:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:53:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:53:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:53:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:54:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:54:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:54:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:55:07: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 12:55:07: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 12:55:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:55:27: New connection from 172.19.0.1:40068 on port 8883.
+2026-04-16 12:55:27: New client connected from 172.19.0.1:40068 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 12:55:27: No will message specified.
+2026-04-16 12:55:27: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 12:55:27: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 12:55:27: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 12:55:27: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 12:55:27: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 12:56:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:56:27: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:56:27: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:57:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:57:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:57:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:58:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:58:28: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:58:28: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 12:59:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 12:59:29: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 12:59:29: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:00:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:00:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:00:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:01:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:01:30: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:01:30: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:02:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:02:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:02:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:03:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:03:31: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:03:31: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:04:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:04:32: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:04:32: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:05:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:05:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:05:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:06:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:06:33: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:06:33: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:07:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:07:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:07:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:08:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:08:34: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:08:34: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:09:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:09:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:09:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:10:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:10:35: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:10:35: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:11:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:11:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:11:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:12:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:12:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:12:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:13:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:13:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:13:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:14:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:14:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:14:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:15:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:15:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:15:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:16:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:16:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:16:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:17:02: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:17:02: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:17:35: New connection from 172.19.0.1:53352 on port 8883.
+2026-04-16 13:17:35: New client connected from 172.19.0.1:53352 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 13:17:35: No will message specified.
+2026-04-16 13:17:35: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 13:17:35: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 13:17:35: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 13:17:35: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 13:17:35: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 13:17:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:18:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:18:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:18:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:19:36: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:19:36: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:19:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:20:37: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:20:37: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:20:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:21:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:21:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:21:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:22:38: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:22:38: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:22:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:23:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:23:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:23:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:24:39: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:24:39: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:24:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:25:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:25:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:25:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:26:40: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:26:40: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:26:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:27:41: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:27:41: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:27:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:27:52: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:27:52: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:28:05: New connection from 172.19.0.1:39132 on port 8883.
+2026-04-16 13:28:05: New client connected from 172.19.0.1:39132 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 13:28:05: No will message specified.
+2026-04-16 13:28:05: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 13:28:05: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 13:28:05: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 13:28:05: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 13:28:05: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 13:28:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:29:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:29:06: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:29:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:30:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:30:06: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:30:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:31:07: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:31:07: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:31:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:32:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:32:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:32:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:33:08: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:33:08: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:33:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:34:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:34:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:34:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:35:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:35:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:35:59: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:36:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:36:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:37:00: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:37:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:37:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:38:01: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:38:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:38:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:39:02: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:39:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:39:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:40:03: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:40:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:40:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:41:04: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:41:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:41:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:42:05: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:42:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:42:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:43:06: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:43:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:43:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:44:07: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:44:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:44:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:45:08: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:45:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:45:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:46:10: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:46:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:46:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:47:11: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:47:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:47:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:48:12: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:48:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:48:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:49:02: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:49:02: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:49:13: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:49:16: New connection from 172.19.0.1:43110 on port 8883.
+2026-04-16 13:49:16: New client connected from 172.19.0.1:43110 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 13:49:16: No will message specified.
+2026-04-16 13:49:16: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 13:49:16: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 13:49:16: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 13:49:16: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 13:49:16: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 13:50:14: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:50:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:50:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:51:15: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:51:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:51:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:52:16: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:52:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:52:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:53:17: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:53:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:53:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:54:18: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:54:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:54:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:55:19: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:55:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:55:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:56:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 13:56:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 13:56:20: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:56:52: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 13:56:52: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 13:57:21: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:58:22: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 13:59:23: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:00:08: New connection from 172.19.0.1:59040 on port 8883.
+2026-04-16 14:00:08: New client connected from 172.19.0.1:59040 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 14:00:08: No will message specified.
+2026-04-16 14:00:08: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 14:00:08: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 14:00:08: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 14:00:08: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 14:00:08: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 14:00:24: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:01:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:01:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:01:25: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:02:09: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:02:09: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:02:26: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:03:10: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:03:10: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:03:27: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:04:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:04:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:04:28: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:05:11: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:05:11: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:05:29: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:06:12: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:06:12: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:06:30: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:07:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:07:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:07:31: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:08:13: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:08:13: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:08:32: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:09:14: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:09:14: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:09:33: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:10:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:10:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:10:34: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:11:15: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:11:15: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:11:35: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:12:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:12:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:12:36: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:13:16: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:13:16: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:13:37: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:14:17: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:14:17: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:14:38: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:15:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:15:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:15:39: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:16:18: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:16:18: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:16:40: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:17:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:17:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:17:41: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:18:19: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:18:19: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:18:42: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:19:20: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:19:20: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:19:43: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:20:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:20:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:20:44: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:21:21: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:21:21: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:21:45: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:22:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:22:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:22:46: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:23:22: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:23:22: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:23:47: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:24:23: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:24:23: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:24:48: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:25:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:25:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:25:49: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:26:24: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:26:24: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:26:50: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:27:00: OpenSSL Error[0]: error:0A000126:SSL routines::unexpected eof while reading
+2026-04-16 14:27:00: Client VitalIO_API_Subscriber closed its connection.
+2026-04-16 14:27:51: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:28:01: New connection from 172.19.0.1:54594 on port 8883.
+2026-04-16 14:28:01: New client connected from 172.19.0.1:54594 as VitalIO_API_Subscriber (p2, c1, k60, u'vitalio').
+2026-04-16 14:28:01: No will message specified.
+2026-04-16 14:28:01: Sending CONNACK to VitalIO_API_Subscriber (0, 0)
+2026-04-16 14:28:01: Received SUBSCRIBE from VitalIO_API_Subscriber
+2026-04-16 14:28:01: 	vitalio/dev/+/measurements (QoS 1)
+2026-04-16 14:28:01: VitalIO_API_Subscriber 1 vitalio/dev/+/measurements
+2026-04-16 14:28:01: Sending SUBACK to VitalIO_API_Subscriber
+2026-04-16 14:28:52: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:29:02: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:29:02: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:29:53: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:30:02: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:30:02: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:30:54: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:31:03: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:31:03: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:31:55: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:32:04: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:32:04: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:32:56: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:33:04: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:33:04: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:33:57: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:34:05: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:34:05: Sending PINGRESP to VitalIO_API_Subscriber
+2026-04-16 14:34:58: Saving in-memory database to /mosquitto/data/mosquitto.db.
+2026-04-16 14:35:06: Received PINGREQ from VitalIO_API_Subscriber
+2026-04-16 14:35:06: Sending PINGRESP to VitalIO_API_Subscriber

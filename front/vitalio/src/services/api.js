@@ -68,6 +68,47 @@ export async function completeOnboarding(accessToken, payload) {
   })
 }
 
+/** Phrase exacte attendue par l’API pour effacer toutes les données patient. */
+export const DELETE_PATIENT_DATA_CONFIRM = 'SUPPRIMER_MES_DONNEES'
+
+export async function deletePatientAccountData(accessToken) {
+  return apiRequest('/api/me/account-data', accessToken, {
+    method: 'DELETE',
+    body: JSON.stringify({ confirm: DELETE_PATIENT_DATA_CONFIRM }),
+  })
+}
+
+/**
+ * Télécharge l’export JSON des données VitalIO du patient.
+ * @returns {{ blob: Blob, filename: string }}
+ */
+export async function downloadPatientDataExport(accessToken) {
+  const url = `${API_URL}/api/me/export-data`
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}))
+    throw new Error(errData.message || `HTTP Error: ${response.status}`)
+  }
+  const blob = await response.blob()
+  let filename = 'vitalio-export.json'
+  const cd = response.headers.get('Content-Disposition')
+  if (cd) {
+    const m = cd.match(/filename="([^"]+)"/)
+    if (m) filename = m[1]
+  }
+  return { blob, filename }
+}
+
+/** @returns {{ device_id: string | null, device_ids: string[] }} */
+export async function getPatientDevice(accessToken) {
+  return apiRequest('/api/me/device', accessToken, {
+    method: 'GET',
+  })
+}
+
 export async function enrollPatientDevice(accessToken, enrollmentCode) {
   return apiRequest('/api/patient/enroll-device', accessToken, {
     method: 'POST',
@@ -88,10 +129,16 @@ export async function getDoctorPatients(accessToken) {
   })
 }
 
-export async function getDoctorPatientMeasurements(accessToken, patientId, days = 30) {
-  return apiRequest(`/api/doctor/patients/${encodeURIComponent(patientId)}/measurements?days=${days}`, accessToken, {
-    method: 'GET',
-  })
+export async function getDoctorPatientMeasurements(accessToken, patientId, days = 30, limit) {
+  const params = new URLSearchParams({ days: String(days) })
+  if (limit != null) {
+    params.set('limit', String(limit))
+  }
+  return apiRequest(
+    `/api/doctor/patients/${encodeURIComponent(patientId)}/measurements?${params.toString()}`,
+    accessToken,
+    { method: 'GET' },
+  )
 }
 
 export async function getDoctorPatientTrends(accessToken, patientId) {

@@ -1030,3 +1030,54 @@
   font-size: 0.8rem;
   color: #475569;
 }
+
+.ml-vital-context-summary-row td {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 0.85rem;
+  vertical-align: top;
+}
+
+.ml-alert-context-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ml-alert-context-section {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+
+  > strong {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    margin-bottom: 0.4rem;
+  }
+
+  > p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #334155;
+  }
+}
+
+.ml-alert-context-section--weekly .ml-weekly-narrative-pre {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.ml-alert-context-section--weekly .ml-weekly-narrative-foot {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+}

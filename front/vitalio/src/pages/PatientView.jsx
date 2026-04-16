@@ -5,10 +5,15 @@ import { Activity, Thermometer, HeartPulse, ShieldAlert, Siren } from 'lucide-re
 import {
   getLatestPatientFeedback,
   getPatientData,
+  getPatientDevice,
   getPatientProfile,
   triggerManualAlert,
 } from '../services/api'
 import PatientLayout from '../components/PatientLayout'
+import {
+  isPatientWelcomeDone,
+  markPatientWelcomeDone,
+} from '../constants/patientWelcome'
 
 const formatDateLabel = (isoValue) => {
   if (!isoValue) return ''
@@ -77,6 +82,34 @@ export default function PatientView() {
   const [alertMessage, setAlertMessage] = useState('')
   const [alertError, setAlertError] = useState('')
   const [alertCooldown, setAlertCooldown] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    if (isPatientWelcomeDone()) return undefined
+    ;(async () => {
+      try {
+        const token = await getAccessTokenSilently()
+        const [profileRes, deviceRes] = await Promise.all([
+          getPatientProfile(token).catch(() => ({ profile: null })),
+          getPatientDevice(token).catch(() => ({ device_id: null })),
+        ])
+        if (cancelled) return
+        const profile = profileRes?.profile ?? profileRes
+        const linked = Boolean(deviceRes?.device_id)
+        const onboarded = Boolean(profile?.onboarding_completed)
+        if (linked && onboarded) {
+          markPatientWelcomeDone()
+          return
+        }
+        navigate('/patient/bienvenue', { replace: true })
+      } catch {
+        /* API indisponible : ne pas bloquer l’accès au tableau de bord */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [getAccessTokenSilently, navigate])
 
   useEffect(() => {
     let mounted = true
@@ -239,8 +272,10 @@ export default function PatientView() {
                   type="button"
                   className="alert-trigger-btn"
                   onClick={() => setAlertStep('confirm')}
+                  aria-label="Déclencher une alerte urgente : notifier médecin et aidant"
                 >
-                  <Siren size={18} /> Déclencher une alerte
+                  <Siren size={16} strokeWidth={2} aria-hidden />
+                  Déclencher une alerte
                 </button>
               )}
               {alertStep === 'confirm' && (
@@ -270,7 +305,8 @@ export default function PatientView() {
                       className="alert-trigger-btn alert-trigger-btn--confirm"
                       onClick={handleSendAlert}
                     >
-                      <Siren size={16} /> Confirmer l'alerte
+                      <Siren size={16} strokeWidth={2} aria-hidden />
+                      Confirmer l&apos;alerte
                     </button>
                   </div>
                 </div>
@@ -283,8 +319,7 @@ export default function PatientView() {
                   <p>Alerte envoyée. Votre médecin et votre aidant ont été notifiés.</p>
                   <button
                     type="button"
-                    className="alert-trigger-btn"
-                    style={{ marginTop: '0.5rem', background: '#475569' }}
+                    className="alert-trigger-btn alert-trigger-btn--secondary alert-trigger-btn--narrow"
                     onClick={() => setAlertStep('idle')}
                   >
                     Fermer
@@ -296,8 +331,7 @@ export default function PatientView() {
                   <p>{alertError}</p>
                   <button
                     type="button"
-                    className="alert-trigger-btn"
-                    style={{ background: '#475569', marginTop: '0.5rem' }}
+                    className="alert-trigger-btn alert-trigger-btn--secondary alert-trigger-btn--narrow"
                     onClick={() => setAlertStep('idle')}
                   >
                     Fermer

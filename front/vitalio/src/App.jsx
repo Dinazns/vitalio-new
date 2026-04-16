@@ -1,16 +1,17 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CaregiverLayout from './components/CaregiverLayout';
 import Login from './pages/Login';
+import ConditionsUtilisation from './pages/ConditionsUtilisation';
 import Home from './pages/Home';
 import InviteAccept from './pages/InviteAccept';
 import CaregiverInviteAccept from './pages/CaregiverInviteAccept';
 import PatientView from './pages/PatientView';
 import PatientProfileView from './pages/PatientProfileView';
-import PatientOnboarding from './pages/PatientOnboarding';
 import PatientMeasurement from './pages/PatientMeasurement';
 import PatientMLView from './pages/PatientMLView';
 import EnrollDevice from './pages/EnrollDevice';
+import PatientWelcome from './pages/PatientWelcome';
 import DoctorView from './pages/DoctorView';
 import DoctorPatientDetail from './pages/DoctorPatientDetail';
 import DoctorPatientML from './pages/DoctorPatientML';
@@ -21,12 +22,11 @@ import CaregiverPatientML from './pages/CaregiverPatientML';
 import AdminView from './pages/AdminView';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
-import PatientOnboardingGuard from './components/PatientOnboardingGuard';
-
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
       <Route path="/invite" element={<InviteAccept />} />
       <Route path="/invite-caregiver" element={<CaregiverInviteAccept />} />
       <Route 
@@ -42,9 +42,17 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['patient']}>
-              <PatientOnboardingGuard>
-                <PatientOnboarding />
-              </PatientOnboardingGuard>
+              <Navigate to="/patient/bienvenue" replace />
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/patient/bienvenue"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <PatientWelcome />
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -54,9 +62,7 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['patient']}>
-              <PatientOnboardingGuard>
-                <PatientView />
-              </PatientOnboardingGuard>
+              <PatientView />
             </RoleProtectedRoute>
           </ProtectedRoute>
         } 
@@ -66,9 +72,7 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['patient']}>
-              <PatientOnboardingGuard>
-                <PatientProfileView />
-              </PatientOnboardingGuard>
+              <PatientProfileView />
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -78,9 +82,7 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['patient']}>
-              <PatientOnboardingGuard>
-                <PatientMeasurement />
-              </PatientOnboardingGuard>
+              <PatientMeasurement />
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -90,9 +92,7 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['patient']}>
-              <PatientOnboardingGuard>
-                <PatientMLView />
-              </PatientOnboardingGuard>
+              <PatientMLView />
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -102,9 +102,7 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['patient']}>
-              <PatientOnboardingGuard>
-                <EnrollDevice />
-              </PatientOnboardingGuard>
+              <EnrollDevice />
             </RoleProtectedRoute>
           </ProtectedRoute>
         }

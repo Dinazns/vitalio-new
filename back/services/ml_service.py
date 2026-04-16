@@ -20,7 +20,11 @@ def run_ml_scoring(device_id: str, measurement_doc: Dict[str, Any]) -> Dict[str,
     create an anomaly event if critical, and enrich the measurement document.
     Returns the ml_result dict.
     """
-    ml_result = ml_module.score_measurement(measurement_doc)
+    to_score = dict(measurement_doc)
+    patient_id = get_patient_id_from_device(device_id)
+    if patient_id:
+        to_score["user_id_auth"] = patient_id
+    ml_result = ml_module.score_measurement(to_score)
 
     is_anomaly = ml_result.get("ml_is_anomaly", False)
     ml_level = ml_result.get("ml_level")
@@ -35,6 +39,10 @@ def run_ml_scoring(device_id: str, measurement_doc: Dict[str, Any]) -> Dict[str,
         "ml_recommended_action": ml_result.get("ml_recommended_action"),
         "ml_anomaly_status": "pending" if is_anomaly and ml_level == "critical" else "none",
     }
+    if ml_result.get("ml_if_base_score") is not None:
+        measurement_update["ml_if_base_score"] = ml_result["ml_if_base_score"]
+    if ml_result.get("ml_tp_exemplar_boost") is not None:
+        measurement_update["ml_tp_exemplar_boost"] = ml_result["ml_tp_exemplar_boost"]
 
     suggestion = None
     if not ml_result.get("ml_skipped"):
@@ -57,6 +65,10 @@ def run_ml_scoring(device_id: str, measurement_doc: Dict[str, Any]) -> Dict[str,
             "urgency": suggestion["urgency"],
             "processed_at": datetime.now(timezone.utc),
         }
+        if ml_result.get("ml_if_base_score") is not None:
+            decision_doc["if_base_score"] = ml_result["ml_if_base_score"]
+        if ml_result.get("ml_tp_exemplar_boost") is not None:
+            decision_doc["tp_exemplar_boost"] = ml_result["ml_tp_exemplar_boost"]
         try:
             get_medical_db().ml_decisions.insert_one(decision_doc)
         except PyMongoError:

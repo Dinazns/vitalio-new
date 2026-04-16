@@ -44,7 +44,7 @@ export default function InviteAccept() {
           picture: user.picture,
         }))
       }
-      setTimeout(() => navigate('/patient'), 2000)
+      setTimeout(() => navigate('/patient/bienvenue'), 2000)
     } catch (e) {
       setError(e.message || "Echec d'acceptation de l'invitation")
     } finally {

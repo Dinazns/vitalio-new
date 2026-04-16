@@ -1,6 +1,8 @@
 """
-Full ML model retrain (Isolation Forest) from measurements + validated/rejected ml_anomalies.
-Used by admin API and by threshold-breach scheduling.
+Full ML model retrain (Isolation Forest) from measurements + doctor feedback on ml_anomalies.
+
+- rejected (FP) : sur-échantillonnés comme inliers IF uniquement.
+- validated (TP) : banque d’exemplaires pour l’inférence (pas dans fit IF).
 """
 from __future__ import annotations
 
@@ -40,9 +42,11 @@ def do_ml_retrain(
     try:
         raw_anomalies = list(get_medical_db().ml_anomalies.find(
             {"status": {"$in": ["validated", "rejected"]}},
-            projection={"_id": 0, "measurement_id": 1, "status": 1, "heart_rate": 1, "spo2": 1,
-                       "temperature": 1, "signal_quality": 1, "measurement": 1}
-        ).limit(10000))
+            projection={
+                "_id": 0, "measurement_id": 1, "status": 1, "user_id_auth": 1,
+                "heart_rate": 1, "spo2": 1, "temperature": 1, "signal_quality": 1, "measurement": 1,
+            },
+        ).sort("validated_at", -1).limit(10000))
         for a in raw_anomalies:
             if a.get("measurement"):
                 validated_anomalies.append(a)

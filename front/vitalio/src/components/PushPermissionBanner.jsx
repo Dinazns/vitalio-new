@@ -16,7 +16,7 @@ export default function PushPermissionBanner({ getAccessTokenSilently }) {
     ) return
 
     if (Notification.permission === 'granted') {
-      // Permission already granted — silently ensure subscription is registered
+      // Permission already granted - silently ensure subscription is registered
       registerPushForAlerts(getAccessTokenSilently).catch(() => {})
       return
     }

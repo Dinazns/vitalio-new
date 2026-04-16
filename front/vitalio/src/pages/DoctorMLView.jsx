@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
@@ -23,7 +23,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
-import { getMLModelInfo, getMLAnomalies, getDoctorAlerts, getDoctorPatients, patchDoctorAlert, apiRequest } from '../services/api'
+import { getMLModelInfo, getMLAnomalies, getDoctorAlerts, getDoctorPatients, getPatientMLAnalysis, patchDoctorAlert, apiRequest } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
 
 const URGENCY_CONFIG = {
@@ -54,6 +54,15 @@ const formatTime = (iso) => {
   if (!iso) return ''
   const d = new Date(iso)
   return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
+/** File « ouvertes » côté UI : exclut Validée/Rejetée même si status en base/API est encore OPEN. */
+function isActionableOpenVitalAlert(a) {
+  const st = String(a.status || 'OPEN').toUpperCase()
+  if (st !== 'OPEN') return false
+  const ds = String(a.doctor_status || 'PENDING').toUpperCase()
+  if (ds === 'VALIDATED' || ds === 'REJECTED') return false
+  return true
 }
 
 function formatPostalAddress(addr) {
@@ -177,11 +186,12 @@ export default function DoctorMLView() {
   const [dateTo, setDateTo] = useState('')
   const [validatingId, setValidatingId] = useState(null)
   const [validatingVitalId, setValidatingVitalId] = useState(null)
-  const [retraining, setRetraining] = useState(false)
-  const [retrainResult, setRetrainResult] = useState(null)
   const [expandedAnomaly, setExpandedAnomaly] = useState(null)
   const [expandedMeasurement, setExpandedMeasurement] = useState(null)
   const [toast, setToast] = useState(null)
+  const [vitalAlertNarratives, setVitalAlertNarratives] = useState({})
+  const narrativeCacheRef = useRef({})
+  const narrativeInflightRef = useRef(new Set())
 
   const patientNames = React.useMemo(() => {
     const m = {}
@@ -192,6 +202,64 @@ export default function DoctorMLView() {
     })
     return m
   }, [patients])
+
+  const openVitalCount = React.useMemo(
+    () => vitalAlerts.filter(isActionableOpenVitalAlert).length,
+    [vitalAlerts],
+  )
+
+  const displayedVitalAlerts = React.useMemo(() => {
+    if (vitalStatusFilter === 'OPEN') {
+      return vitalAlerts.filter(isActionableOpenVitalAlert)
+    }
+    return vitalAlerts
+  }, [vitalAlerts, vitalStatusFilter])
+
+  useEffect(() => {
+    let cancelled = false
+    if (activeTab !== 'vital') return undefined
+    const ids = [...new Set(displayedVitalAlerts.map((a) => a.patient_id).filter(Boolean))]
+    for (const pid of ids) {
+      if (narrativeCacheRef.current[pid] !== undefined) {
+        const cached = narrativeCacheRef.current[pid]
+        setVitalAlertNarratives((prev) => {
+          if (prev[pid]?.error && cached === null) return prev
+          if (prev[pid] && !prev[pid].loading && prev[pid].summary === cached) return prev
+          return {
+            ...prev,
+            [pid]: { loading: false, summary: cached, error: null },
+          }
+        })
+        continue
+      }
+      if (narrativeInflightRef.current.has(pid)) continue
+      narrativeInflightRef.current.add(pid)
+      setVitalAlertNarratives((prev) => ({ ...prev, [pid]: { loading: true, summary: prev[pid]?.summary, error: null } }))
+      ;(async () => {
+        try {
+          const token = await getAccessTokenSilently()
+          const data = await getPatientMLAnalysis(token, pid, { days: 7, include_forecast: false })
+          if (cancelled) return
+          const s = data?.clinical_narrative_summary ?? null
+          narrativeCacheRef.current[pid] = s
+          narrativeInflightRef.current.delete(pid)
+          setVitalAlertNarratives((prev) => ({ ...prev, [pid]: { loading: false, summary: s, error: null } }))
+        } catch {
+          narrativeInflightRef.current.delete(pid)
+          narrativeCacheRef.current[pid] = null
+          if (!cancelled) {
+            setVitalAlertNarratives((prev) => ({
+              ...prev,
+              [pid]: { loading: false, summary: null, error: 'Synthèse 7 jours indisponible.' },
+            }))
+          }
+        }
+      })()
+    }
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, displayedVitalAlerts, getAccessTokenSilently])
 
   const loadData = useCallback(async () => {
     try {
@@ -233,20 +301,19 @@ export default function DoctorMLView() {
   const hasNotifiedRef = React.useRef(false)
   useEffect(() => {
     if (loading || hasNotifiedRef.current) return
-    const openCount = vitalAlerts.filter((a) => a.status === 'OPEN').length
-    if (openCount > 0 && typeof window !== 'undefined' && 'Notification' in window) {
+    if (openVitalCount > 0 && typeof window !== 'undefined' && 'Notification' in window) {
       hasNotifiedRef.current = true
       try {
         if (Notification.permission === 'granted') {
           new Notification('VitalIO - Alertes à traiter', {
-            body: `${openCount} alerte(s) vitale(s) ouverte(s) nécessitent votre attention.`,
+            body: `${openVitalCount} alerte(s) vitale(s) ouverte(s) nécessitent votre attention.`,
             icon: '/favicon.ico',
           })
         } else if (Notification.permission !== 'denied') {
           Notification.requestPermission().then((p) => {
             if (p === 'granted') {
               new Notification('VitalIO - Alertes à traiter', {
-                body: `${openCount} alerte(s) vitale(s) ouverte(s) nécessitent votre attention.`,
+                body: `${openVitalCount} alerte(s) vitale(s) ouverte(s) nécessitent votre attention.`,
                 icon: '/favicon.ico',
               })
             }
@@ -256,7 +323,7 @@ export default function DoctorMLView() {
         console.warn('Notification non disponible:', e)
       }
     }
-  }, [vitalAlerts, loading])
+  }, [openVitalCount, loading])
 
   const handleValidate = async (anomalyId, newStatus) => {
     try {
@@ -299,8 +366,15 @@ export default function DoctorMLView() {
       await patchDoctorAlert(token, alertId, { doctor_status: doctorStatus })
       setVitalAlerts((prev) =>
         prev.map((a) =>
-          (a.alert_id === alertId) ? { ...a, doctor_status: doctorStatus } : a
-        )
+          (a.alert_id === alertId)
+            ? {
+                ...a,
+                doctor_status: doctorStatus,
+                status: 'RESOLVED',
+                resolved_at: new Date().toISOString(),
+              }
+            : a,
+        ),
       )
       setToast({
         message: doctorStatus === 'VALIDATED' ? 'Alerte validée' : 'Alerte rejetée',
@@ -313,25 +387,6 @@ export default function DoctorMLView() {
     }
   }
 
-  const handleRetrain = async () => {
-    try {
-      setRetraining(true)
-      setRetrainResult(null)
-      const token = await getAccessTokenSilently()
-      const result = await apiRequest('/api/admin/ml/retrain', token, {
-        method: 'POST',
-        body: JSON.stringify({ days: 30 }),
-      })
-      setRetrainResult(result)
-      const mlInfo = await getMLModelInfo().catch(() => null)
-      setModelInfo(mlInfo)
-    } catch (e) {
-      setRetrainResult({ error: e.message })
-    } finally {
-      setRetraining(false)
-    }
-  }
-
   return (
     <DoctorLayout>
       <div className="doctor-ml">
@@ -340,7 +395,7 @@ export default function DoctorMLView() {
         <header className="ml-header">
           <div>
             <h1><BrainCircuit size={28} /> Alertes</h1>
-            <p>Alertes vitales (FC, SpO2, température) et détection IA. Validez ou rejetez les alertes, prenez contact avec l&apos;aidant ou le patient.</p>
+            <p>Alertes vitales et détection automatique. Validez ou rejetez les alertes, prenez contact avec l&apos;aidant ou le patient.</p>
           </div>
           <div className="ml-header-actions">
             {modelInfo && (
@@ -349,24 +404,8 @@ export default function DoctorMLView() {
                 <span>Version {modelInfo.version}{modelInfo.loaded ? '' : ' (indisponible)'}</span>
               </div>
             )}
-            <button
-              className="ml-retrain-btn"
-              onClick={handleRetrain}
-              disabled={retraining}
-            >
-              {retraining ? 'Mise à jour...' : 'Mettre à jour'}
-            </button>
           </div>
         </header>
-
-        {retrainResult && (
-          <div className={`ml-panel ${retrainResult.error ? 'ml-panel--error' : 'ml-panel--success'}`}>
-            {retrainResult.error
-              ? <><ShieldAlert size={18} /> <span>{retrainResult.error}</span></>
-              : <><CheckCircle2 size={18} /> <span>Système mis à jour (version {retrainResult.version}, {retrainResult.n_samples} mesures intégrées)</span></>
-            }
-          </div>
-        )}
 
         {loading && <div className="ml-panel">Chargement...</div>}
         {!loading && error && (
@@ -375,24 +414,6 @@ export default function DoctorMLView() {
 
         {!loading && !error && (
           <>
-            <div className="ml-tabs">
-              <button
-                className={`ml-tab ${activeTab === 'vital' ? 'ml-tab--active' : ''}`}
-                onClick={() => setActiveTab('vital')}
-              >
-                <Heart size={18} /> Alertes vitales
-                {vitalAlerts.filter((a) => a.status === 'OPEN').length > 0 && (
-                  <span className="ml-tab-badge">{vitalAlerts.filter((a) => a.status === 'OPEN').length}</span>
-                )}
-              </button>
-              <button
-                className={`ml-tab ${activeTab === 'ml' ? 'ml-tab--active' : ''}`}
-                onClick={() => setActiveTab('ml')}
-              >
-                <BrainCircuit size={18} /> Alertes IA
-              </button>
-            </div>
-
             {activeTab === 'vital' && (
               <section className="ml-panel">
                 <div className="ml-anomaly-header">
@@ -411,7 +432,7 @@ export default function DoctorMLView() {
                     </div>
                   </div>
                 </div>
-                {vitalAlerts.length === 0 ? (
+                {displayedVitalAlerts.length === 0 ? (
                   <div className="ml-empty">
                     <Info size={20} />
                     <span>Aucune alerte vitale {vitalStatusFilter === 'OPEN' ? 'ouverte' : ''}.</span>
@@ -432,7 +453,7 @@ export default function DoctorMLView() {
                         </tr>
                       </thead>
                       <tbody>
-                        {vitalAlerts.map((a) => {
+                        {displayedVitalAlerts.map((a) => {
                           const docStatus = (a.doctor_status || 'PENDING').toUpperCase()
                           const dsCfg = DOCTOR_STATUS_CONFIG[docStatus] || DOCTOR_STATUS_CONFIG.PENDING
                           const patientName = patientNames[a.patient_id] || a.patient_id || '-'
@@ -588,6 +609,54 @@ export default function DoctorMLView() {
                                         ))}
                                       </div>
                                     )}
+                                  </td>
+                                </tr>
+                              )}
+                              {a.patient_id && (
+                                <tr className="ml-vital-context-summary-row">
+                                  <td colSpan={8}>
+                                    <div className="ml-alert-context-stack">
+                                      <div className="ml-alert-context-section">
+                                        <strong>Synthèse liée à cette alerte</strong>
+                                        {a.medical_label && (
+                                          <p style={{ fontWeight: 600, marginBottom: '0.35rem', color: '#0f172a' }}>{a.medical_label}</p>
+                                        )}
+                                        <p>{a.medical_description || '—'}</p>
+                                        {a.alert_source === 'manual' && a.patient_message && (
+                                          <p style={{ marginTop: '0.5rem', fontStyle: 'italic', color: '#475569' }}>
+                                            Message patient : « {a.patient_message} »
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="ml-alert-context-section ml-alert-context-section--weekly">
+                                        <strong>Historique des constantes (7 derniers jours)</strong>
+                                        {vitalAlertNarratives[a.patient_id]?.loading && (
+                                          <p className="ml-weekly-narrative-pre" style={{ color: '#64748b' }}>Chargement de la synthèse…</p>
+                                        )}
+                                        {vitalAlertNarratives[a.patient_id]?.error && !vitalAlertNarratives[a.patient_id]?.loading && (
+                                          <p className="ml-weekly-narrative-pre" style={{ color: '#b45309' }}>
+                                            {vitalAlertNarratives[a.patient_id].error}
+                                          </p>
+                                        )}
+                                        {!vitalAlertNarratives[a.patient_id]?.loading && vitalAlertNarratives[a.patient_id]?.summary?.text && (
+                                          <>
+                                            <p className="ml-weekly-narrative-pre">{vitalAlertNarratives[a.patient_id].summary.text}</p>
+                                            {vitalAlertNarratives[a.patient_id].summary.recommended_action && (
+                                              <p className="ml-weekly-narrative-foot">
+                                                {vitalAlertNarratives[a.patient_id].summary.recommended_action}
+                                              </p>
+                                            )}
+                                          </>
+                                        )}
+                                        {!vitalAlertNarratives[a.patient_id]?.loading
+                                          && !vitalAlertNarratives[a.patient_id]?.error
+                                          && !vitalAlertNarratives[a.patient_id]?.summary?.text && (
+                                          <p className="ml-weekly-narrative-pre" style={{ color: '#94a3b8' }}>
+                                            Pas assez de données sur 7 jours pour générer la synthèse narrative.
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
                                   </td>
                                 </tr>
                               )}

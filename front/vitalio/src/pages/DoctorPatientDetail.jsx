@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import { ArrowLeft, BrainCircuit, Copy, Cpu, Heart, Mail, PhoneCall, Thermometer, User, Users, Wind } from 'lucide-react'
+import { ArrowLeft, BrainCircuit, Copy, Cpu, FileText, Heart, Mail, PhoneCall, Thermometer, User, Users, Wind } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import {
   assignDoctorPatientDevice,
@@ -12,11 +12,16 @@ import {
   getLatestPatientFeedback,
   getPatientCaregiverInfo,
   getPatientProfileForDoctor,
+  getPatientMLAnalysis,
 } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
 
 /** Message API quand aucun enregistrement users_devices n’expose encore de device_id mesurable. */
 const NO_PATIENT_DEVICE_MESSAGE = 'No device record found for patient'
+
+/** Aperçu tableau médecin ; chargement complet au clic. */
+const DOCTOR_MEASUREMENTS_PREVIEW_LIMIT = 10
+const DOCTOR_MEASUREMENTS_FULL_LIMIT = 500
 
 function formatDay(timestamp) {
   if (!timestamp) return ''
@@ -42,6 +47,14 @@ function computeAge(birthdate, ageFromProfile) {
   } catch {
     return null
   }
+}
+
+const CLINICAL_RISK_BADGE = {
+  minimal: { bg: '#ecfdf5', color: '#047857', label: 'Risque minimal' },
+  low: { bg: '#eff6ff', color: '#1d4ed8', label: 'Risque faible' },
+  moderate: { bg: '#fffbeb', color: '#b45309', label: 'Risque modéré' },
+  high: { bg: '#fef2f2', color: '#b91c1c', label: 'Risque élevé' },
+  unknown: { bg: '#f1f5f9', color: '#64748b', label: '—' },
 }
 
 function ProfileField({ label, value, link }) {
@@ -70,6 +83,8 @@ export default function DoctorPatientDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [measurements, setMeasurements] = useState([])
+  const [measurementsShowAll, setMeasurementsShowAll] = useState(false)
+  const [measurementsLoadingMore, setMeasurementsLoadingMore] = useState(false)
   const [trends, setTrends] = useState(null)
   const [windowDays, setWindowDays] = useState(7)
   const [feedback, setFeedback] = useState([])
@@ -84,6 +99,9 @@ export default function DoctorPatientDetail() {
   const [deviceSaving, setDeviceSaving] = useState(false)
   const [deviceError, setDeviceError] = useState('')
   const [deviceSuccess, setDeviceSuccess] = useState('')
+  const [weeklyClinicalSummary, setWeeklyClinicalSummary] = useState(null)
+  const [weeklySummaryLoading, setWeeklySummaryLoading] = useState(false)
+  const [weeklySummaryError, setWeeklySummaryError] = useState('')
 
   useEffect(() => {
     let mounted = true
@@ -92,9 +110,10 @@ export default function DoctorPatientDetail() {
       try {
         setLoading(true)
         setError('')
+        setMeasurementsShowAll(false)
         const token = await getAccessTokenSilently()
         const [measurementsRes, trendsRes, feedbackRes, caregiverRes, profileRes, deviceDoc] = await Promise.all([
-          getDoctorPatientMeasurements(token, patientId, 30).catch((e) => {
+          getDoctorPatientMeasurements(token, patientId, 30, DOCTOR_MEASUREMENTS_PREVIEW_LIMIT).catch((e) => {
             if (e.message && e.message.includes(NO_PATIENT_DEVICE_MESSAGE)) {
               return { measurements: [], device_id: null, patient_id: patientId }
             }
@@ -138,6 +157,31 @@ export default function DoctorPatientDetail() {
     }
   }, [getAccessTokenSilently, patientId])
 
+  useEffect(() => {
+    if (!patientId || loading) return undefined
+    let cancelled = false
+    setWeeklySummaryLoading(true)
+    setWeeklySummaryError('')
+    ;(async () => {
+      try {
+        const token = await getAccessTokenSilently()
+        const data = await getPatientMLAnalysis(token, patientId, { days: 7, include_forecast: false })
+        if (cancelled) return
+        setWeeklyClinicalSummary(data?.clinical_narrative_summary || null)
+      } catch {
+        if (!cancelled) {
+          setWeeklyClinicalSummary(null)
+          setWeeklySummaryError('Impossible de charger le résumé des 7 derniers jours.')
+        }
+      } finally {
+        if (!cancelled) setWeeklySummaryLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [patientId, loading, getAccessTokenSilently])
+
   const submitPatientDevice = async () => {
     const trimmed = deviceIdInput.trim()
     if (!trimmed) {
@@ -154,8 +198,9 @@ export default function DoctorPatientDetail() {
       setPatientDevice(deviceDoc)
       setDeviceSuccess('Boîtier associé. Le patient peut finaliser l’appairage chez lui.')
       try {
+        setMeasurementsShowAll(false)
         const [measurementsRes, trendsRes] = await Promise.all([
-          getDoctorPatientMeasurements(token, patientId, 30),
+          getDoctorPatientMeasurements(token, patientId, 30, DOCTOR_MEASUREMENTS_PREVIEW_LIMIT),
           getDoctorPatientTrends(token, patientId),
         ])
         setMeasurements(Array.isArray(measurementsRes.measurements) ? measurementsRes.measurements : [])
@@ -167,6 +212,26 @@ export default function DoctorPatientDetail() {
       setDeviceError(e.message || 'Association impossible.')
     } finally {
       setDeviceSaving(false)
+    }
+  }
+
+  const loadAllMeasurements = async () => {
+    try {
+      setMeasurementsLoadingMore(true)
+      setError('')
+      const token = await getAccessTokenSilently()
+      const measurementsRes = await getDoctorPatientMeasurements(
+        token,
+        patientId,
+        30,
+        DOCTOR_MEASUREMENTS_FULL_LIMIT,
+      )
+      setMeasurements(Array.isArray(measurementsRes.measurements) ? measurementsRes.measurements : [])
+      setMeasurementsShowAll(true)
+    } catch (e) {
+      setError(e.message || 'Impossible de charger tout l’historique des mesures')
+    } finally {
+      setMeasurementsLoadingMore(false)
     }
   }
 
@@ -183,6 +248,9 @@ export default function DoctorPatientDetail() {
   }, [selectedTrend])
 
   const latest = measurements[0]
+  const weeklyRiskForDisplay = weeklyClinicalSummary?.text
+    ? CLINICAL_RISK_BADGE[weeklyClinicalSummary.risk_level] || CLINICAL_RISK_BADGE.unknown
+    : null
 
   const submitFeedback = async () => {
     const trimmedMessage = feedbackMessage.trim()
@@ -287,9 +355,6 @@ export default function DoctorPatientDetail() {
                             >
                               <Copy size={16} /> Copier l&apos;adresse
                             </button>
-                            <a href="tel:15" className="doctor-btn doctor-btn-primary" style={{ textDecoration: 'none' }}>
-                              <PhoneCall size={16} /> 15 (SAMU)
-                            </a>
                           </div>
                         ) : (
                           <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.875rem' }}>Adresse non renseignée par le patient.</p>
@@ -315,6 +380,116 @@ export default function DoctorPatientDetail() {
                   </div>
                 </section>
               )}
+              <section className="doctor-stats">
+                <article className="doctor-stat-card doctor-stat-spo2">
+                  <div className="doctor-stat-icon">
+                    <Wind size={24} />
+                  </div>
+                  <div className="doctor-stat-content">
+                    <span className="doctor-stat-value">{latest?.spo2 ?? '-'}</span>
+                    <span className="doctor-stat-label">SpO₂</span>
+                  </div>
+                </article>
+                <article className="doctor-stat-card doctor-stat-fc">
+                  <div className="doctor-stat-icon">
+                    <Heart size={24} />
+                  </div>
+                  <div className="doctor-stat-content">
+                    <span className="doctor-stat-value">{latest?.heart_rate ?? '-'}</span>
+                    <span className="doctor-stat-label">Fréquence cardiaque</span>
+                  </div>
+                </article>
+                <article className="doctor-stat-card doctor-stat-temp">
+                  <div className="doctor-stat-icon">
+                    <Thermometer size={24} />
+                  </div>
+                  <div className="doctor-stat-content">
+                    <span className="doctor-stat-value">{latest?.temperature ?? '-'}</span>
+                    <span className="doctor-stat-label">Température</span>
+                  </div>
+                </article>
+              </section>
+              <section className="doctor-patients-section">
+              <div className="doctor-patients-card">
+                <div className="section-header">
+                  <h3>Historique des mesures</h3>
+                </div>
+                <div className="doctor-table-wrap">
+                <table className="doctor-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>SpO2</th>
+                      <th>FC</th>
+                      <th>Température</th>
+                      <th>Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {measurements.map((measurement, index) => (
+                      <tr key={`${measurement.timestamp}-${index}`}>
+                        <td>{new Date(measurement.timestamp).toLocaleString('fr-FR')}</td>
+                        <td>{measurement.spo2}</td>
+                        <td>{measurement.heart_rate}</td>
+                        <td>{measurement.temperature}</td>
+                        <td>{measurement.status || '-'}</td>
+                      </tr>
+                    ))}
+                    {!measurements.length && (
+                      <tr>
+                        <td colSpan="5">Aucune mesure disponible.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                </div>
+                {!measurementsShowAll && measurements.length === DOCTOR_MEASUREMENTS_PREVIEW_LIMIT && (
+                  <div className="doctor-measurements-more">
+                    <button
+                      type="button"
+                      className="doctor-btn doctor-btn-secondary"
+                      onClick={loadAllMeasurements}
+                      disabled={measurementsLoadingMore}
+                    >
+                      {measurementsLoadingMore ? 'Chargement…' : 'Afficher toutes les mesures'}
+                    </button>
+                  </div>
+                )}
+              </div>
+              </section>
+              {(weeklySummaryLoading || weeklySummaryError || weeklyClinicalSummary?.text) && (
+                      <div className="doctor-weekly-narrative">
+                        <h4 className="doctor-weekly-narrative__title">
+                          <FileText size={18} /> Résumé des 7 derniers jours (mesures)
+                        </h4>
+                        <p className="doctor-weekly-narrative__sub">
+                          Synthèse automatique basée sur les constantes enregistrées sur une semaine glissante (même source que le suivi avancé, période 7 jours).
+                        </p>
+                        {weeklySummaryLoading && (
+                          <p className="doctor-weekly-narrative__body" style={{ color: '#64748b' }}>Chargement du résumé…</p>
+                        )}
+                        {weeklySummaryError && !weeklySummaryLoading && (
+                          <p className="doctor-weekly-narrative__body" style={{ color: '#b91c1c' }}>{weeklySummaryError}</p>
+                        )}
+                        {!weeklySummaryLoading && weeklyClinicalSummary?.text && (
+                          <>
+                            <span
+                              className="doctor-weekly-narrative__badge"
+                              style={{
+                                background: weeklyRiskForDisplay.bg,
+                                color: weeklyRiskForDisplay.color,
+                              }}
+                            >
+                              {weeklyRiskForDisplay.label}
+                            </span>
+                            <p className="doctor-weekly-narrative__body">{weeklyClinicalSummary.text}</p>
+                            {weeklyClinicalSummary.recommended_action && (
+                              <p className="doctor-weekly-narrative__action">{weeklyClinicalSummary.recommended_action}</p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
               <section className="doctor-patients-section">
                 <div className="doctor-patients-card">
                   <div className="section-header">
@@ -411,75 +586,6 @@ export default function DoctorPatientDetail() {
                   </div>
                 </section>
               )}
-
-              <section className="doctor-stats">
-                <article className="doctor-stat-card doctor-stat-spo2">
-                  <div className="doctor-stat-icon">
-                    <Wind size={24} />
-                  </div>
-                  <div className="doctor-stat-content">
-                    <span className="doctor-stat-value">{latest?.spo2 ?? '-'}</span>
-                    <span className="doctor-stat-label">SpO₂</span>
-                  </div>
-                </article>
-                <article className="doctor-stat-card doctor-stat-fc">
-                  <div className="doctor-stat-icon">
-                    <Heart size={24} />
-                  </div>
-                  <div className="doctor-stat-content">
-                    <span className="doctor-stat-value">{latest?.heart_rate ?? '-'}</span>
-                    <span className="doctor-stat-label">Fréquence cardiaque</span>
-                  </div>
-                </article>
-                <article className="doctor-stat-card doctor-stat-temp">
-                  <div className="doctor-stat-icon">
-                    <Thermometer size={24} />
-                  </div>
-                  <div className="doctor-stat-content">
-                    <span className="doctor-stat-value">{latest?.temperature ?? '-'}</span>
-                    <span className="doctor-stat-label">Température</span>
-                  </div>
-                </article>
-              </section>
-
-
-              <section className="doctor-patients-section">
-              <div className="doctor-patients-card">
-                <div className="section-header">
-                  <h3>Historique des mesures</h3>
-                </div>
-                <div className="doctor-table-wrap">
-                <table className="doctor-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>SpO2</th>
-                      <th>FC</th>
-                      <th>Température</th>
-                      <th>Statut</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {measurements.map((measurement, index) => (
-                      <tr key={`${measurement.timestamp}-${index}`}>
-                        <td>{new Date(measurement.timestamp).toLocaleString('fr-FR')}</td>
-                        <td>{measurement.spo2}</td>
-                        <td>{measurement.heart_rate}</td>
-                        <td>{measurement.temperature}</td>
-                        <td>{measurement.status || '-'}</td>
-                      </tr>
-                    ))}
-                    {!measurements.length && (
-                      <tr>
-                        <td colSpan="5">Aucune mesure disponible.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-                </div>
-              </div>
-              </section>
-
               <section className="doctor-patients-section">
               <div className="doctor-patients-card">
                 <div className="section-header">

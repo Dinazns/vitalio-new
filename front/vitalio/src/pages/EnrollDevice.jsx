@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { CheckCircle2, Cpu } from 'lucide-react'
-import { enrollPatientDevice } from '../services/api'
+import { enrollPatientDevice, getPatientDevice } from '../services/api'
 import PatientLayout from '../components/PatientLayout'
 
 export default function EnrollDevice() {
@@ -11,6 +11,28 @@ export default function EnrollDevice() {
   const [code, setCode] = useState('')
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [associatedDeviceId, setAssociatedDeviceId] = useState(null)
+  const [deviceInfoLoading, setDeviceInfoLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const token = await getAccessTokenSilently()
+        const data = await getPatientDevice(token)
+        if (!cancelled && data?.device_id) {
+          setAssociatedDeviceId(String(data.device_id))
+        }
+      } catch {
+        /* pas bloquant */
+      } finally {
+        if (!cancelled) setDeviceInfoLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [getAccessTokenSilently])
 
   const handleEnroll = async () => {
     if (code.length !== 6) return
@@ -18,7 +40,8 @@ export default function EnrollDevice() {
     setStatus(null)
     try {
       const token = await getAccessTokenSilently()
-      await enrollPatientDevice(token, code)
+      const res = await enrollPatientDevice(token, code)
+      if (res?.device_id) setAssociatedDeviceId(String(res.device_id))
       setStatus('success')
     } catch (e) {
       setStatus(e.message || 'Erreur')
@@ -42,6 +65,11 @@ export default function EnrollDevice() {
               <CheckCircle2 size={40} style={{ marginBottom: '1rem' }} aria-hidden />
               <h2 style={{ marginTop: 0 }}>Dispositif enregistré</h2>
               <p>Votre boîtier est maintenant lié à votre compte.</p>
+              {associatedDeviceId && (
+                <p style={{ fontSize: '1.05rem', margin: '0.75rem 0' }}>
+                  Numéro du boîtier : <strong style={{ letterSpacing: '0.04em' }}>{associatedDeviceId}</strong>
+                </p>
+              )}
               <p>Vous pouvez commencer à prendre vos mesures.</p>
               <button type="button" className="primary-button" onClick={() => navigate('/patient')}>
                 Retour au tableau de bord
@@ -64,6 +92,27 @@ export default function EnrollDevice() {
             </h1>
             <p>Entrez le code à 6 chiffres affiché sur l&apos;écran de votre boîtier.</p>
           </header>
+
+          {!deviceInfoLoading && associatedDeviceId && (
+            <section
+              className="panel"
+              style={{
+                marginBottom: '1.25rem',
+                background: 'linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)',
+                border: '1px solid #bfdbfe',
+              }}
+            >
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569' }}>
+                Boîtier associé à votre compte
+              </p>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '1.25rem', fontWeight: 700, color: '#1e3a5f', letterSpacing: '0.03em' }}>
+                {associatedDeviceId}
+              </p>
+              <p style={{ margin: '0.75rem 0 0', fontSize: '0.85rem', color: '#64748b', lineHeight: 1.45 }}>
+                Si votre médecin vous a attribué ce matériel, saisissez ci-dessous le code à 6 chiffres affiché sur le boîtier pour terminer l&apos;appairage.
+              </p>
+            </section>
+          )}
 
           <section className="panel">
             <label htmlFor="enroll-code" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
