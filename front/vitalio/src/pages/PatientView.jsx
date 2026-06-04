@@ -85,7 +85,8 @@ export default function PatientView() {
 
   useEffect(() => {
     let cancelled = false
-    if (isPatientWelcomeDone()) return undefined
+    const userId = user?.sub
+    if (isPatientWelcomeDone(userId)) return undefined
     ;(async () => {
       try {
         const token = await getAccessTokenSilently()
@@ -95,10 +96,10 @@ export default function PatientView() {
         ])
         if (cancelled) return
         const profile = profileRes?.profile ?? profileRes
-        const linked = Boolean(deviceRes?.device_id)
+        const linked = Boolean(deviceRes?.device_enrolled)
         const onboarded = Boolean(profile?.onboarding_completed)
         if (linked && onboarded) {
-          markPatientWelcomeDone()
+          markPatientWelcomeDone(userId)
           return
         }
         navigate('/patient/bienvenue', { replace: true })
@@ -109,7 +110,7 @@ export default function PatientView() {
     return () => {
       cancelled = true
     }
-  }, [getAccessTokenSilently, navigate])
+  }, [getAccessTokenSilently, navigate, user?.sub])
 
   useEffect(() => {
     let mounted = true

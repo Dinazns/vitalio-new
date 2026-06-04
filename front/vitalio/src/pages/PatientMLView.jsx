@@ -50,6 +50,7 @@ export default function PatientMLView() {
   const [measurements, setMeasurements] = useState([])
   const [modelInfo, setModelInfo] = useState(null)
   const [weeklyData, setWeeklyData] = useState(null)
+  const [weeklyError, setWeeklyError] = useState('')
 
   useEffect(() => {
     let mounted = true
@@ -57,16 +58,34 @@ export default function PatientMLView() {
       try {
         setLoading(true)
         setError('')
+        setWeeklyError('')
         const token = await getAccessTokenSilently()
-        const [data, mlInfo, weekly] = await Promise.all([
+        const [dataRes, mlRes, weeklyRes] = await Promise.allSettled([
           getPatientData(token),
-          getMLModelInfo().catch(() => null),
-          getPatientWeeklyAnalysis(token).catch(() => ({ measurements: [], summary: null })),
+          getMLModelInfo(),
+          getPatientWeeklyAnalysis(token),
         ])
-        if (mounted) {
+        if (!mounted) return
+        if (dataRes.status === 'fulfilled') {
+          const data = dataRes.value
           setMeasurements(Array.isArray(data.measurements) ? data.measurements : [])
-          setModelInfo(mlInfo)
-          setWeeklyData(weekly)
+        } else {
+          const msg = dataRes.reason?.message || 'Impossible de charger vos mesures'
+          setError(msg)
+          setMeasurements([])
+        }
+        if (mlRes.status === 'fulfilled') {
+          setModelInfo(mlRes.value)
+        } else {
+          setModelInfo(null)
+        }
+        if (weeklyRes.status === 'fulfilled') {
+          setWeeklyData(weeklyRes.value)
+          setWeeklyError('')
+        } else {
+          const wmsg = weeklyRes.reason?.message || 'Résumé hebdomadaire indisponible'
+          setWeeklyData({ measurements: [], summary: null })
+          setWeeklyError(wmsg)
         }
       } catch (e) {
         if (mounted) setError(e.message || 'Erreur de chargement')
@@ -238,10 +257,19 @@ export default function PatientMLView() {
               </section>
             )}
 
-            {weeklyData?.summary && (
+            {(weeklyData?.summary || weeklyError) && (
               <section className="ml-panel ml-panel--ai-summary">
                 <h2><Sparkles size={18} /> Résumé automatique de vos mesures cette semaine</h2>
-                <p className="ml-panel-sub">Analyse automatique, rédigée en mots simples pour vous aider à comprendre vos mesures de la semaine.</p>
+                <p className="ml-panel-sub">
+                  Synthèse générée côté serveur à partir de vos constantes (statistiques, tendances, corrélations) — pas d&apos;appel à un LLM externe.
+                </p>
+                {weeklyError && (
+                  <div className="ml-panel ml-panel--error" style={{ marginBottom: '12px' }}>
+                    <ShieldAlert size={18} />
+                    <span>{weeklyError}</span>
+                  </div>
+                )}
+                {weeklyData?.summary && !weeklyError && (
                 <div className="ml-ai-summary-content">
                   <p className="ml-ai-summary-text">{weeklyData.summary.text}</p>
                   <div className="ml-ai-summary-actions">
@@ -257,6 +285,7 @@ export default function PatientMLView() {
                     )}
                   </div>
                 </div>
+                )}
               </section>
             )}
 

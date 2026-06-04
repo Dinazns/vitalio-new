@@ -23,6 +23,7 @@ from config import (
     SMTP_HOST, SMTP_USER, SMTP_PASSWORD,
     MONGODB_IDENTITY_DB, MONGODB_MEDICAL_DB,
     ALERT_DEFAULT_CONSECUTIVE_BREACHES,
+    CORS_EXTRA_ORIGINS,
 )
 from database import get_identity_db, get_medical_db, init_database
 from exceptions import AuthError, DatabaseError
@@ -31,6 +32,7 @@ from api_auth import requires_auth, requires_role, get_current_user_role, get_us
 # Services
 from services.user_service import (
     get_device_ids, get_device_id, get_device_measurements,
+    get_device_status, is_device_active,
     get_assigned_patient_ids_for_doctor, get_assigned_patient_ids_for_caregiver,
     get_assigned_doctor_ids_for_patient, get_assigned_caregiver_ids_for_patient,
     ensure_patient_access_or_403, resolve_patient_id_to_user_id_auth, get_user_db_id,
@@ -162,17 +164,48 @@ def _build_combined_anomaly_summary_for_analysis(
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
+_cors_base = ["https://vitalio-new.vercel.app", "http://localhost:5173"]
+if FRONTEND_URL and str(FRONTEND_URL).strip():
+    _cors_base.append(str(FRONTEND_URL).strip())
+_cors_origins = list(dict.fromkeys(_cors_base + CORS_EXTRA_ORIGINS))
 CORS(app, resources={
     r"/api/*": {
-        "origins": [
-            "https://vitalio-new.vercel.app",
-            "http://localhost:5173",
-        ],
+        "origins": _cors_origins,
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True,
     }
 })
+
+
+@app.after_request
+def _ensure_cors_on_all_responses(response: Response):
+    """
+    Garantir Access-Control-Allow-Origin sur les réponses d'erreur (ex. 500) : sans cela,
+    le navigateur affiche une erreur CORS au lieu du corps JSON (même si l'origine est autorisée).
+    Avec credentials, l'origine doit être échoée explicitement (pas '*').
+    """
+    try:
+        origin = request.headers.get("Origin")
+        if origin and origin in _cors_origins:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers.setdefault("Vary", "Origin")
+            # Émettre l'ensemble complet d'en-têtes CORS : ce handler s'exécute avant
+            # flask_cors (ordre inverse d'enregistrement), et comme il pose déjà
+            # Access-Control-Allow-Origin, flask_cors considère la requête « déjà
+            # évaluée » et n'ajoute plus Allow-Headers/Allow-Methods. On les pose donc ici.
+            response.headers.setdefault(
+                "Access-Control-Allow-Headers",
+                request.headers.get("Access-Control-Request-Headers", "Content-Type, Authorization"),
+            )
+            response.headers.setdefault(
+                "Access-Control-Allow-Methods",
+                "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+            )
+    except Exception:
+        pass
+    return response
 
 
 # ============================================================================
@@ -601,11 +634,40 @@ def delete_my_patient_account_data():
 @requires_auth
 @requires_role("patient")
 def get_patient_me_device():
-    """Identifiant(s) du ou des boîtiers liés au compte (attribution médecin ou appairage terminé)."""
+    """Identifiant(s) du ou des boîtiers ; attribution médecin (assigned_by) et appairage code 6 chiffres (device_enrollments)."""
     device_ids = get_device_ids(g.user_id_auth)
+    ud = None
+    try:
+        ud = get_identity_db().users_devices.find_one({"user_id_auth": g.user_id_auth})
+    except PyMongoError as e:
+        logger.warning("users_devices lookup failed in get_patient_me_device: %s", e)
+
+    doctor_assigned = bool(ud and ud.get("assigned_by"))
+    primary_id = device_ids[0] if device_ids else None
+    device_enrolled = False
+    if primary_id:
+        try:
+            enr = get_identity_db().device_enrollments.find_one(
+                {"device_id": primary_id, "enrolled": True},
+                projection={"_id": 1},
+            )
+            device_enrolled = enr is not None
+        except PyMongoError as e:
+            logger.warning("device_enrollments lookup failed: %s", e)
+
     if not device_ids:
-        return jsonify({"device_id": None, "device_ids": []}), 200
-    return jsonify({"device_id": device_ids[0], "device_ids": device_ids}), 200
+        return jsonify({
+            "device_id": None,
+            "device_ids": [],
+            "doctor_assigned_device": False,
+            "device_enrolled": False,
+        }), 200
+    return jsonify({
+        "device_id": device_ids[0],
+        "device_ids": device_ids,
+        "doctor_assigned_device": doctor_assigned,
+        "device_enrolled": device_enrolled,
+    }), 200
 
 
 @app.route("/api/me/data", methods=["GET"])
@@ -863,6 +925,8 @@ def _build_lay_patient_weekly_summary(analysis: Dict[str, Any], max_severity: in
         med = stats.get("median")
         std = stats.get("std")
         cv = stats.get("cv")
+        if mn is None or mx is None or med is None:
+            continue
 
         parts: List[str] = []
         if feat == "heart_rate":
@@ -987,13 +1051,21 @@ def get_patient_weekly_analysis():
     try:
         analysis = ml_module.analyze_patient_vitals(measurements)
         max_sev = _weekly_summary_max_severity(analysis)
-        summary = _build_lay_patient_weekly_summary(analysis, max_sev)
+        try:
+            summary = _build_lay_patient_weekly_summary(analysis, max_sev)
+        except Exception as build_err:
+            logger.warning("Weekly lay summary build failed: %s", build_err, exc_info=True)
+            summary = {
+                "text": "Vos mesures de la semaine sont bien prises en compte, mais le texte de synthèse n'a pas pu être généré pour le moment.",
+                "risk_level": "unknown",
+                "recommended_action": "Réessayez plus tard. En cas de symptômes inquiétants, contactez un professionnel de santé.",
+            }
     except Exception as e:
-        logger.warning("Weekly analysis failed for patient: %s", e)
+        logger.warning("Weekly analysis failed for patient: %s", e, exc_info=True)
         summary = {
-            "text": "Analyse en cours de chargement. Réessayez dans quelques instants.",
+            "text": "Analyse indisponible pour le moment (erreur technique). Vos mesures restent enregistrées.",
             "risk_level": "unknown",
-            "recommended_action": "",
+            "recommended_action": "Réessayez dans quelques instants.",
         }
     return jsonify({
         "device_id": device_id,
@@ -1007,10 +1079,16 @@ def get_patient_weekly_analysis():
 @requires_auth
 @requires_role("patient")
 def submit_patient_measurement():
+    """Enregistre une mesure pour le boîtier associé au compte (users_devices), jamais un device_id fourni par le client."""
     device_id = get_device_id(g.user_id_auth)
     if not device_id:
         raise DatabaseError({"code": "device_not_found", "message": "No device record found for authenticated user"}, 404)
+    if get_device_status(device_id) == "suspended":
+        return jsonify({"code": "device_suspended", "message": "Dispositif suspendu par un administrateur"}), 403
     payload = request.get_json(silent=True) or {}
+    # Ne jamais faire confiance au corps de la requête pour l’identifiant matériel : même logique que les mesures boîtier.
+    if isinstance(payload, dict):
+        payload = {k: v for k, v in payload.items() if k != "device_id"}
     try:
         normalized = normalize_patient_measurement_payload(payload)
     except ValueError as validation_error:
@@ -1166,15 +1244,27 @@ def create_doctor_invitation():
         if not patient_email:
             return jsonify({"code": "invalid_payload", "message": "patient_email is required when send_email is true"}), 400
 
+    invite_device_id = str(payload.get("device_id") or "").strip() or None
+    if invite_device_id:
+        existing_dev = get_identity_db().users_devices.find_one({"device_id": invite_device_id})
+        if existing_dev:
+            return jsonify({
+                "code": "device_already_assigned",
+                "message": "Ce device est déjà associé à un compte patient",
+            }), 409
+
     invite_token = generate_invite_token()
     now = datetime.now(timezone.utc)
     expires_at = now + timedelta(hours=max(INVITE_TTL_HOURS, 1))
+    invite_metadata: Dict[str, Any] = {"targeted": bool(patient_user_id_auth)}
+    if invite_device_id:
+        invite_metadata["device_id"] = invite_device_id
     invite_doc = {
         "token_hash": hash_secret_token(invite_token),
         "doctor_user_id_auth": g.user_id_auth, "patient_user_id_auth": patient_user_id_auth,
         "expires_at": expires_at, "used_at": None, "created_at": now,
         "created_by_user_id_auth": g.user_id_auth, "mode": "invite_link",
-        "metadata": {"targeted": bool(patient_user_id_auth)},
+        "metadata": invite_metadata,
     }
     try:
         get_identity_db().doctor_invites.insert_one(invite_doc)
@@ -1201,23 +1291,22 @@ def create_doctor_invitation():
                 password_setup_url = ticket_or_id
         except Exception as e:
             logger.warning("Auth0 user creation skipped: %s", e)
-        import threading as _th
-        def _send_async():
-            try:
-                send_invitation_email(
-                    patient_email, invite_token, web_invite_url, expires_at,
-                    doctor_display_name,
-                    password_setup_url=password_setup_url,
-                )
-            except Exception as e:
-                logger.exception("Envoi email invitation échoué (background): %s", e)
-        _th.Thread(target=_send_async, daemon=True).start()
+        # Envoi synchrone : un thread daemon peut être coupé avant la fin du SMTP (Render, etc.).
+        try:
+            send_invitation_email(
+                patient_email, invite_token, web_invite_url, expires_at,
+                doctor_display_name,
+                password_setup_url=password_setup_url,
+            )
+        except Exception as e:
+            logger.exception("Envoi email invitation échoué: %s", e)
 
     return jsonify({
         "invite_token": invite_token, "expires_at": datetime_to_iso_utc(expires_at),
         "deep_link": f"vitalio://invite?token={invite_token}", "web_invite_url": web_invite_url,
         "qr_payload": web_invite_url, "mode": "invite_link",
         "target_patient_user_id_auth": patient_user_id_auth, "email_sent": bool(send_email and patient_email),
+        "pending_device_id": invite_device_id,
     }), 201
 
 
@@ -1236,6 +1325,24 @@ def accept_doctor_invitation():
     created = create_doctor_patient_link(doctor_user_id_auth, g.user_id_auth, "patient_accept_invite", g.user_id_auth)
     if not created:
         raise AuthError({"code": "association_exists", "message": "Doctor-patient association already exists"}, 409)
+
+    meta = invite.get("metadata") or {}
+    pending_device = str(meta.get("device_id") or "").strip()
+    device_assigned = False
+    device_assignment_error = None
+    if pending_device:
+        res = _apply_patient_device_assignment(g.user_id_auth, pending_device, doctor_user_id_auth)
+        if res[0]:
+            device_assigned = True
+        else:
+            device_assignment_error = res[1].get("message")
+            logger.warning(
+                "Invite accept: device %s not assigned to %s: %s",
+                pending_device,
+                g.user_id_auth,
+                device_assignment_error,
+            )
+
     now = datetime.now(timezone.utc)
     get_identity_db().doctor_invites.update_one(
         {"_id": invite["_id"], "used_at": None},
@@ -1243,8 +1350,17 @@ def accept_doctor_invitation():
     )
     log_link_audit_event("invite_accepted", g.user_id_auth, doctor_user_id_auth, g.user_id_auth, "invite_link",
                          {"invite_created_at": str(invite.get("created_at"))})
-    return jsonify({"message": "Invitation accepted", "doctor_user_id_auth": doctor_user_id_auth,
-                    "patient_user_id_auth": g.user_id_auth}), 201
+    body: Dict[str, Any] = {
+        "message": "Invitation accepted",
+        "doctor_user_id_auth": doctor_user_id_auth,
+        "patient_user_id_auth": g.user_id_auth,
+        "device_assigned": device_assigned,
+    }
+    if pending_device:
+        body["pending_device_id"] = pending_device
+    if device_assignment_error:
+        body["device_assignment_error"] = device_assignment_error
+    return jsonify(body), 201
 
 
 @app.route("/api/doctor/cabinet-codes", methods=["POST"])
@@ -1350,6 +1466,232 @@ def create_caregiver_patient_association():
         raise DatabaseError({"code": "caregiver_association_insert_error", "message": f"Failed to store caregiver-patient association: {str(e)}"}, 500)
     return jsonify({"message": "Caregiver-patient association saved", "caregiver_user_id_auth": caregiver_user_id_auth,
                     "patient_user_id_auth": patient_user_id_auth}), 201
+
+
+def _admin_user_summary(profile: Dict[str, Any], user_id_auth: Optional[str]) -> Optional[Dict[str, Any]]:
+    """Compact user descriptor for admin listings."""
+    if not user_id_auth:
+        return None
+    return {
+        "user_id_auth": user_id_auth,
+        "display_name": profile.get("display_name"),
+        "email": profile.get("email"),
+        "first_name": profile.get("first_name"),
+        "last_name": profile.get("last_name"),
+    }
+
+
+@app.route("/api/admin/devices", methods=["GET"])
+@requires_auth
+@requires_role("admin")
+def admin_list_devices():
+    """Paginated registry of patient devices with status and relationships."""
+    identity_db = get_identity_db()
+    q = (request.args.get("q") or "").strip()
+    status_filter = (request.args.get("status") or "").strip().lower()
+    page = max(request.args.get("page", default=1, type=int) or 1, 1)
+    page_size = min(max(request.args.get("page_size", default=50, type=int) or 50, 1), 200)
+
+    conditions: List[Dict[str, Any]] = []
+    if status_filter == "suspended":
+        conditions.append({"status": "suspended"})
+    elif status_filter == "active":
+        conditions.append({"$or": [{"status": "active"}, {"status": {"$exists": False}}]})
+
+    try:
+        if q:
+            regex = {"$regex": re.escape(q), "$options": "i"}
+            matched_patient_ids = [
+                u.get("user_id_auth")
+                for u in identity_db.users.find(
+                    {"$or": [
+                        {"email": regex}, {"display_name": regex},
+                        {"first_name": regex}, {"last_name": regex},
+                        {"user_id_auth": regex},
+                    ]},
+                    projection={"user_id_auth": 1, "_id": 0},
+                ) if u.get("user_id_auth")
+            ]
+            search_or: List[Dict[str, Any]] = [{"device_id": regex}]
+            if matched_patient_ids:
+                search_or.append({"user_id_auth": {"$in": matched_patient_ids}})
+            conditions.append({"$or": search_or})
+
+        mongo_filter = {"$and": conditions} if conditions else {}
+        total = identity_db.users_devices.count_documents(mongo_filter)
+        rows = list(
+            identity_db.users_devices
+            .find(mongo_filter, {"_id": 0})
+            .sort("device_id", 1)
+            .skip((page - 1) * page_size)
+            .limit(page_size)
+        )
+
+        patient_ids = [r.get("user_id_auth") for r in rows if r.get("user_id_auth")]
+        device_ids = [r.get("device_id") for r in rows if r.get("device_id")]
+
+        profiles: Dict[str, Any] = {}
+        doctors_by_patient: Dict[str, List[str]] = {}
+        doctor_ids: set = set()
+        if patient_ids:
+            for u in identity_db.users.find(
+                {"user_id_auth": {"$in": patient_ids}},
+                {"_id": 0, "user_id_auth": 1, "display_name": 1, "email": 1, "first_name": 1, "last_name": 1},
+            ):
+                profiles[u["user_id_auth"]] = u
+            for link in identity_db.doctor_patients.find(
+                {"patient_user_id_auth": {"$in": patient_ids}},
+                {"_id": 0, "doctor_user_id_auth": 1, "patient_user_id_auth": 1},
+            ):
+                doctors_by_patient.setdefault(link["patient_user_id_auth"], []).append(link["doctor_user_id_auth"])
+                doctor_ids.add(link["doctor_user_id_auth"])
+
+        doctor_profiles: Dict[str, Any] = {}
+        if doctor_ids:
+            for u in identity_db.users.find(
+                {"user_id_auth": {"$in": list(doctor_ids)}},
+                {"_id": 0, "user_id_auth": 1, "display_name": 1, "email": 1},
+            ):
+                doctor_profiles[u["user_id_auth"]] = u
+
+        enrolled_ids: set = set()
+        if device_ids:
+            for e in identity_db.device_enrollments.find(
+                {"device_id": {"$in": device_ids}, "enrolled": True},
+                {"_id": 0, "device_id": 1},
+            ):
+                enrolled_ids.add(e["device_id"])
+    except PyMongoError as e:
+        raise DatabaseError({"code": "admin_devices_query_error", "message": str(e)}, 500)
+
+    devices = []
+    for r in rows:
+        pid = r.get("user_id_auth")
+        prof = profiles.get(pid, {})
+        devices.append({
+            "device_id": r.get("device_id"),
+            "status": r.get("status") or "active",
+            "status_updated_at": datetime_to_iso_utc(r.get("status_updated_at")) if r.get("status_updated_at") else None,
+            "status_updated_by": r.get("status_updated_by"),
+            "suspension_reason": r.get("suspension_reason"),
+            "assigned_at": datetime_to_iso_utc(r.get("assigned_at")) if r.get("assigned_at") else None,
+            "assigned_by": r.get("assigned_by"),
+            "enrolled": r.get("device_id") in enrolled_ids,
+            "patient": _admin_user_summary(prof, pid),
+            "doctors": [
+                {
+                    "user_id_auth": d,
+                    "display_name": doctor_profiles.get(d, {}).get("display_name"),
+                    "email": doctor_profiles.get(d, {}).get("email"),
+                }
+                for d in doctors_by_patient.get(pid, [])
+            ],
+        })
+
+    return jsonify({"count": total, "page": page, "page_size": page_size, "devices": devices}), 200
+
+
+@app.route("/api/admin/devices/<device_id>/status", methods=["PATCH"])
+@requires_auth
+@requires_role("admin")
+def admin_update_device_status(device_id):
+    """Activate or suspend a device. Suspension blocks measurement ingestion."""
+    device_id = str(device_id or "").strip()
+    if not device_id:
+        return jsonify({"code": "missing_device_id", "message": "device_id requis"}), 400
+    payload = request.get_json(silent=True) or {}
+    status = str(payload.get("status") or "").strip().lower()
+    if status not in ("active", "suspended"):
+        return jsonify({"code": "invalid_status", "message": "status doit être 'active' ou 'suspended'"}), 400
+    reason = str(payload.get("reason") or "").strip()
+
+    identity_db = get_identity_db()
+    device_doc = identity_db.users_devices.find_one({"device_id": device_id})
+    if not device_doc:
+        return jsonify({"code": "unknown_device", "message": "device_id inconnu"}), 404
+
+    current = device_doc.get("status") or "active"
+    now = datetime.now(timezone.utc)
+    set_ops: Dict[str, Any] = {
+        "$set": {"status": status, "status_updated_at": now, "status_updated_by": g.user_id_auth}
+    }
+    if status == "suspended":
+        set_ops["$set"]["suspension_reason"] = reason or None
+    else:
+        set_ops["$unset"] = {"suspension_reason": ""}
+
+    try:
+        identity_db.users_devices.update_one({"device_id": device_id}, set_ops)
+    except PyMongoError as e:
+        raise DatabaseError({"code": "device_status_update_error", "message": str(e)}, 500)
+
+    # Audit only real transitions to keep the journal meaningful (idempotent calls are silent).
+    if current != status:
+        try:
+            identity_db.audit_links.insert_one({
+                "event_type": "device_status_changed",
+                "actor_user_id_auth": g.user_id_auth,
+                "patient_user_id_auth": device_doc.get("user_id_auth"),
+                "device_id": device_id,
+                "from_status": current,
+                "to_status": status,
+                "reason": reason or None,
+                "created_at": now,
+            })
+        except PyMongoError as e:
+            logger.warning("Failed to write device status audit for %s: %s", device_id, e)
+
+    return jsonify({
+        "message": "Device status updated",
+        "device_id": device_id,
+        "status": status,
+        "suspension_reason": (reason or None) if status == "suspended" else None,
+        "status_updated_at": datetime_to_iso_utc(now),
+    }), 200
+
+
+@app.route("/api/admin/associations/doctor-patients", methods=["GET"])
+@requires_auth
+@requires_role("admin")
+def admin_list_doctor_patient_links():
+    """Paginated list of doctor-patient links enriched with user info."""
+    identity_db = get_identity_db()
+    page = max(request.args.get("page", default=1, type=int) or 1, 1)
+    page_size = min(max(request.args.get("page_size", default=100, type=int) or 100, 1), 500)
+    try:
+        total = identity_db.doctor_patients.count_documents({})
+        links = list(
+            identity_db.doctor_patients
+            .find({}, {"_id": 0})
+            .sort("created_at", -1)
+            .skip((page - 1) * page_size)
+            .limit(page_size)
+        )
+        user_ids: set = set()
+        for link in links:
+            for key in ("doctor_user_id_auth", "patient_user_id_auth"):
+                if link.get(key):
+                    user_ids.add(link[key])
+        profiles: Dict[str, Any] = {}
+        if user_ids:
+            for u in identity_db.users.find(
+                {"user_id_auth": {"$in": list(user_ids)}},
+                {"_id": 0, "user_id_auth": 1, "display_name": 1, "email": 1, "first_name": 1, "last_name": 1},
+            ):
+                profiles[u["user_id_auth"]] = u
+    except PyMongoError as e:
+        raise DatabaseError({"code": "doctor_patient_links_query_error", "message": str(e)}, 500)
+
+    items = [
+        {
+            "doctor": _admin_user_summary(profiles.get(link.get("doctor_user_id_auth"), {}), link.get("doctor_user_id_auth")),
+            "patient": _admin_user_summary(profiles.get(link.get("patient_user_id_auth"), {}), link.get("patient_user_id_auth")),
+            "linked_by": link.get("linked_by"),
+            "created_at": datetime_to_iso_utc(link.get("created_at")) if link.get("created_at") else None,
+        }
+        for link in links
+    ]
+    return jsonify({"count": total, "page": page, "page_size": page_size, "links": items}), 200
 
 
 @app.route("/api/doctor/patients", methods=["GET"])
@@ -1602,6 +1944,15 @@ def patch_doctor_alert(alert_id: str):
                         logger.warning("Background ML retrain after doctor alert failed: %s", e)
 
                 threading.Thread(target=_retrain_from_alert, daemon=True).start()
+        elif str(alert_doc.get("alert_source") or "") == "threshold" and not alert_doc.get("ml_anomaly_id"):
+            # Données créées avant liaison ml_anomalies : feedback médecin déclenche quand même un réentraînement
+            def _retrain_threshold_legacy():
+                try:
+                    do_ml_retrain(days=30, trigger="doctor_threshold_feedback")
+                except Exception as e:
+                    logger.warning("Background ML retrain after threshold alert (legacy) failed: %s", e)
+
+            threading.Thread(target=_retrain_threshold_legacy, daemon=True).start()
     elif doctor_note:
         get_medical_db().alerts.update_one(
             {"_id": oid},
@@ -1877,6 +2228,41 @@ def get_doctor_patient_trends(patient_id: str):
     return jsonify({"patient_id": patient_id, "device_id": device_id, "trends": {"7d": trend_7, "30d": trend_30}}), 200
 
 
+def _apply_patient_device_assignment(
+    patient_user_id_auth: str,
+    device_id: str,
+    assigned_by_user_id_auth: str,
+):
+    """Associe un boîtier à un patient. Retourne (True, now) ou (False, body_dict, http_status)."""
+    existing = get_identity_db().users_devices.find_one({"device_id": device_id})
+    if existing and existing.get("user_id_auth") != patient_user_id_auth:
+        return (
+            False,
+            {
+                "code": "device_already_assigned",
+                "message": "Ce device est déjà assigné à un autre patient",
+            },
+            409,
+        )
+    now = datetime.now(timezone.utc)
+    try:
+        get_identity_db().users_devices.update_one(
+            {"user_id_auth": patient_user_id_auth},
+            {
+                "$set": {
+                    "user_id_auth": patient_user_id_auth,
+                    "device_id": device_id,
+                    "assigned_by": assigned_by_user_id_auth,
+                    "assigned_at": now,
+                }
+            },
+            upsert=True,
+        )
+    except PyMongoError as e:
+        raise DatabaseError({"code": "device_assign_error", "message": str(e)}, 500)
+    return (True, now)
+
+
 @app.route("/api/doctor/patients/<patient_id>/device", methods=["POST"])
 @requires_auth
 @requires_role("doctor", "superuser", "medecin")
@@ -1891,30 +2277,10 @@ def assign_device_to_patient(patient_id: str):
     if not device_id:
         return jsonify({"code": "missing_device_id", "message": "device_id requis"}), 400
 
-    existing = get_identity_db().users_devices.find_one({"device_id": device_id})
-    if existing and existing.get("user_id_auth") != patient_id:
-        return jsonify({
-            "code": "device_already_assigned",
-            "message": "Ce device est déjà assigné à un autre patient",
-        }), 409
-
-    now = datetime.now(timezone.utc)
-    try:
-        get_identity_db().users_devices.update_one(
-            {"user_id_auth": patient_id},
-            {
-                "$set": {
-                    "user_id_auth": patient_id,
-                    "device_id": device_id,
-                    "assigned_by": g.user_id_auth,
-                    "assigned_at": now,
-                }
-            },
-            upsert=True,
-        )
-    except PyMongoError as e:
-        raise DatabaseError({"code": "device_assign_error", "message": str(e)}, 500)
-
+    res = _apply_patient_device_assignment(patient_id, device_id, g.user_id_auth)
+    if not res[0]:
+        return jsonify(res[1]), res[2]
+    _, now = res
     return jsonify({
         "message": "Device assigné au patient",
         "patient_id": patient_id,
@@ -2274,7 +2640,7 @@ def list_ml_anomalies():
         query["device_id"] = {"$in": allowed_devices}
     if status_filter in ("pending", "validated", "rejected"):
         query["status"] = status_filter
-    if severity in ("critical", "warning"):
+    if severity in ("critical", "warning", "threshold"):
         query["anomaly_level"] = severity
     if from_date or to_date:
         date_q: Dict[str, Any] = {}
@@ -2353,6 +2719,31 @@ def validate_ml_anomaly(anomaly_id: str):
             )
         except PyMongoError:
             logger.warning("Failed to propagate validation to measurement %s", measurement_id)
+    # Alerte seuil ouverte liée : clôturer la même ligne que PATCH /api/doctor/alerts
+    if (
+        anomaly_doc.get("anomaly_source") == "threshold"
+        or anomaly_doc.get("anomaly_level") == "threshold"
+    ):
+        try:
+            ds_alert = "VALIDATED" if new_status == "validated" else "REJECTED"
+            alert_upd: Dict[str, Any] = {
+                "doctor_status": ds_alert,
+                "status": "RESOLVED",
+                "resolved_at": now,
+                "updated_at": now,
+            }
+            if new_status == "validated":
+                alert_upd["validated_by"] = g.user_id_auth
+                alert_upd["validated_at"] = now
+            else:
+                alert_upd["rejected_by"] = g.user_id_auth
+                alert_upd["rejected_at"] = now
+            get_medical_db().alerts.update_one(
+                {"ml_anomaly_id": oid, "alert_source": "threshold", "status": "OPEN"},
+                {"$set": alert_upd},
+            )
+        except PyMongoError as e:
+            logger.warning("sync threshold alert from ML validation failed: %s", e)
     audit_alert_id = None
     audit_mode = None
     if new_status == "validated":
@@ -2545,6 +2936,25 @@ def update_ml_thresholds():
     return jsonify({"message": "Thresholds updated", **ml_module.get_model_info()}), 200
 
 
+_PATIENT_IDENTITY_PROJECTION = {"display_name": 1, "email": 1, "first_name": 1, "last_name": 1}
+
+
+def _apply_patient_identity_to_ml_payload(payload: Dict[str, Any], user_doc: Optional[Dict[str, Any]]) -> None:
+    """Remplit patient_display, patient_first_name, patient_last_name pour les réponses ML."""
+    if not user_doc:
+        return
+    payload["patient_display"] = user_doc.get("display_name") or user_doc.get("email")
+    fn = (user_doc.get("first_name") or "").strip()
+    ln = (user_doc.get("last_name") or "").strip()
+    if not fn and not ln:
+        disp = (user_doc.get("display_name") or "").strip()
+        if disp:
+            a, b = _split_display_name(disp)
+            fn, ln = (a or "").strip(), (b or "").strip()
+    payload["patient_first_name"] = fn or None
+    payload["patient_last_name"] = ln or None
+
+
 @app.route("/api/ml/decisions", methods=["GET"])
 @requires_auth
 @requires_role("doctor", "superuser")
@@ -2596,9 +3006,9 @@ def get_ml_forecast(patient_id: str):
     result["train_days"] = train_days
     result["history_hours"] = history_hours
     try:
-        user_doc = get_identity_db().users.find_one({"user_id_auth": patient_id}, {"display_name": 1, "email": 1})
+        user_doc = get_identity_db().users.find_one({"user_id_auth": patient_id}, _PATIENT_IDENTITY_PROJECTION)
         if user_doc:
-            result["patient_display"] = user_doc.get("display_name") or user_doc.get("email")
+            _apply_patient_identity_to_ml_payload(result, user_doc)
     except Exception:
         pass
     return jsonify(result), 200
@@ -2620,7 +3030,33 @@ def get_patient_ml_analysis(patient_id: str):
     forecast_horizon = max(1, min(forecast_horizon, 72))  # horizon in hours (24 = full day)
     measurements = query_patient_measurements_for_devices(device_ids=device_ids, days=days, limit=50000)
     if len(measurements) < 3:
-        return jsonify({"code": "insufficient_data", "message": f"Attendre plus de mesures ({len(measurements)} < 3)", "patient_id": patient_id}), 400
+        # Pas une « mauvaise requête » : le client doit pouvoir afficher un message sans erreur HTTP 400.
+        narrative = _build_clinical_weekly_narrative({"status": "insufficient_data"}, 0)
+        insuff_body: Dict[str, Any] = {
+            "code": "insufficient_data",
+            "message": f"Moins de 3 mesures sur les {days} derniers jours ({len(measurements)} reçue(s)). L'analyse détaillée nécessite au moins 3 points.",
+            "patient_id": get_user_db_id(patient_id) or patient_id,
+            "patient_user_id_auth": patient_id,
+            "device_ids": device_ids,
+            "days": days,
+            "measurement_count": len(measurements),
+            "measurements": measurements,
+            "n_total_measurements": count_patient_measurements_total(device_ids),
+            "status": "insufficient_data",
+            "clinical_narrative_summary": narrative,
+            "anomaly_summary": {"total": 0, "by_status": {}, "recent": []},
+            "vitals": {},
+            "timeline": [],
+            "correlations": {},
+            "ml_score_timeline": [],
+        }
+        try:
+            user_doc = get_identity_db().users.find_one({"user_id_auth": patient_id}, _PATIENT_IDENTITY_PROJECTION)
+            if user_doc:
+                _apply_patient_identity_to_ml_payload(insuff_body, user_doc)
+        except Exception:
+            pass
+        return jsonify(insuff_body), 200
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     ml_decisions_list, anomaly_records = [], []
     try:
@@ -2647,28 +3083,37 @@ def get_patient_ml_analysis(patient_id: str):
         for key, val in doc.items():
             if isinstance(val, datetime):
                 doc[key] = datetime_to_iso_utc(val)
-    result = ml_module.analyze_patient_vitals(measurements, ml_scores=ml_decisions_list, anomaly_records=anomaly_records)
-    _max_sev = _weekly_summary_max_severity(result)
-    result["clinical_narrative_summary"] = _build_clinical_weekly_narrative(result, _max_sev)
-    result["anomaly_summary"] = _build_combined_anomaly_summary_for_analysis(
-        anomaly_records, threshold_alert_docs
-    )
-    if include_forecast and len(measurements) >= 3:
-        try:
-            result["forecast"] = ml_module.forecast_vitals(measurements, horizon=forecast_horizon, history_window_hours=48)
-        except Exception as e:
-            result["forecast"] = {"error": str(e)}
-    result["patient_id"] = get_user_db_id(patient_id) or patient_id
-    result["device_ids"] = device_ids
-    result["days"] = days
-    result["n_total_measurements"] = count_patient_measurements_total(device_ids)
     try:
-        user_doc = get_identity_db().users.find_one({"user_id_auth": patient_id}, {"display_name": 1, "email": 1})
-        if user_doc:
-            result["patient_display"] = user_doc.get("display_name") or user_doc.get("email")
-    except Exception:
-        pass
-    return jsonify(result), 200
+        result = ml_module.analyze_patient_vitals(measurements, ml_scores=ml_decisions_list, anomaly_records=anomaly_records)
+        _max_sev = _weekly_summary_max_severity(result)
+        result["clinical_narrative_summary"] = _build_clinical_weekly_narrative(result, _max_sev)
+        result["anomaly_summary"] = _build_combined_anomaly_summary_for_analysis(
+            anomaly_records, threshold_alert_docs
+        )
+        if include_forecast and len(measurements) >= 3:
+            try:
+                result["forecast"] = ml_module.forecast_vitals(measurements, horizon=forecast_horizon, history_window_hours=48)
+            except Exception as e:
+                result["forecast"] = {"error": str(e)}
+        result["patient_id"] = get_user_db_id(patient_id) or patient_id
+        result["device_ids"] = device_ids
+        result["days"] = days
+        result["n_total_measurements"] = count_patient_measurements_total(device_ids)
+        try:
+            user_doc = get_identity_db().users.find_one({"user_id_auth": patient_id}, _PATIENT_IDENTITY_PROJECTION)
+            if user_doc:
+                _apply_patient_identity_to_ml_payload(result, user_doc)
+        except Exception:
+            pass
+        return jsonify(result), 200
+    except (AuthError, DatabaseError):
+        raise
+    except Exception as e:
+        logger.exception("get_patient_ml_analysis failed: %s", e)
+        return jsonify({
+            "code": "analysis_error",
+            "message": "L'analyse n'a pas pu être calculée. Réessayez plus tard.",
+        }), 500
 
 @app.route("/api/device/measurements", methods=["POST"])
 def submit_device_measurement():
@@ -2681,6 +3126,8 @@ def submit_device_measurement():
     device_doc = get_identity_db().users_devices.find_one({"device_id": device_id})
     if not device_doc:
         return jsonify({"code": "unknown_device", "message": "device_id inconnu"}), 403
+    if (device_doc.get("status") or "active") == "suspended":
+        return jsonify({"code": "device_suspended", "message": "Dispositif suspendu par un administrateur"}), 403
 
     try:
         normalized = normalize_patient_measurement_payload(payload)

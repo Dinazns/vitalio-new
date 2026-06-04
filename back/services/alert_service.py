@@ -2,13 +2,15 @@
 Alert threshold and breach evaluation logic.
 """
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timezone
+from bson import ObjectId
 from pymongo.errors import PyMongoError
 
 from config import ALERT_DEFAULT_THRESHOLDS, ALERT_DEFAULT_CONSECUTIVE_BREACHES
 from database import get_medical_db
 from exceptions import DatabaseError
+from services.user_service import get_patient_id_from_device
 
 logger = logging.getLogger(__name__)
 
@@ -167,11 +169,10 @@ def upsert_open_alert(
     threshold_config: Dict[str, Any],
     measured_at: datetime,
     measurement_id: Any = None,
-) -> bool:
+) -> Tuple[bool, Optional[ObjectId]]:
     """
     Create or update an open alert for a durable breach.
-    Returns True if a NEW alert was created (insert), False if existing was updated.
-    On creation also writes an alert_created event to alert_events.
+    Returns (is_new, alert_object_id). On creation also writes an alert_created event to alert_events.
     """
     metric = breach["metric"]
     operator = breach["operator"]
@@ -211,6 +212,7 @@ def upsert_open_alert(
     )
     is_new = result.upserted_id is not None
     if is_new:
+        alert_oid: Optional[ObjectId] = result.upserted_id
         write_alert_event(
             medical_alert_id=str(result.upserted_id),
             event_type="alert_created",
@@ -226,7 +228,63 @@ def upsert_open_alert(
                 "measurement_id": str(measurement_id) if measurement_id else None,
             },
         )
-    return is_new
+    else:
+        doc = get_medical_db().alerts.find_one(query, projection={"_id": 1})
+        alert_oid = doc["_id"] if doc else None
+    return is_new, alert_oid
+
+
+def ensure_threshold_ml_anomaly_for_alert(
+    *,
+    device_id: str,
+    measurement: Dict[str, Any],
+    breach: Dict[str, Any],
+    threshold_config: Dict[str, Any],
+    alert_oid: Optional[ObjectId],
+) -> None:
+    """
+    Insère une ligne ml_anomalies (feedback médecin + réentraînement) et lie l'alerte seuil.
+    Idempotent si l'alerte a déjà ml_anomaly_id.
+    """
+    if alert_oid is None:
+        return
+    db = get_medical_db()
+    try:
+        existing = db.alerts.find_one({"_id": alert_oid}, projection={"ml_anomaly_id": 1})
+        if existing and existing.get("ml_anomaly_id"):
+            return
+    except PyMongoError:
+        return
+
+    import ml_module
+
+    patient_id = get_patient_id_from_device(device_id)
+    meas_id = measurement.get("_id")
+    event_doc = ml_module.build_threshold_anomaly_document(
+        device_id=device_id,
+        user_id_auth=patient_id,
+        measurement_id=meas_id,
+        measurement=measurement,
+        breach=breach,
+        rule_scope=str(threshold_config.get("scope") or "builtin_default"),
+    )
+    try:
+        ins = db.ml_anomalies.insert_one(event_doc)
+        anomaly_oid = ins.inserted_id
+        db.alerts.update_one(
+            {"_id": alert_oid},
+            {"$set": {"ml_anomaly_id": anomaly_oid, "updated_at": datetime.now(timezone.utc)}},
+        )
+        if meas_id is not None:
+            db.measurements.update_one(
+                {"_id": meas_id},
+                {"$set": {
+                    "ml_anomaly_id": anomaly_oid,
+                    "ml_anomaly_status": "pending",
+                }},
+            )
+    except PyMongoError as e:
+        logger.warning("ensure_threshold_ml_anomaly_for_alert failed: %s", e)
 
 
 def create_manual_alert(
@@ -373,9 +431,16 @@ def evaluate_measurement_alerts(device_id: str, measurement: Dict[str, Any], pat
 
     for breach in breaches:
         if has_consecutive_breach(device_id, breach, threshold_config["consecutive_breaches"]):
-            is_new = upsert_open_alert(
+            is_new, alert_oid = upsert_open_alert(
                 device_id, breach, threshold_config, measured_at,
                 measurement_id=measurement.get("_id"),
+            )
+            ensure_threshold_ml_anomaly_for_alert(
+                device_id=device_id,
+                measurement=measurement,
+                breach=breach,
+                threshold_config=threshold_config,
+                alert_oid=alert_oid,
             )
             durable.append({
                 "metric": breach["metric"],

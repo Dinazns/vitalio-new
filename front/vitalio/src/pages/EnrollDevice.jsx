@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { CheckCircle2, Cpu } from 'lucide-react'
@@ -12,17 +12,27 @@ export default function EnrollDevice() {
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const [associatedDeviceId, setAssociatedDeviceId] = useState(null)
+  const [doctorAssignedDevice, setDoctorAssignedDevice] = useState(false)
+  const [deviceEnrolled, setDeviceEnrolled] = useState(false)
   const [deviceInfoLoading, setDeviceInfoLoading] = useState(true)
+
+  const loadDeviceInfo = useCallback(async () => {
+    const token = await getAccessTokenSilently()
+    const data = await getPatientDevice(token)
+    if (data?.device_id) {
+      setAssociatedDeviceId(String(data.device_id))
+    } else {
+      setAssociatedDeviceId(null)
+    }
+    setDoctorAssignedDevice(Boolean(data?.doctor_assigned_device))
+    setDeviceEnrolled(Boolean(data?.device_enrolled))
+  }, [getAccessTokenSilently])
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        const token = await getAccessTokenSilently()
-        const data = await getPatientDevice(token)
-        if (!cancelled && data?.device_id) {
-          setAssociatedDeviceId(String(data.device_id))
-        }
+        await loadDeviceInfo()
       } catch {
         /* pas bloquant */
       } finally {
@@ -32,7 +42,7 @@ export default function EnrollDevice() {
     return () => {
       cancelled = true
     }
-  }, [getAccessTokenSilently])
+  }, [loadDeviceInfo])
 
   const handleEnroll = async () => {
     if (code.length !== 6) return
@@ -42,7 +52,8 @@ export default function EnrollDevice() {
       const token = await getAccessTokenSilently()
       const res = await enrollPatientDevice(token, code)
       if (res?.device_id) setAssociatedDeviceId(String(res.device_id))
-      setStatus('success')
+      await loadDeviceInfo()
+      setStatus(null)
     } catch (e) {
       setStatus(e.message || 'Erreur')
     } finally {
@@ -53,10 +64,25 @@ export default function EnrollDevice() {
   const onCodeChange = (value) => {
     const digits = value.replace(/\D/g, '').slice(0, 6)
     setCode(digits)
-    if (status && status !== 'success') setStatus(null)
+    if (status) setStatus(null)
   }
 
-  if (status === 'success') {
+  const showPaired = deviceEnrolled
+  const showEnrollmentForm = doctorAssignedDevice && !deviceEnrolled
+
+  if (deviceInfoLoading) {
+    return (
+      <PatientLayout>
+        <div className="patient-container patient-theme">
+          <main className="patient-dashboard" style={{ maxWidth: 440, margin: '0 auto' }}>
+            <div className="panel">Chargement…</div>
+          </main>
+        </div>
+      </PatientLayout>
+    )
+  }
+
+  if (showPaired) {
     return (
       <PatientLayout>
         <div className="patient-container patient-theme">
@@ -64,7 +90,7 @@ export default function EnrollDevice() {
             <section className="panel panel-success" style={{ textAlign: 'center', maxWidth: 480, margin: '0 auto' }}>
               <CheckCircle2 size={40} style={{ marginBottom: '1rem' }} aria-hidden />
               <h2 style={{ marginTop: 0 }}>Dispositif enregistré</h2>
-              <p>Votre boîtier est maintenant lié à votre compte.</p>
+              <p>Votre boîtier est lié à votre compte.</p>
               {associatedDeviceId && (
                 <p style={{ fontSize: '1.05rem', margin: '0.75rem 0' }}>
                   Numéro du boîtier : <strong style={{ letterSpacing: '0.04em' }}>{associatedDeviceId}</strong>
@@ -90,10 +116,17 @@ export default function EnrollDevice() {
               <Cpu size={28} style={{ verticalAlign: 'middle', marginRight: 8 }} aria-hidden />
               Enregistrer votre dispositif
             </h1>
-            <p>Entrez le code à 6 chiffres affiché sur l&apos;écran de votre boîtier.</p>
+            {showEnrollmentForm ? (
+              <p>Entrez le code à 6 chiffres affiché sur l&apos;écran de votre boîtier.</p>
+            ) : (
+              <p>
+                Votre médecin doit d&apos;abord enregistrer l&apos;identifiant de votre boîtier sur votre dossier. Vous
+                pourrez ensuite saisir ici le code à 6 chiffres affiché sur l&apos;appareil.
+              </p>
+            )}
           </header>
 
-          {!deviceInfoLoading && associatedDeviceId && (
+          {showEnrollmentForm && associatedDeviceId && (
             <section
               className="panel"
               style={{
@@ -102,59 +135,67 @@ export default function EnrollDevice() {
                 border: '1px solid #bfdbfe',
               }}
             >
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569' }}>
-                Boîtier associé à votre compte
-              </p>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '1.25rem', fontWeight: 700, color: '#1e3a5f', letterSpacing: '0.03em' }}>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569' }}>Boîtier associé à votre compte</p>
+              <p
+                style={{
+                  margin: '0.5rem 0 0',
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  color: '#1e3a5f',
+                  letterSpacing: '0.03em',
+                }}
+              >
                 {associatedDeviceId}
               </p>
               <p style={{ margin: '0.75rem 0 0', fontSize: '0.85rem', color: '#64748b', lineHeight: 1.45 }}>
-                Si votre médecin vous a attribué ce matériel, saisissez ci-dessous le code à 6 chiffres affiché sur le boîtier pour terminer l&apos;appairage.
+                Saisissez ci-dessous le code à 6 chiffres affiché sur le boîtier pour terminer l&apos;appairage.
               </p>
             </section>
           )}
 
-          <section className="panel">
-            <label htmlFor="enroll-code" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-              Code à 6 chiffres
-            </label>
-            <input
-              id="enroll-code"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              value={code}
-              onChange={(e) => onCodeChange(e.target.value)}
-              placeholder="000000"
-              aria-label="Code à 6 chiffres affiché sur le boîtier"
-              aria-describedby="enroll-hint"
-              style={{
-                width: '100%',
-                padding: '1rem',
-                fontSize: '2rem',
-                textAlign: 'center',
-                letterSpacing: '0.35em',
-                border: '2px solid #2E75B6',
-                borderRadius: 8,
-                marginBottom: '1rem',
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            />
-            <p id="enroll-hint" style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#64748b' }}>
-              Le code est valable environ 10 minutes après affichage sur le boîtier.
-            </p>
-            {status && <p className="error-text">{status}</p>}
-            <button
-              type="button"
-              className="primary-button"
-              style={{ width: '100%' }}
-              onClick={handleEnroll}
-              disabled={code.length !== 6 || loading}
-            >
-              {loading ? 'Vérification…' : 'Enregistrer'}
-            </button>
-          </section>
+          {showEnrollmentForm && (
+            <section className="panel">
+              <label htmlFor="enroll-code" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                Code à 6 chiffres
+              </label>
+              <input
+                id="enroll-code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={code}
+                onChange={(e) => onCodeChange(e.target.value)}
+                placeholder="000000"
+                aria-label="Code à 6 chiffres affiché sur le boîtier"
+                aria-describedby="enroll-hint"
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  fontSize: '2rem',
+                  textAlign: 'center',
+                  letterSpacing: '0.35em',
+                  border: '2px solid #2E75B6',
+                  borderRadius: 8,
+                  marginBottom: '1rem',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              />
+              <p id="enroll-hint" style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#64748b' }}>
+                Le code est valable environ 10 minutes après affichage sur le boîtier.
+              </p>
+              {status && <p className="error-text">{status}</p>}
+              <button
+                type="button"
+                className="primary-button"
+                style={{ width: '100%' }}
+                onClick={handleEnroll}
+                disabled={code.length !== 6 || loading}
+              >
+                {loading ? 'Vérification…' : 'Enregistrer'}
+              </button>
+            </section>
+          )}
         </main>
       </div>
     </PatientLayout>

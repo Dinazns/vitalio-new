@@ -136,6 +136,21 @@
     background: #fef2f2;
     color: #991b1b;
   }
+
+  &--notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    border-color: #fcd34d;
+    background: #fffbeb;
+    color: #92400e;
+
+    .pml-panel--notice-desc {
+      margin: 0.35rem 0 0;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+  }
 }
 
 .pml-panel-sub {

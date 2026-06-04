@@ -38,6 +38,7 @@ export default function PatientMeasurement() {
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState(null)
+  const [storedDeviceId, setStoredDeviceId] = useState(null)
   const [error, setError] = useState('')
   const [simulateCritical, setSimulateCritical] = useState(false)
 
@@ -53,6 +54,7 @@ export default function PatientMeasurement() {
       const payload = createSimulatedMeasurement(simulateCritical)
       const response = await submitPatientMeasurement(token, payload)
       setResult(response.measurement || payload)
+      setStoredDeviceId(response.device_id ? String(response.device_id) : null)
       nextStep()
     } catch (submitError) {
         setError(submitError.message || "L'envoi a échoué.")
@@ -128,6 +130,12 @@ export default function PatientMeasurement() {
               <CheckCircle2 size={20} /> Résultat
             </h2>
             <p>Mesure envoyée avec succès.</p>
+            {storedDeviceId && (
+              <p style={{ fontSize: '0.95rem', color: '#475569', marginBottom: '0.75rem' }}>
+                Enregistrée pour votre boîtier&nbsp;:{' '}
+                <strong style={{ letterSpacing: '0.03em' }}>{storedDeviceId}</strong>
+              </p>
+            )}
             {result && (
               <div className="result-grid">
                 <span>SpO2: {result.spo2}%</span>
@@ -144,6 +152,7 @@ export default function PatientMeasurement() {
                 onClick={() => {
                   setStep(0)
                   setResult(null)
+                  setStoredDeviceId(null)
                   setError('')
                   setSimulateCritical(false)
                 }}

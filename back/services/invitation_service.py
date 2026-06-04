@@ -242,19 +242,18 @@ def invite_emergency_contact_if_needed(
     web_invite_url = f"{FRONTEND_URL.rstrip('/')}/invite-caregiver?token={invite_token}"
 
     if SMTP_HOST and SMTP_USER and SMTP_PASSWORD:
-        def _send_async():
-            try:
-                send_caregiver_invitation_email(
-                    caregiver_email=emergency_email,
-                    invite_token=invite_token,
-                    web_invite_url=web_invite_url,
-                    expires_at=expires_at,
-                    patient_display_name=patient_display_name,
-                )
-            except Exception as e:
-                logger.exception("Envoi email invitation aidant échoué: %s", e)
-
-        threading.Thread(target=_send_async, daemon=True).start()
+        # Envoi synchrone : un thread daemon peut être coupé dès que la requête HTTP se termine
+        # (typique sur hébergement type Render / workers), ce qui empêchait l'email de partir.
+        try:
+            send_caregiver_invitation_email(
+                caregiver_email=emergency_email,
+                invite_token=invite_token,
+                web_invite_url=web_invite_url,
+                expires_at=expires_at,
+                patient_display_name=patient_display_name,
+            )
+        except Exception as e:
+            logger.exception("Envoi email invitation aidant échoué: %s", e)
     else:
         logger.warning("SMTP not configured - caregiver invite created but email NOT sent for %s", emergency_email)
 

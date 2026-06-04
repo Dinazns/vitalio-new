@@ -42,7 +42,7 @@ PHYSIOLOGICAL_RANGES:Dict[str,Tuple[float,float]]={
 HARD_RANGES:Dict[str,Tuple[float,float]]={
     "heart_rate":(30.0,220.0),
     "spo2":(70.0,100.0),
-    "temperature":(34.0,42.0),
+    "temperature":(30.0,42.0),
     "signal_quality":(0.0,100.0),
 }
 
@@ -637,6 +637,47 @@ def build_anomaly_event(
     event["clinical_reasoning"]=suggestion.get("clinical_reasoning",[])
     event["urgency"]=suggestion.get("urgency","routine")
     return event
+
+def build_threshold_anomaly_document(
+    device_id:str,
+    user_id_auth:Optional[str],
+    measurement_id:Any,
+    measurement:Dict[str,Any],
+    breach:Dict[str,Any],
+    rule_scope:str,
+)->Dict[str,Any]:
+    """
+    Document ml_anomalies pour un dépassement de seuil clinique (non score ML critique).
+    Permet la même file de validation / réentraînement que les anomalies IF.
+    """
+    now=datetime.now(timezone.utc)
+    metric=str(breach.get("metric")or"")
+    label=FEATURE_LABELS.get(metric,metric)
+    return{
+        "device_id":device_id,
+        "user_id_auth":user_id_auth,
+        "measurement_id":measurement_id,
+        "measured_at":measurement.get("measured_at",now),
+        "anomaly_score":1.0,
+        "anomaly_level":"threshold",
+        "anomaly_source":"threshold",
+        "model_version":get_model_version(),
+        "contributing_variables":[{"variable":metric,"contribution_weight":1.0}],
+        "threshold_breach":{
+            "metric":metric,
+            "operator":breach.get("operator"),
+            "threshold":breach.get("threshold"),
+            "value":breach.get("value"),
+            "rule_scope":rule_scope,
+        },
+        "recommended_action":f"Validation clinique du dépassement de seuil ({label}).",
+        "clinical_reasoning":[],
+        "urgency":"routine",
+        "status":"pending",
+        "validated_by":None,
+        "validated_at":None,
+        "created_at":now,
+    }
 
 FORECAST_FEATURES=["heart_rate","spo2","temperature"]
 
@@ -1502,24 +1543,55 @@ def analyze_patient_vitals(
     - Daily segmentation for pattern detection
     - Forecast integration
     """
-    for m in measurements:
+    def _coerce_measured_at_iso(m:Dict[str,Any])->None:
         if not m.get("measured_at") and m.get("timestamp"):
             m["measured_at"]=m["timestamp"]
+        ts=m.get("measured_at")
+        if ts is None:
+            return
+        if isinstance(ts,datetime):
+            t=ts
+            if t.tzinfo is not None:
+                t=t.astimezone(timezone.utc).replace(tzinfo=None)
+            m["measured_at"]=t.isoformat()
+        elif not isinstance(ts,str):
+            m["measured_at"]=str(ts)
+
+    def _sort_key_measured_at(m:Dict[str,Any])->datetime:
+        ts=m.get("measured_at") or m.get("timestamp")
+        if ts is None:
+            return datetime.min.replace(tzinfo=timezone.utc)
+        if isinstance(ts,datetime):
+            t=ts
+            return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
+        if isinstance(ts,str):
+            try:
+                return datetime.fromisoformat(ts.replace("Z","+00:00"))
+            except ValueError:
+                return datetime.min.replace(tzinfo=timezone.utc)
+        return datetime.min.replace(tzinfo=timezone.utc)
+
+    for m in measurements:
+        _coerce_measured_at_iso(m)
 
     sorted_m=sorted(
         [m for m in measurements if m.get("measured_at")],
-        key=lambda m:m["measured_at"],
+        key=_sort_key_measured_at,
     )
 
     if len(sorted_m)<3:
         return{"status":"insufficient_data","n_measurements":len(sorted_m)}
 
     def _parse_ts_local(ts):
-        if isinstance(ts,str):
-            ts=datetime.fromisoformat(ts.replace("Z","+00:00"))
-        if ts.tzinfo is not None:
-            ts=ts.replace(tzinfo=None)
-        return ts
+        if isinstance(ts,datetime):
+            out=ts
+        elif isinstance(ts,str):
+            out=datetime.fromisoformat(ts.replace("Z","+00:00"))
+        else:
+            out=datetime.fromisoformat(str(ts).replace("Z","+00:00"))
+        if out.tzinfo is not None:
+            out=out.replace(tzinfo=None)
+        return out
 
     base_ts=_parse_ts_local(sorted_m[0]["measured_at"])
 

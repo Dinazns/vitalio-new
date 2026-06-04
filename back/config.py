@@ -2,12 +2,17 @@
 Configuration: environment variables and application constants.
 """
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
-env_path = '.env'
-if not os.path.exists(env_path):
-    env_path = '../.env'
-load_dotenv(env_path)
+_BASE_DIR = Path(__file__).resolve().parent
+# Priorité : back/.env (à côté de ce fichier), puis cwd, puis racine du repo.
+# Évite de charger ../.env (souvent localhost) quand on lance l'API depuis un autre dossier.
+for _env_path in (_BASE_DIR / ".env", Path.cwd() / ".env", _BASE_DIR.parent / ".env"):
+    if _env_path.is_file():
+        load_dotenv(_env_path)
+        break
 
 # Auth0
 AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
@@ -19,9 +24,32 @@ AUTH0_M2M_CLIENT_ID = os.getenv("AUTH0_M2M_CLIENT_ID")
 AUTH0_M2M_CLIENT_SECRET = os.getenv("AUTH0_M2M_CLIENT_SECRET")
 
 # MongoDB
-MONGODB_URI = os.getenv("MONGODB_URI", "") 
+MONGODB_URI = os.getenv("MONGODB_URI", "")
 MONGODB_IDENTITY_DB = os.getenv("MONGODB_IDENTITY_DB", "Vitalio_Identity")
 MONGODB_MEDICAL_DB = os.getenv("MONGODB_MEDICAL_DB", "Vitalio_Medical")
+# Optionnel : serveurs DNS pour les requêtes SRV/TXT (mongodb+srv). Utile sous Windows si d'autres
+# cartes (WSL, Hyper-V) pointent vers des DNS 192.168.* qui timeout. Ex. : 8.8.8.8,1.1.1.1
+MONGODB_DNS_SERVERS = os.getenv("MONGODB_DNS_SERVERS", "").strip()
+
+
+def apply_mongodb_dns_resolver() -> None:
+    """Force dnspython à utiliser des résolveurs explicites pour mongodb+srv (évite DNS LAN cassés)."""
+    if not MONGODB_DNS_SERVERS:
+        return
+    servers = [s.strip() for s in MONGODB_DNS_SERVERS.split(",") if s.strip()]
+    if not servers:
+        return
+    try:
+        import dns.resolver
+
+        res = dns.resolver.Resolver(configure=False)
+        res.nameservers = servers
+        dns.resolver.default_resolver = res
+    except ImportError:
+        pass
+
+
+apply_mongodb_dns_resolver()
 
 # MQTT
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
@@ -54,6 +82,15 @@ SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "charldevlin@gmail.com")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+
+# CORS: comma-separated extra origins (e.g. Vercel preview URLs). Merged in api.py with base list.
+def _parse_cors_origins_env(raw: str) -> list:
+    if not raw or not raw.strip():
+        return []
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
+CORS_EXTRA_ORIGINS = _parse_cors_origins_env(os.getenv("CORS_ORIGINS", ""))
 
 # Web Push (VAPID keys - generate with: py -m vapid --gen)
 VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY", "")

@@ -64,6 +64,15 @@ def init_database():
         )
         identity_db.caregiver_patients.create_index("caregiver_user_id_auth")
         identity_db.users_devices.create_index("device_id")
+        identity_db.users_devices.create_index("status")
+        # Backfill: existing device assignments are considered active.
+        try:
+            identity_db.users_devices.update_many(
+                {"status": {"$exists": False}},
+                {"$set": {"status": "active"}},
+            )
+        except PyMongoError:
+            pass
         identity_db.doctor_invites.create_index("token_hash", unique=True)
         identity_db.doctor_invites.create_index("expires_at", expireAfterSeconds=0)
         identity_db.doctor_invites.create_index([("doctor_user_id_auth", 1), ("mode", 1), ("created_at", -1)])

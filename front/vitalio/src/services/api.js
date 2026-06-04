@@ -102,7 +102,7 @@ export async function downloadPatientDataExport(accessToken) {
   return { blob, filename }
 }
 
-/** @returns {{ device_id: string | null, device_ids: string[] }} */
+/** @returns {{ device_id: string | null, device_ids: string[], doctor_assigned_device?: boolean, device_enrolled?: boolean }} */
 export async function getPatientDevice(accessToken) {
   return apiRequest('/api/me/device', accessToken, {
     method: 'GET',
@@ -116,6 +116,7 @@ export async function enrollPatientDevice(accessToken, enrollmentCode) {
   })
 }
 
+/** Le serveur attache toujours la mesure au device_id du compte (users_devices) ; ne pas envoyer device_id. */
 export async function submitPatientMeasurement(accessToken, measurement) {
   return apiRequest('/api/me/measurements', accessToken, {
     method: 'POST',
@@ -321,6 +322,29 @@ export async function adminAssociateDoctorPatient(accessToken, doctorId, patient
       patient_user_id_auth: patientId,
     }),
   })
+}
+
+export async function adminListDevices(accessToken, { q = '', status = '', page = 1, pageSize = 50 } = {}) {
+  const sp = new URLSearchParams()
+  if (q) sp.set('q', q)
+  if (status) sp.set('status', status)
+  sp.set('page', String(page))
+  sp.set('page_size', String(pageSize))
+  return apiRequest(`/api/admin/devices?${sp.toString()}`, accessToken, { method: 'GET' })
+}
+
+export async function adminUpdateDeviceStatus(accessToken, deviceId, status, reason = '') {
+  return apiRequest(`/api/admin/devices/${encodeURIComponent(deviceId)}/status`, accessToken, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, reason }),
+  })
+}
+
+export async function adminListDoctorPatientLinks(accessToken, { page = 1, pageSize = 100 } = {}) {
+  const sp = new URLSearchParams()
+  sp.set('page', String(page))
+  sp.set('page_size', String(pageSize))
+  return apiRequest(`/api/admin/associations/doctor-patients?${sp.toString()}`, accessToken, { method: 'GET' })
 }
 
 export async function getMLModelInfo() {

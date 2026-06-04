@@ -19,7 +19,7 @@ from services.measurement_service import validate_measurement_payload_mqtt
 from services.alert_service import evaluate_measurement_alerts
 from services.ml_service import run_ml_scoring
 from services.ml_retrain_scheduler import schedule_retrain_after_new_measurement
-from services.user_service import get_patient_id_from_device, get_user_profile
+from services.user_service import get_patient_id_from_device, get_user_profile, is_device_active
 
 _mqtt_client: Optional[mqtt.Client] = None
 _mqtt_thread: Optional[threading.Thread] = None
@@ -34,6 +34,11 @@ def on_mqtt_message(client, userdata, msg):
 
         if not device_id:
             print(f"Warning: Could not extract device_id from topic: {msg.topic}")
+            return
+
+        # Refuser l'ingestion des dispositifs inconnus ou suspendus par un admin.
+        if not is_device_active(device_id):
+            print(f"Ignored measurement: device {device_id} is unknown or suspended")
             return
 
         validation = validate_measurement_payload_mqtt(payload)

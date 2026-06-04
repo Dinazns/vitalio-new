@@ -11,7 +11,8 @@ import {
 
 export default function PatientWelcome() {
   const navigate = useNavigate()
-  const { getAccessTokenSilently } = useAuth0()
+  const { getAccessTokenSilently, user } = useAuth0()
+  const userId = user?.sub
   const [loading, setLoading] = useState(true)
   const [hasDevice, setHasDevice] = useState(false)
   const [questionnaireDone, setQuestionnaireDone] = useState(false)
@@ -27,17 +28,16 @@ export default function PatientWelcome() {
         ])
         if (cancelled) return
         const profile = profileRes?.profile ?? profileRes
-        const deviceId = deviceRes?.device_id
         const onboarded = Boolean(profile?.onboarding_completed)
-        const linked = Boolean(deviceId)
+        const linked = Boolean(deviceRes?.device_enrolled)
         setHasDevice(linked)
         setQuestionnaireDone(onboarded)
         if (linked && onboarded) {
-          markPatientWelcomeDone()
+          markPatientWelcomeDone(userId)
           navigate('/patient', { replace: true })
           return
         }
-        if (isPatientWelcomeDone()) {
+        if (isPatientWelcomeDone(userId)) {
           navigate('/patient', { replace: true })
           return
         }
@@ -48,10 +48,10 @@ export default function PatientWelcome() {
     return () => {
       cancelled = true
     }
-  }, [getAccessTokenSilently, navigate])
+  }, [getAccessTokenSilently, navigate, userId])
 
   const goDashboard = () => {
-    markPatientWelcomeDone()
+    markPatientWelcomeDone(userId)
     navigate('/patient', { replace: true })
   }
 

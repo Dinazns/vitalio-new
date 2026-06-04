@@ -305,16 +305,36 @@ def validate_measurement_values(
     spo2: Any,
     temperature: Any,
     signal_quality: Any = None,
-    require_signal_quality: bool = False
+    require_signal_quality: bool = False,
+    *,
+    optional_heart_rate: bool = False,
+    optional_spo2: bool = False,
+    optional_temperature: bool = False,
 ) -> List[str]:
-    """Validate measurement values and return reason codes for invalid fields."""
+    """Validate measurement values and return reason codes for invalid fields.
+
+    When optional_* is True, a missing (None) value is accepted; only non-null
+    values are range-checked. Used for MQTT when the device sends only some sensors.
+    """
     reasons = []
-    if heart_rate is None or heart_rate < 30 or heart_rate > 220:
-        reasons.append("heart_rate_out_of_range")
-    if spo2 is None or spo2 < 70 or spo2 > 100:
-        reasons.append("spo2_out_of_range")
-    if temperature is None or temperature < 34 or temperature > 42:
-        reasons.append("temperature_out_of_range")
+    if optional_heart_rate:
+        if heart_rate is not None and (heart_rate < 30 or heart_rate > 220):
+            reasons.append("heart_rate_out_of_range")
+    else:
+        if heart_rate is None or heart_rate < 30 or heart_rate > 220:
+            reasons.append("heart_rate_out_of_range")
+    if optional_spo2:
+        if spo2 is not None and (spo2 < 70 or spo2 > 100):
+            reasons.append("spo2_out_of_range")
+    else:
+        if spo2 is None or spo2 < 70 or spo2 > 100:
+            reasons.append("spo2_out_of_range")
+    if optional_temperature:
+        if temperature is not None and (temperature < 30 or temperature > 42):
+            reasons.append("temperature_out_of_range")
+    else:
+        if temperature is None or temperature < 30 or temperature > 42:
+            reasons.append("temperature_out_of_range")
     if require_signal_quality or signal_quality is not None:
         if signal_quality is None or signal_quality < 50:
             reasons.append("low_signal_quality")
@@ -322,7 +342,11 @@ def validate_measurement_values(
 
 
 def normalize_patient_measurement_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """Normalize and validate payload sent by patient app."""
+    """Normalize and validate payload sent by patient app.
+
+    Persisted ``device_id`` is always resolved server-side from ``users_devices`` for the authenticated user;
+    any ``device_id`` key in *payload* must be stripped by the caller before validation.
+    """
     required_fields = ["heart_rate", "spo2", "temperature"]
     missing = [field for field in required_fields if field not in payload]
     if missing:
@@ -360,18 +384,33 @@ def normalize_patient_measurement_payload(payload: Dict[str, Any]) -> Dict[str, 
 
 
 def validate_measurement_payload_mqtt(payload: dict) -> dict:
-    """Validate IoT sensor payload for MQTT messages."""
+    """Validate IoT sensor payload for MQTT messages.
+
+    FC / SpO2 are optional (omit MAX30102 or leave fields unset). Signal quality
+    is required only when at least one pulse-ox value is present.
+    If there is no pulse data, ``object_temp`` must be present and in range
+    (30–42 °C). If both pulse and temp are present, all provided values are checked.
+    """
     sensors = payload.get("sensors", {})
-    max30102 = sensors.get("MAX30102", {})
-    mlx90614 = sensors.get("MLX90614", {})
+    max30102 = sensors.get("MAX30102") or {}
+    mlx90614 = sensors.get("MLX90614") or {}
     hr = max30102.get("heart_rate")
     spo2 = max30102.get("spo2")
     temp = mlx90614.get("object_temp")
     signal_quality = payload.get("signal_quality")
 
+    has_pulse = hr is not None or spo2 is not None
+    # Sans pouls : la température est requise (cas « température seule »). Avec pouls sans temp : OK.
+    optional_temperature = temp is None and has_pulse
     reasons = validate_measurement_values(
-        heart_rate=hr, spo2=spo2, temperature=temp,
-        signal_quality=signal_quality, require_signal_quality=True
+        heart_rate=hr,
+        spo2=spo2,
+        temperature=temp,
+        signal_quality=signal_quality,
+        require_signal_quality=has_pulse,
+        optional_heart_rate=hr is None,
+        optional_spo2=spo2 is None,
+        optional_temperature=optional_temperature,
     )
     status = "VALID" if not reasons else "INVALID"
 

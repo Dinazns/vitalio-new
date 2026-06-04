@@ -60,6 +60,32 @@ def get_patient_id_from_device(device_id: str) -> Optional[str]:
         return None
 
 
+def get_device_status(device_id: str) -> Optional[str]:
+    """Return a device lifecycle status, or None if the device is unknown.
+
+    Documents created before the status field was introduced are treated as
+    'active' (backward compatibility)."""
+    if not device_id:
+        return None
+    try:
+        doc = get_identity_db().users_devices.find_one(
+            {"device_id": device_id},
+            projection={"status": 1, "_id": 0}
+        )
+    except PyMongoError:
+        return None
+    if not doc:
+        return None
+    return doc.get("status") or "active"
+
+
+def is_device_active(device_id: str) -> bool:
+    """True only when the device exists and is not suspended.
+
+    Unknown devices are rejected so callers can gate ingestion safely."""
+    return get_device_status(device_id) == "active"
+
+
 def get_device_measurements(device_id: str) -> List[Dict[str, Any]]:
     """Query Vitalio_Medical.measurements for vital measurements of a device."""
     try:

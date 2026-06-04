@@ -33,9 +33,10 @@ const URGENCY_CONFIG = {
 }
 
 const LEVEL_CONFIG = {
-  normal:   { color: '#047857', bg: '#ecfdf5', label: 'Normal',       Icon: CheckCircle2 },
-  warning:  { color: '#b45309', bg: '#fffbeb', label: 'Surveillance', Icon: AlertTriangle },
-  critical: { color: '#b91c1c', bg: '#fef2f2', label: 'Critique',     Icon: XCircle },
+  normal:    { color: '#047857', bg: '#ecfdf5', label: 'Normal',          Icon: CheckCircle2 },
+  warning:   { color: '#b45309', bg: '#fffbeb', label: 'Surveillance',    Icon: AlertTriangle },
+  critical:  { color: '#b91c1c', bg: '#fef2f2', label: 'Critique',        Icon: XCircle },
+  threshold: { color: '#7c3aed', bg: '#f5f3ff', label: 'Seuil dépassé', Icon: ShieldAlert },
 }
 
 const STATUS_CONFIG = {
@@ -181,7 +182,7 @@ export default function DoctorMLView() {
   const [patients, setPatients] = useState([])
   const [vitalStatusFilter, setVitalStatusFilter] = useState('OPEN')
   const [statusFilter, setStatusFilter] = useState('')
-  const [severityFilter, setSeverityFilter] = useState('critical')
+  const [severityFilter, setSeverityFilter] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [validatingId, setValidatingId] = useState(null)
@@ -699,6 +700,13 @@ export default function DoctorMLView() {
                     >
                       <XCircle size={12} /> Critiques uniquement
                     </button>
+                    <button
+                      className={`ml-filter-btn ${severityFilter === 'threshold' ? 'ml-filter-btn--active' : ''}`}
+                      onClick={() => setSeverityFilter('threshold')}
+                      title="Dépassements de seuils cliniques (FC, SpO₂, température)"
+                    >
+                      <ShieldAlert size={12} /> Seuils
+                    </button>
                   </div>
                   <div className="ml-date-filters">
                     <Clock size={14} />
@@ -731,7 +739,7 @@ export default function DoctorMLView() {
                   <Info size={20} />
                   <span>
                     Aucune alerte
-                    {severityFilter === 'critical' ? ' critique' : ''}
+                    {severityFilter === 'critical' ? ' critique' : severityFilter === 'threshold' ? ' de seuil' : ''}
                     {statusFilter ? ` avec le statut « ${STATUS_CONFIG[statusFilter]?.label} »` : ' détectée'}.
                   </span>
                 </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { Filter, Mail, QrCode, Search, Send, TriangleAlert, Users } from 'lucide-react'
+import { Cpu, Mail, QrCode, Search, Send, TriangleAlert, Users } from 'lucide-react'
 import { createCabinetCode, createDoctorInvitation, getDoctorPatients, getDoctorAlerts } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
 
@@ -22,6 +22,7 @@ export default function DoctorView() {
   const [inviteInfo, setInviteInfo] = useState(null)
   const [cabinetCodeInfo, setCabinetCodeInfo] = useState(null)
   const [patientEmail, setPatientEmail] = useState('')
+  const [inviteDeviceId, setInviteDeviceId] = useState('')
   const [sendEmail, setSendEmail] = useState(false)
   const [actionError, setActionError] = useState('')
   const [criticalCount, setCriticalCount] = useState(0)
@@ -81,6 +82,10 @@ export default function DoctorView() {
         payload.patient_email = patientEmail.trim()
         payload.send_email = true
       }
+      const trimmedDevice = inviteDeviceId.trim()
+      if (trimmedDevice) {
+        payload.device_id = trimmedDevice
+      }
       const data = await createDoctorInvitation(token, payload)
       setInviteInfo(data)
     } catch (e) {
@@ -138,6 +143,39 @@ export default function DoctorView() {
                 </div>
                 <p className="doctor-invite-desc">Générez une invitation par lien ou QR code, envoyée par email au patient.</p>
               </div>
+              <div
+                className="doctor-invite-device-panel"
+                style={{
+                  marginBottom: '1.25rem',
+                  padding: '1rem 0 0',
+                  borderTop: '1px solid #e2e8f0',
+                }}
+              >
+                <div className="section-header" style={{ marginBottom: '0.75rem' }}>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, fontSize: '1rem' }}>
+                    <Cpu size={20} /> Boîtier patient
+                  </h3>
+                </div>
+                <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
+                  Saisissez ou scannez l&apos;identifiant matériel affiché sur le boîtier (ex.&nbsp;ESP32-0042). Une fois
+                  enregistré, le patient peut terminer l&apos;enrôlement à domicile.
+                </p>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Device ID (optionnel)</span>
+                  <input
+                    type="text"
+                    className="doctor-invite-email"
+                    value={inviteDeviceId}
+                    onChange={(e) => setInviteDeviceId(e.target.value)}
+                    placeholder="ESP32-0042"
+                    autoComplete="off"
+                    spellCheck="false"
+                  />
+                </label>
+                <p style={{ margin: '0.75rem 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Si vous laissez ce champ vide, vous pourrez renseigner le boîtier plus tard depuis la fiche patient.
+                </p>
+              </div>
               <div className="doctor-invite-form">
                 <label className="doctor-invite-checkbox">
                   <input
@@ -190,6 +228,12 @@ export default function DoctorView() {
                       <span className="doctor-invite-success-dot" />
                       Email envoyé au patient avec le QR code.
                     </div>
+                  )}
+                  {inviteInfo.pending_device_id && (
+                    <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', color: '#334155' }}>
+                      Boîtier prévu pour cette invitation&nbsp;:{' '}
+                      <strong style={{ letterSpacing: '0.03em' }}>{inviteInfo.pending_device_id}</strong>
+                    </p>
                   )}
                   <div className="doctor-invite-token">
                     <span className="doctor-invite-token-label">Lien d'invitation</span>

@@ -1,79 +1,192 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { ArrowLeft, Wifi, Battery, Search, Server, Power, RefreshCw, AlertOctagon } from 'lucide-react';
-import { SENSORS_STATUS } from '../data/mockData';
-import { adminAssociateDoctorPatient } from '../services/api';
+import { ArrowLeft, Search, Server, RefreshCw, Link2, Ban, CheckCircle2, Stethoscope, User, ArrowRight } from 'lucide-react';
+import {
+    adminListDevices,
+    adminUpdateDeviceStatus,
+    adminListDoctorPatientLinks,
+    adminAssociateDoctorPatient,
+} from '../services/api';
 
 const STATUS_LABELS = {
-    online: 'En ligne',
-    offline: 'Hors ligne',
-    warning: 'Alerte',
+    active: 'Actif',
+    suspended: 'Suspendu',
 };
 
 const StatusBadge = ({ status }) => {
-    const colors = {
-        online: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-        offline: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
-        warning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    };
+    const isActive = status === 'active';
     return (
-        <span className={`px-2 py-1 rounded text-xs font-mono border ${colors[status] || colors.offline}`}>
+        <span
+            className={`status-led ${isActive ? 'ok' : 'err'}`}
+            title={isActive ? 'Dispositif actif' : 'Dispositif suspendu'}
+        >
+            <span className="led-dot" aria-hidden="true" />
             {STATUS_LABELS[status] || status}
         </span>
     );
 };
 
-const BatteryIndicator = ({ level }) => {
-    let color = 'text-green-500';
-    if (level < 20) color = 'text-red-500';
-    else if (level < 50) color = 'text-amber-500';
+const EnrolledBadge = ({ enrolled }) => (
+    <span
+        className={`status-led ${enrolled ? 'ok' : 'err'}`}
+        title={enrolled ? 'Boîtier appairé au patient' : 'Boîtier non appairé'}
+    >
+        <span className="led-dot" aria-hidden="true" />
+        {enrolled ? 'Appairé' : 'Non appairé'}
+    </span>
+);
 
-    return (
-        <div className="flex items-center gap-1">
-            <Battery size={16} className={color} />
-            <span className={`text-xs font-mono font-bold ${color}`}>{level}%</span>
-        </div>
-    );
-};
-
-const SignalIndicator = ({ strength }) => {
-    let color = 'text-green-500';
-    if (strength < 40) color = 'text-red-500';
-    else if (strength < 70) color = 'text-amber-500';
-
-    return (
-        <div className="flex items-center gap-1">
-            <Wifi size={16} className={color} />
-            <span className={`text-xs font-mono font-bold ${color}`}>{strength}%</span>
-        </div>
-    );
+const personLabel = (person) => {
+    if (!person) return '—';
+    return person.display_name || person.email || person.user_id_auth || '—';
 };
 
 export default function AdminView() {
     const navigate = useNavigate();
     const { getAccessTokenSilently } = useAuth0();
+
+    const [devices, setDevices] = React.useState([]);
+    const [totalDevices, setTotalDevices] = React.useState(0);
+    const [links, setLinks] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState('');
+    const [busyDevice, setBusyDevice] = React.useState('');
+
+    const [search, setSearch] = React.useState('');
+    const [statusFilter, setStatusFilter] = React.useState('');
+    const [doctorFilter, setDoctorFilter] = React.useState('');
+
     const [doctorId, setDoctorId] = React.useState('');
     const [patientId, setPatientId] = React.useState('');
     const [linkMessage, setLinkMessage] = React.useState('');
     const [linkError, setLinkError] = React.useState('');
+    const [associating, setAssociating] = React.useState(false);
+
+    const loadAll = React.useCallback(async (opts = {}) => {
+        setLoading(true);
+        setError('');
+        try {
+            const token = await getAccessTokenSilently();
+            const [devicesRes, linksRes] = await Promise.all([
+                adminListDevices(token, { q: opts.q ?? search, status: opts.status ?? statusFilter }),
+                adminListDoctorPatientLinks(token),
+            ]);
+            setDevices(devicesRes.devices || []);
+            setTotalDevices(devicesRes.count || 0);
+            setLinks(linksRes.links || []);
+        } catch (e) {
+            setError(e.message || 'Impossible de charger les données admin');
+        } finally {
+            setLoading(false);
+        }
+    }, [getAccessTokenSilently, search, statusFilter]);
+
+    React.useEffect(() => {
+        loadAll();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleSearchSubmit = (event) => {
+        event.preventDefault();
+        loadAll();
+    };
+
+    const handleFilterChange = (value) => {
+        setStatusFilter(value);
+        loadAll({ status: value });
+    };
+
+    const handleToggleStatus = async (device) => {
+        const suspending = device.status !== 'suspended';
+        let reason = '';
+        if (suspending) {
+            if (!window.confirm(`Suspendre le dispositif ${device.device_id} ? Les nouvelles mesures seront bloquées.`)) {
+                return;
+            }
+            reason = window.prompt('Motif de suspension (optionnel) :', '') || '';
+        } else if (!window.confirm(`Réactiver le dispositif ${device.device_id} ?`)) {
+            return;
+        }
+        setBusyDevice(device.device_id);
+        setError('');
+        try {
+            const token = await getAccessTokenSilently();
+            await adminUpdateDeviceStatus(token, device.device_id, suspending ? 'suspended' : 'active', reason);
+            await loadAll();
+        } catch (e) {
+            setError(e.message || 'Impossible de mettre à jour le statut du dispositif');
+        } finally {
+            setBusyDevice('');
+        }
+    };
 
     const handleAssociate = async () => {
+        setLinkError('');
+        setLinkMessage('');
+        setAssociating(true);
         try {
-            setLinkError('');
-            setLinkMessage('');
             const token = await getAccessTokenSilently();
             await adminAssociateDoctorPatient(token, doctorId.trim(), patientId.trim());
             setLinkMessage('Association médecin-patient créée.');
+            setDoctorId('');
+            setPatientId('');
+            const linksRes = await adminListDoctorPatientLinks(token);
+            setLinks(linksRes.links || []);
         } catch (e) {
             setLinkError(e.message || "Impossible de créer l'association");
+        } finally {
+            setAssociating(false);
         }
     };
+
+    const doctorOptions = React.useMemo(() => {
+        const byId = new Map();
+        links.forEach((link) => {
+            const doctor = link.doctor;
+            if (doctor?.user_id_auth) byId.set(doctor.user_id_auth, doctor);
+        });
+        devices.forEach((device) => {
+            (device.doctors || []).forEach((doctor) => {
+                if (doctor?.user_id_auth) byId.set(doctor.user_id_auth, doctor);
+            });
+        });
+        return Array.from(byId.values()).sort((a, b) =>
+            personLabel(a).localeCompare(personLabel(b), 'fr', { sensitivity: 'base' })
+        );
+    }, [links, devices]);
+
+    const filteredLinks = React.useMemo(() => {
+        const list = doctorFilter
+            ? links.filter((link) => link.doctor?.user_id_auth === doctorFilter)
+            : links;
+        return [...list].sort((a, b) =>
+            personLabel(a.patient).localeCompare(personLabel(b.patient), 'fr', { sensitivity: 'base' })
+        );
+    }, [links, doctorFilter]);
+
+    const filteredDevices = React.useMemo(() => {
+        const list = doctorFilter
+            ? devices.filter((device) =>
+                (device.doctors || []).some((doctor) => doctor.user_id_auth === doctorFilter)
+            )
+            : devices;
+        return [...list].sort((a, b) =>
+            personLabel(a.patient).localeCompare(personLabel(b.patient), 'fr', { sensitivity: 'base' })
+        );
+    }, [devices, doctorFilter]);
+
+    const activeCount = filteredDevices.filter((d) => d.status !== 'suspended').length;
+    const suspendedCount = filteredDevices.filter((d) => d.status === 'suspended').length;
+    const enrolledCount = filteredDevices.filter((d) => d.enrolled).length;
+
+    const selectedDoctorLabel = doctorFilter
+        ? personLabel(doctorOptions.find((d) => d.user_id_auth === doctorFilter))
+        : null;
 
     return (
         <div className="admin-container admin-theme">
 
-            {}
             <nav className="admin-nav">
                 <div className="nav-left">
                     <button onClick={() => navigate('/')} className="back-btn">
@@ -84,116 +197,249 @@ export default function AdminView() {
                             <Server size={18} className="icon" />
                             VitalIO_Admin
                         </h1>
-                        <p className="version">v2.4.0-stable • système : ok</p>
+                        <p className="version">Gestion des dispositifs &amp; associations</p>
                     </div>
                 </div>
                 <div className="nav-right">
                     <span className="status-dot animate-pulse"></span>
-                    <span className="status-text">Connecté</span>
+                    <span className="status-text">{loading ? 'Chargement' : 'Connecté'}</span>
                 </div>
             </nav>
 
             <div className="admin-content">
 
-                {}
                 <div className="kpi-grid">
                     <div className="kpi-card">
-                        <p className="label">Capteurs totaux</p>
-                        <p className="value">42</p>
+                        <p className="label">{doctorFilter ? 'Patients filtrés' : 'Dispositifs (page)'}</p>
+                        <p className="value">{filteredDevices.length}</p>
                     </div>
                     <div className="kpi-card">
-                        <p className="label">En ligne</p>
-                        <p className="value ok">38</p>
+                        <p className="label">Actifs</p>
+                        <p className="value ok">{activeCount}</p>
                     </div>
                     <div className="kpi-card">
-                        <p className="label">Alertes</p>
-                        <p className="value warn">3</p>
+                        <p className="label">Suspendus</p>
+                        <p className="value err">{suspendedCount}</p>
                     </div>
                     <div className="kpi-card">
-                        <p className="label">Hors ligne</p>
-                        <p className="value err">1</p>
+                        <p className="label">Appairés</p>
+                        <p className="value">
+                            {enrolledCount}
+                            {' / '}
+                            {doctorFilter ? filteredDevices.length : totalDevices}
+                            {doctorFilter ? '' : ' total'}
+                        </p>
                     </div>
                 </div>
 
-                {}
                 <div className="toolbar">
-                    <div className="search-box">
+                    <form className="search-box" onSubmit={handleSearchSubmit}>
                         <Search className="icon" size={16} />
                         <input
                             type="text"
-                            placeholder="Rechercher ID appareil, emplacement..."
+                            placeholder="Rechercher ID dispositif, email ou nom patient..."
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
                         />
-                    </div>
-                    <button className="refresh-btn">
-                        <RefreshCw size={16} /> Actualiser
-                    </button>
-                </div>
-
-                <div className="patient-table-section" style={{ marginBottom: '16px' }}>
-                    <div className="section-header">
-                        <h3>Liaison médecin / patient</h3>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        <input
-                            type="text"
-                            placeholder="doctor_user_id_auth"
-                            value={doctorId}
-                            onChange={(event) => setDoctorId(event.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="patient_user_id_auth"
-                            value={patientId}
-                            onChange={(event) => setPatientId(event.target.value)}
-                        />
-                        <button className="refresh-btn" onClick={handleAssociate}>
-                            Associer
+                    </form>
+                    <div className="toolbar-controls">
+                        <select
+                            className="admin-select doctor-filter"
+                            value={doctorFilter}
+                            onChange={(event) => setDoctorFilter(event.target.value)}
+                            aria-label="Filtrer par médecin"
+                        >
+                            <option value="">Tous les médecins</option>
+                            {doctorOptions.map((doctor) => (
+                                <option key={doctor.user_id_auth} value={doctor.user_id_auth}>
+                                    {personLabel(doctor)}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            className="admin-select"
+                            value={statusFilter}
+                            onChange={(event) => handleFilterChange(event.target.value)}
+                            aria-label="Filtrer par statut"
+                        >
+                            <option value="">Tous les statuts</option>
+                            <option value="active">Actifs</option>
+                            <option value="suspended">Suspendus</option>
+                        </select>
+                        <button className="refresh-btn" onClick={() => loadAll()} type="button">
+                            <RefreshCw size={16} /> Actualiser
                         </button>
                     </div>
-                    {linkError && <p className="doctor-error">{linkError}</p>}
-                    {linkMessage && <p>{linkMessage}</p>}
                 </div>
 
-                {}
-                <div className="devices-grid">
-                    {SENSORS_STATUS.map(sensor => (
-                        <div key={sensor.id} className="device-card group">
-                            {sensor.status === 'warning' && <div className="warning-overlay"></div>}
+                {error && <p className="doctor-error" style={{ marginBottom: '16px' }}>{error}</p>}
 
-                            <div className="card-header">
-                                <div>
-                                    <h3>{sensor.type}</h3>
-                                    <p className="id-text">{sensor.id}</p>
-                                </div>
-                                <StatusBadge status={sensor.status} />
-                            </div>
+                <section className="association-section">
+                    <div className="section-header">
+                        <h3>
+                            <Link2 size={18} />
+                            Liaison médecin / patient
+                        </h3>
+                        <span className="section-count">
+                            {doctorFilter
+                                ? `${filteredLinks.length} patient${filteredLinks.length !== 1 ? 's' : ''}`
+                                : `${links.length} lien${links.length !== 1 ? 's' : ''}`}
+                        </span>
+                    </div>
 
-                            <div className="info-list">
-                                <div className="info-row border-b">
-                                    <span className="label">Emplacement</span>
-                                    <span className="val">{sensor.location}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Batterie</span>
-                                    <BatteryIndicator level={sensor.battery} />
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Signal</span>
-                                    <SignalIndicator strength={sensor.signal} />
-                                </div>
-                            </div>
-
-                            <div className="actions">
-                                <button title="Redémarrer">
-                                    <Power size={16} />
-                                </button>
-                                <button title="Diagnostiquer">
-                                    <AlertOctagon size={16} />
-                                </button>
-                            </div>
+                    <div className="association-form">
+                        <div className="association-field">
+                            <label htmlFor="admin-doctor-id">
+                                <Stethoscope size={12} />
+                                Médecin
+                            </label>
+                            <input
+                                id="admin-doctor-id"
+                                type="text"
+                                placeholder="auth0|… ou identifiant médecin"
+                                value={doctorId}
+                                onChange={(event) => setDoctorId(event.target.value)}
+                            />
                         </div>
-                    ))}
-                </div>
+
+                        <div className="association-arrow" aria-hidden="true">
+                            <ArrowRight size={18} />
+                        </div>
+
+                        <div className="association-field">
+                            <label htmlFor="admin-patient-id">
+                                <User size={12} />
+                                Patient
+                            </label>
+                            <input
+                                id="admin-patient-id"
+                                type="text"
+                                placeholder="auth0|… ou identifiant patient"
+                                value={patientId}
+                                onChange={(event) => setPatientId(event.target.value)}
+                            />
+                        </div>
+
+                        <div className="association-submit">
+                            <button
+                                className="refresh-btn"
+                                onClick={handleAssociate}
+                                type="button"
+                                disabled={associating || !doctorId.trim() || !patientId.trim()}
+                            >
+                                <Link2 size={16} />
+                                {associating ? 'Association…' : 'Associer'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {linkError && (
+                        <p className="association-feedback error" role="alert">{linkError}</p>
+                    )}
+                    {linkMessage && (
+                        <p className="association-feedback success" role="status">{linkMessage}</p>
+                    )}
+
+                    <div className="association-links">
+                        <p className="links-label">
+                            {doctorFilter
+                                ? `Patients de ${selectedDoctorLabel}`
+                                : 'Liens existants'}
+                        </p>
+                        {filteredLinks.length === 0 ? (
+                            <p className="links-empty">
+                                {doctorFilter
+                                    ? 'Aucun patient associé à ce médecin.'
+                                    : 'Aucun lien médecin-patient enregistré.'}
+                            </p>
+                        ) : (
+                            <div className="links-list">
+                                {filteredLinks.map((link, idx) => (
+                                    <div
+                                        key={`${link.doctor?.user_id_auth}-${link.patient?.user_id_auth}-${idx}`}
+                                        className="link-row"
+                                    >
+                                        <div className="link-parties">
+                                            <span className="link-person doctor" title={link.doctor?.user_id_auth}>
+                                                {personLabel(link.doctor)}
+                                            </span>
+                                            <ArrowRight size={14} className="link-arrow" />
+                                            <span className="link-person patient" title={link.patient?.user_id_auth}>
+                                                {personLabel(link.patient)}
+                                            </span>
+                                        </div>
+                                        {link.linked_by && (
+                                            <span className="link-meta">via {link.linked_by}</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {loading && filteredDevices.length === 0 && devices.length === 0 ? (
+                    <p style={{ color: '#64748b' }}>Chargement des dispositifs...</p>
+                ) : filteredDevices.length === 0 ? (
+                    <p style={{ color: '#64748b' }}>
+                        {doctorFilter
+                            ? `Aucun dispositif pour ${selectedDoctorLabel}.`
+                            : 'Aucun dispositif trouvé.'}
+                    </p>
+                ) : (
+                    <div className="devices-grid">
+                        {filteredDevices.map((device) => (
+                            <div key={device.device_id} className="device-card group">
+                                {device.status === 'suspended' && <div className="warning-overlay"></div>}
+
+                                <div className="card-header">
+                                    <div>
+                                        <h3>{personLabel(device.patient)}</h3>
+                                        <p className="id-text">{device.device_id}</p>
+                                    </div>
+                                    <StatusBadge status={device.status} />
+                                </div>
+
+                                <div className="info-list">
+                                    <div className="info-row border-b">
+                                        <span className="label">Patient</span>
+                                        <span className="val">{device.patient?.email || '—'}</span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="label">Médecins liés</span>
+                                        <span className="val">
+                                            {device.doctors && device.doctors.length > 0
+                                                ? device.doctors.map((d) => personLabel(d)).join(', ')
+                                                : '—'}
+                                        </span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="label">Appairage</span>
+                                        <EnrolledBadge enrolled={device.enrolled} />
+                                    </div>
+                                    {device.status === 'suspended' && device.suspension_reason && (
+                                        <div className="info-row">
+                                            <span className="label">Motif</span>
+                                            <span className="val">{device.suspension_reason}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="actions" style={{ opacity: 1 }}>
+                                    <button
+                                        title={device.status === 'suspended' ? 'Réactiver' : 'Suspendre'}
+                                        onClick={() => handleToggleStatus(device)}
+                                        disabled={busyDevice === device.device_id}
+                                    >
+                                        {device.status === 'suspended'
+                                            ? <CheckCircle2 size={16} />
+                                            : <Ban size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
             </div>
         </div>

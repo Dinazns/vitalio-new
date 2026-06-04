@@ -431,7 +431,7 @@ export default function DoctorPatientML() {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h1><BrainCircuit size={26} /> Suivi avancé - {analysis?.patient_display || patientId}</h1>
+              <h1><BrainCircuit size={26} /> Suivi avancé - {[analysis?.patient_first_name, analysis?.patient_last_name].filter(Boolean).join(' ') || analysis?.patient_display || patientId}</h1>
               <p>Tendances, détection des signes d'alerte et prévisions des constantes vitales</p>
             </div>
           </div>
@@ -458,6 +458,15 @@ export default function DoctorPatientML() {
 
         {!loading && !error && analysis && (
           <>
+            {analysis.code === 'insufficient_data' && (
+              <div className="pml-panel pml-panel--notice" role="status">
+                <Info size={20} aria-hidden />
+                <div>
+                  <strong>Données insuffisantes sur la période</strong>
+                  <p className="pml-panel--notice-desc">{analysis.message}</p>
+                </div>
+              </div>
+            )}
             <section className="pml-stats-section">
               <div className="pml-stats-header">
                 <h2 className="pml-stats-title">Indicateurs clés</h2>
