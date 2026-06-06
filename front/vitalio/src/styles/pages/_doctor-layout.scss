@@ -1,4 +1,5 @@
 @use '../variables' as *;
+@use '../mixins' as *;
 
 $doc-sidebar-width: 240px;
 $doc-sidebar-collapsed: 64px;
@@ -11,6 +12,7 @@ $doc-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .doctor-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
 
   &--collapsed .doctor-sidebar {
     width: $doc-sidebar-collapsed;
@@ -33,6 +35,9 @@ $doc-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
   transition: width $doc-sidebar-transition;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
 
   .sidebar-header {
     display: flex;
@@ -130,7 +135,9 @@ $doc-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     align-items: center;
     gap: 0.75rem;
     padding: 0.65rem 0.75rem;
+    min-height: 2.75rem;
     border-radius: 10px;
+    position: relative;
     color: $doc-sidebar-text;
     text-decoration: none;
     font-size: 0.9rem;
@@ -185,6 +192,17 @@ $doc-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
+  .sidebar-badge-dot {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.45rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: #ef4444;
+    box-shadow: 0 0 0 2px $doc-sidebar-bg;
+  }
+
   .sidebar-footer {
     display: flex;
     flex-direction: column;
@@ -200,6 +218,9 @@ $doc-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   margin-left: $doc-sidebar-width;
   transition: margin-left $doc-sidebar-transition;
   min-height: 100vh;
+  min-height: 100dvh;
+  min-width: 0;
+  padding-right: env(safe-area-inset-right, 0);
 }
 
 .doctor-layout .doctor-container {
@@ -210,7 +231,7 @@ $doc-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: $bp-md) {
   .doctor-sidebar {
     width: $doc-sidebar-collapsed;
   }
@@ -229,9 +250,23 @@ $doc-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   .doctor-sidebar .sidebar-link {
     justify-content: center;
     padding: 0.65rem;
+    min-height: 2.75rem;
   }
 
   .doctor-sidebar .sidebar-footer .sidebar-link {
     justify-content: center;
+  }
+}
+
+@media (max-width: $bp-sm) {
+  .doctor-sidebar .sidebar-header {
+    padding: 0.75rem 0.5rem;
+    min-height: 56px;
+    justify-content: center;
+  }
+
+  .doctor-sidebar .sidebar-toggle {
+    width: 2.75rem;
+    height: 2.75rem;
   }
 }

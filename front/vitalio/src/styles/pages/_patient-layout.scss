@@ -1,4 +1,5 @@
 @use '../variables' as *;
+@use '../mixins' as *;
 
 $sidebar-width: 240px;
 $sidebar-collapsed: 64px;
@@ -11,6 +12,7 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .patient-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background: #f6f9fc;
 
   &--collapsed .patient-sidebar {
@@ -34,6 +36,9 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
   transition: width $sidebar-transition;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
 }
 
 .patient-main {
@@ -41,6 +46,9 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   margin-left: $sidebar-width;
   transition: margin-left $sidebar-transition;
   min-height: 100vh;
+  min-height: 100dvh;
+  min-width: 0;
+  padding-right: env(safe-area-inset-right, 0);
 }
 
 .sidebar-header {
@@ -121,6 +129,7 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 0.75rem;
+  min-height: 2.75rem;
   border-radius: 10px;
   color: $sidebar-text;
   text-decoration: none;
@@ -171,13 +180,14 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .patient-layout .patient-container {
   padding: 1.5rem 2rem;
   min-height: 100vh;
+  min-height: 100dvh;
 
-  @media (max-width: 768px) {
+  @media (max-width: $bp-md) {
     padding: 1rem 1.25rem;
   }
 
-  @media (max-width: 480px) {
-    padding: 0.75rem 1rem;
+  @media (max-width: $bp-sm) {
+    padding: 0.75rem 0.875rem;
   }
 
   .back-button,
@@ -191,7 +201,7 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $bp-md) {
   .patient-sidebar {
     width: $sidebar-collapsed;
   }
@@ -209,7 +219,7 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   .sidebar-link {
     justify-content: center;
     padding: 0.65rem;
-    min-height: 44px;
+    min-height: 2.75rem;
   }
 
   .sidebar-footer .sidebar-link {
@@ -217,7 +227,7 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: $bp-sm) {
   .patient-sidebar {
     width: $sidebar-collapsed;
   }
@@ -229,10 +239,11 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   .sidebar-header {
     padding: 0.75rem 0.5rem;
     min-height: 56px;
+    justify-content: center;
   }
 
   .sidebar-toggle {
-    width: 40px;
-    height: 40px;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 }

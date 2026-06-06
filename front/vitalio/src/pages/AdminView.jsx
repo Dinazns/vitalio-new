@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { ArrowLeft, Search, Server, RefreshCw, Link2, Ban, CheckCircle2, Stethoscope, User, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Search, Server, RefreshCw, Link2, Ban, CheckCircle2, Stethoscope, User, ArrowRight, LogOut } from 'lucide-react';
 import {
     adminListDevices,
     adminUpdateDeviceStatus,
@@ -44,7 +44,12 @@ const personLabel = (person) => {
 
 export default function AdminView() {
     const navigate = useNavigate();
-    const { getAccessTokenSilently } = useAuth0();
+    const { getAccessTokenSilently, logout } = useAuth0();
+
+    const handleLogout = () => {
+        logout({ logoutParams: { returnTo: window.location.origin } });
+        localStorage.removeItem('vitalio_user');
+    };
 
     const [devices, setDevices] = React.useState([]);
     const [totalDevices, setTotalDevices] = React.useState(0);
@@ -203,6 +208,15 @@ export default function AdminView() {
                 <div className="nav-right">
                     <span className="status-dot animate-pulse"></span>
                     <span className="status-text">{loading ? 'Chargement' : 'Connecté'}</span>
+                    <button
+                        type="button"
+                        className="admin-logout-btn"
+                        onClick={handleLogout}
+                        title="Déconnexion"
+                    >
+                        <LogOut size={16} />
+                        <span>Déconnexion</span>
+                    </button>
                 </div>
             </nav>
 
@@ -425,7 +439,7 @@ export default function AdminView() {
                                     )}
                                 </div>
 
-                                <div className="actions" style={{ opacity: 1 }}>
+                                <div className="actions">
                                     <button
                                         title={device.status === 'suspended' ? 'Réactiver' : 'Suspendre'}
                                         onClick={() => handleToggleStatus(device)}

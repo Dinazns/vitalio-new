@@ -103,8 +103,15 @@ export default function DoctorLayout({ children }) {
             >
               <Icon size={20} />
               {!collapsed && <span>{label}</span>}
-              {!collapsed && to === '/doctor/alertes' && criticalCount > 0 && (
-                <span className="sidebar-badge sidebar-badge--critical">{criticalCount}</span>
+              {to === '/doctor/alertes' && criticalCount > 0 && (
+                collapsed ? (
+                  <span
+                    className="sidebar-badge-dot"
+                    aria-label={`${criticalCount} alerte${criticalCount > 1 ? 's' : ''}`}
+                  />
+                ) : (
+                  <span className="sidebar-badge sidebar-badge--critical">{criticalCount}</span>
+                )
               )}
             </NavLink>
           ))}

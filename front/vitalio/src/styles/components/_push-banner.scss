@@ -2,9 +2,13 @@
 
 .push-banner {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0));
+  padding-left: max(1rem, env(safe-area-inset-left, 0));
+  padding-right: max(1rem, env(safe-area-inset-right, 0));
   background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);
   color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -68,8 +72,14 @@
 
   &__actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     flex-shrink: 0;
+    width: 100%;
+
+    @media (min-width: 640px) {
+      width: auto;
+    }
   }
 
   &__btn {
@@ -78,9 +88,17 @@
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 600;
-    padding: 0.4rem 0.9rem;
+    padding: 0.5rem 0.9rem;
+    min-height: 2.75rem;
     transition: all 0.15s;
     white-space: nowrap;
+    flex: 1;
+
+    @media (min-width: 640px) {
+      flex: 0 1 auto;
+      min-height: auto;
+      padding: 0.4rem 0.9rem;
+    }
 
     &--primary {
       background: #fff;
