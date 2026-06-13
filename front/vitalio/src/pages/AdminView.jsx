@@ -1,13 +1,41 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { ArrowLeft, Search, Server, RefreshCw, Link2, Ban, CheckCircle2, Stethoscope, User, ArrowRight, LogOut } from 'lucide-react';
+import { ArrowLeft, Search, Server, RefreshCw, Link2, Ban, CheckCircle2, Stethoscope, User, ArrowRight, LogOut, ScrollText } from 'lucide-react';
 import {
     adminListDevices,
     adminUpdateDeviceStatus,
     adminListDoctorPatientLinks,
     adminAssociateDoctorPatient,
+    getAdminAuditLog,
 } from '../services/api';
+
+const AUDIT_EVENT_LABELS = {
+    patient_data_export: 'Export données patient',
+    patient_data_erasure: 'Suppression compte patient',
+    patient_profile_read: 'Consultation profil patient',
+    patient_measurements_read: 'Consultation mesures patient',
+    admin_association_created: 'Association médecin-patient',
+    admin_caregiver_association_created: 'Association aidant-patient',
+    device_status_changed: 'Changement statut device',
+    alert_manual_trigger: 'Alerte manuelle patient',
+    alert_doctor_triage: 'Triage alerte médecin',
+};
+
+const formatAuditDate = (iso) => {
+    if (!iso) return '';
+    try {
+        return new Date(iso).toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    } catch {
+        return iso;
+    }
+};
 
 const STATUS_LABELS = {
     active: 'Actif',
@@ -39,7 +67,8 @@ const EnrolledBadge = ({ enrolled }) => (
 
 const personLabel = (person) => {
     if (!person) return '—';
-    return person.display_name || person.email || person.user_id_auth || '—';
+    const fullName = [person.first_name, person.last_name].filter(Boolean).join(' ').trim();
+    return person.display_name || fullName || person.email || person.user_id_auth || '—';
 };
 
 export default function AdminView() {
@@ -68,6 +97,25 @@ export default function AdminView() {
     const [linkError, setLinkError] = React.useState('');
     const [associating, setAssociating] = React.useState(false);
 
+    const [auditEvents, setAuditEvents] = React.useState([]);
+    const [auditTotal, setAuditTotal] = React.useState(0);
+    const [auditFilter, setAuditFilter] = React.useState('');
+    const [auditLoading, setAuditLoading] = React.useState(false);
+
+    const loadAuditLog = React.useCallback(async (eventType = auditFilter) => {
+        setAuditLoading(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await getAdminAuditLog(token, { eventType, pageSize: 50 });
+            setAuditEvents(res.events || []);
+            setAuditTotal(res.total ?? 0);
+        } catch (err) {
+            console.error('Audit log load failed:', err);
+        } finally {
+            setAuditLoading(false);
+        }
+    }, [getAccessTokenSilently, auditFilter]);
+
     const loadAll = React.useCallback(async (opts = {}) => {
         setLoading(true);
         setError('');
@@ -89,6 +137,7 @@ export default function AdminView() {
 
     React.useEffect(() => {
         loadAll();
+        loadAuditLog('');
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -119,6 +168,7 @@ export default function AdminView() {
             const token = await getAccessTokenSilently();
             await adminUpdateDeviceStatus(token, device.device_id, suspending ? 'suspended' : 'active', reason);
             await loadAll();
+            await loadAuditLog();
         } catch (e) {
             setError(e.message || 'Impossible de mettre à jour le statut du dispositif');
         } finally {
@@ -138,6 +188,7 @@ export default function AdminView() {
             setPatientId('');
             const linksRes = await adminListDoctorPatientLinks(token);
             setLinks(linksRes.links || []);
+            await loadAuditLog();
         } catch (e) {
             setLinkError(e.message || "Impossible de créer l'association");
         } finally {
@@ -416,7 +467,7 @@ export default function AdminView() {
 
                                 <div className="info-list">
                                     <div className="info-row border-b">
-                                        <span className="label">Patient</span>
+                                        <span className="label">Email</span>
                                         <span className="val">{device.patient?.email || '—'}</span>
                                     </div>
                                     <div className="info-row">
@@ -454,6 +505,73 @@ export default function AdminView() {
                         ))}
                     </div>
                 )}
+
+                <section className="association-section" style={{ marginTop: '2rem' }}>
+                    <div className="section-header">
+                        <h3>
+                            <ScrollText size={18} />
+                            Journal d&apos;audit
+                        </h3>
+                        <span className="section-count">
+                            {auditTotal} événement{auditTotal !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <div className="toolbar-controls" style={{ marginBottom: '12px' }}>
+                        <select
+                            className="admin-select"
+                            value={auditFilter}
+                            onChange={(e) => {
+                                setAuditFilter(e.target.value);
+                                loadAuditLog(e.target.value);
+                            }}
+                            aria-label="Filtrer le journal d'audit"
+                        >
+                            <option value="">Tous les types</option>
+                            {Object.entries(AUDIT_EVENT_LABELS).map(([key, label]) => (
+                                <option key={key} value={key}>{label}</option>
+                            ))}
+                        </select>
+                        <button className="refresh-btn" type="button" onClick={() => loadAuditLog()} disabled={auditLoading}>
+                            <RefreshCw size={16} /> {auditLoading ? 'Chargement…' : 'Actualiser'}
+                        </button>
+                    </div>
+                    {auditLoading && auditEvents.length === 0 ? (
+                        <p style={{ color: '#64748b' }}>Chargement du journal…</p>
+                    ) : auditEvents.length === 0 ? (
+                        <p style={{ color: '#64748b' }}>Aucun événement enregistré pour le moment.</p>
+                    ) : (
+                        <div className="association-links">
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                                <thead>
+                                    <tr style={{ textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
+                                        <th style={{ padding: '8px 4px' }}>Date</th>
+                                        <th style={{ padding: '8px 4px' }}>Type</th>
+                                        <th style={{ padding: '8px 4px' }}>Acteur</th>
+                                        <th style={{ padding: '8px 4px' }}>Rôle</th>
+                                        <th style={{ padding: '8px 4px' }}>Ressource</th>
+                                        <th style={{ padding: '8px 4px' }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {auditEvents.map((ev) => (
+                                        <tr key={ev.id || `${ev.created_at}-${ev.event_type}`} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                            <td style={{ padding: '8px 4px', whiteSpace: 'nowrap' }}>{formatAuditDate(ev.created_at)}</td>
+                                            <td style={{ padding: '8px 4px' }}>{AUDIT_EVENT_LABELS[ev.event_type] || ev.event_type}</td>
+                                            <td style={{ padding: '8px 4px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.actor_user_id_auth}>
+                                                {ev.actor_user_id_auth ? String(ev.actor_user_id_auth).slice(-12) : '—'}
+                                            </td>
+                                            <td style={{ padding: '8px 4px' }}>{ev.actor_role || '—'}</td>
+                                            <td style={{ padding: '8px 4px', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.resource_id}>
+                                                {ev.resource_id || '—'}
+                                            </td>
+                                            <td style={{ padding: '8px 4px' }}>{ev.action || '—'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </section>
 
             </div>
         </div>

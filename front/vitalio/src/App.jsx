@@ -11,6 +11,7 @@ import PatientProfileView from './pages/PatientProfileView';
 import PatientMeasurement from './pages/PatientMeasurement';
 import PatientMLView from './pages/PatientMLView';
 import EnrollDevice from './pages/EnrollDevice';
+import DeviceConfirm from './pages/DeviceConfirm';
 import PatientWelcome from './pages/PatientWelcome';
 import DoctorView from './pages/DoctorView';
 import DoctorPatientDetail from './pages/DoctorPatientDetail';
@@ -19,6 +20,7 @@ import DoctorMLView from './pages/DoctorMLView';
 import FamilyView from './pages/FamilyView';
 import CaregiverPatientDetail from './pages/CaregiverPatientDetail';
 import CaregiverPatientML from './pages/CaregiverPatientML';
+import CaregiverAlertsView from './pages/CaregiverAlertsView';
 import AdminView from './pages/AdminView';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
@@ -29,6 +31,7 @@ function AppRoutes() {
       <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} />
       <Route path="/invite" element={<InviteAccept />} />
       <Route path="/invite-caregiver" element={<CaregiverInviteAccept />} />
+      <Route path="/device/confirm" element={<DeviceConfirm />} />
       <Route 
         path="/home" 
         element={
@@ -158,6 +161,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<FamilyView />} />
+        <Route path="alertes" element={<CaregiverAlertsView />} />
         <Route path="patient/:patientId" element={<CaregiverPatientDetail />} />
         <Route path="patient/:patientId/ml" element={<CaregiverPatientML />} />
       </Route>
@@ -172,6 +176,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<FamilyView />} />
+        <Route path="alertes" element={<CaregiverAlertsView />} />
         <Route path="patient/:patientId" element={<CaregiverPatientDetail />} />
         <Route path="patient/:patientId/ml" element={<CaregiverPatientML />} />
       </Route>

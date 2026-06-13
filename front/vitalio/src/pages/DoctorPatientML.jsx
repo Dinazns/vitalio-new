@@ -33,7 +33,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend, Brush,
 } from 'recharts'
-import { getPatientMLAnalysis, patchDoctorAlert } from '../services/api'
+import { getPatientMLAnalysis, getMLForecast, patchDoctorAlert } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
 
 const VITAL_CONFIG = {
@@ -180,9 +180,10 @@ export default function DoctorPatientML() {
   const { getAccessTokenSilently } = useAuth0()
 
   const [loading, setLoading] = useState(true)
+  const [forecastLoading, setForecastLoading] = useState(false)
   const [error, setError] = useState('')
   const [analysis, setAnalysis] = useState(null)
-  const [days, setDays] = useState(30)
+  const [days, setDays] = useState(90)
   const [activeVital, setActiveVital] = useState('heart_rate')
   const [showMA, setShowMA] = useState(true)
   const [showAnomalies, setShowAnomalies] = useState(true)
@@ -192,17 +193,37 @@ export default function DoctorPatientML() {
   const loadAnalysis = useCallback(async () => {
     try {
       setLoading(true)
+      setForecastLoading(false)
       setError('')
       const token = await getAccessTokenSilently()
       const data = await getPatientMLAnalysis(token, patientId, {
         days,
-        include_forecast: true,
+        include_forecast: false,
         forecast_horizon: 24,
       })
       setAnalysis(data)
+      setLoading(false)
+
+      if (data.code === 'insufficient_data' || data.status === 'insufficient_data') {
+        return
+      }
+
+      setForecastLoading(true)
+      try {
+        const forecast = await getMLForecast(token, patientId, {
+          train_days: days,
+          horizon: 24,
+          history_hours: 48,
+        })
+        setAnalysis((prev) => (prev ? { ...prev, forecast } : prev))
+      } catch (e) {
+        console.warn('Forecast load failed:', e)
+        setAnalysis((prev) => (prev ? { ...prev, forecast: { error: e.message } } : prev))
+      } finally {
+        setForecastLoading(false)
+      }
     } catch (e) {
       setError(e.message || 'Erreur de chargement')
-    } finally {
       setLoading(false)
     }
   }, [getAccessTokenSilently, patientId, days])
@@ -451,7 +472,15 @@ export default function DoctorPatientML() {
           </div>
         </header>
 
-        {loading && <div className="pml-panel pml-loading">Chargement de l'analyse...</div>}
+        {loading && (
+          <div className="pml-panel pml-loading">
+            Chargement de l'analyse…
+            {days >= 90 && ' Les longues périodes peuvent prendre jusqu\'à 30 secondes.'}
+          </div>
+        )}
+        {forecastLoading && !loading && (
+          <div className="pml-panel pml-loading">Calcul des prévisions en cours…</div>
+        )}
         {!loading && error && (
           <div className="pml-panel pml-panel--error"><ShieldAlert size={20} /> {error}</div>
         )}
@@ -464,6 +493,16 @@ export default function DoctorPatientML() {
                 <div>
                   <strong>Données insuffisantes sur la période</strong>
                   <p className="pml-panel--notice-desc">{analysis.message}</p>
+                  {analysis.suggested_days && analysis.suggested_days !== days && (
+                    <button
+                      type="button"
+                      className="pml-period-btn pml-period-btn--active"
+                      style={{ marginTop: '0.75rem' }}
+                      onClick={() => setDays(analysis.suggested_days)}
+                    >
+                      Afficher {analysis.suggested_days} jours
+                    </button>
+                  )}
                 </div>
               </div>
             )}

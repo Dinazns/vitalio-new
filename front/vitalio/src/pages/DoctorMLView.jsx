@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { getMLModelInfo, getMLAnomalies, getDoctorAlerts, getDoctorPatients, getPatientMLAnalysis, patchDoctorAlert, apiRequest } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
+import { getSeverityConfig, SEVERITY_LEVEL_CONFIG } from '../constants/severityLevels'
 
 const URGENCY_CONFIG = {
   immediate: { color: '#b91c1c', bg: '#fef2f2', label: 'Immédiat' },
@@ -137,8 +138,13 @@ function Toast({ message, type, onClose }) {
   const border = type === 'success' ? '#6ee7b7' : '#fecaca'
   const color = type === 'success' ? '#047857' : '#b91c1c'
   return (
-    <div className="ml-toast" style={{ background: bg, borderColor: border, color }}>
-      {type === 'success' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+    <div
+      className="ml-toast"
+      style={{ background: bg, borderColor: border, color }}
+      role="status"
+      aria-live={type === 'error' ? 'assertive' : 'polite'}
+    >
+      {type === 'success' ? <CheckCircle2 size={16} aria-hidden /> : <XCircle size={16} aria-hidden />}
       <span>{message}</span>
     </div>
   )
@@ -181,6 +187,7 @@ export default function DoctorMLView() {
   const [vitalAlerts, setVitalAlerts] = useState([])
   const [patients, setPatients] = useState([])
   const [vitalStatusFilter, setVitalStatusFilter] = useState('OPEN')
+  const [vitalSeverityFilter, setVitalSeverityFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [severityFilter, setSeverityFilter] = useState('')
   const [dateFrom, setDateFrom] = useState('')
@@ -210,11 +217,15 @@ export default function DoctorMLView() {
   )
 
   const displayedVitalAlerts = React.useMemo(() => {
+    let rows = vitalAlerts
     if (vitalStatusFilter === 'OPEN') {
-      return vitalAlerts.filter(isActionableOpenVitalAlert)
+      rows = rows.filter(isActionableOpenVitalAlert)
     }
-    return vitalAlerts
-  }, [vitalAlerts, vitalStatusFilter])
+    if (vitalSeverityFilter) {
+      rows = rows.filter((a) => (a.severity_level || '').toUpperCase() === vitalSeverityFilter)
+    }
+    return rows
+  }, [vitalAlerts, vitalStatusFilter, vitalSeverityFilter])
 
   useEffect(() => {
     let cancelled = false
@@ -276,7 +287,11 @@ export default function DoctorMLView() {
       const [mlInfo, anomalyRes, vitalRes, patientsRes] = await Promise.all([
         getMLModelInfo().catch(() => null),
         getMLAnomalies(token, anomalyParams).catch(() => ({ anomalies: [] })),
-        getDoctorAlerts(token, { status: vitalStatusFilter, limit: 100 }).catch(() => ({ alerts: [] })),
+        getDoctorAlerts(token, {
+          status: vitalStatusFilter,
+          limit: 100,
+          severity_level: vitalSeverityFilter || undefined,
+        }).catch(() => ({ alerts: [] })),
         getDoctorPatients(token).catch(() => ({ patients: [] })),
       ])
       setModelInfo(mlInfo)
@@ -288,7 +303,7 @@ export default function DoctorMLView() {
     } finally {
       setLoading(false)
     }
-  }, [getAccessTokenSilently, statusFilter, severityFilter, dateFrom, dateTo, vitalStatusFilter])
+  }, [getAccessTokenSilently, statusFilter, severityFilter, dateFrom, dateTo, vitalStatusFilter, vitalSeverityFilter])
 
   useEffect(() => { loadData() }, [loadData])
 
@@ -395,7 +410,7 @@ export default function DoctorMLView() {
 
         <header className="ml-header">
           <div>
-            <h1><BrainCircuit size={28} /> Alertes</h1>
+            <h1 id="doctor-alerts-title"><BrainCircuit size={28} aria-hidden /> Alertes</h1>
             <p>Alertes vitales et détection automatique. Validez ou rejetez les alertes, prenez contact avec l&apos;aidant ou le patient.</p>
           </div>
           <div className="ml-header-actions">
@@ -408,43 +423,70 @@ export default function DoctorMLView() {
           </div>
         </header>
 
-        {loading && <div className="ml-panel">Chargement...</div>}
+        {loading && <div className="ml-panel" role="status" aria-live="polite">Chargement...</div>}
         {!loading && error && (
-          <div className="ml-panel ml-panel--error"><ShieldAlert size={20} /> <span>{error}</span></div>
+          <div className="ml-panel ml-panel--error" role="alert">
+            <ShieldAlert size={20} aria-hidden /> <span>{error}</span>
+          </div>
         )}
 
         {!loading && !error && (
           <>
             {activeTab === 'vital' && (
-              <section className="ml-panel">
+              <section className="ml-panel" aria-labelledby="doctor-vital-alerts-heading">
                 <div className="ml-anomaly-header">
-                  <h2><Heart size={18} /> Alertes vitales (seuils)</h2>
+                  <h2 id="doctor-vital-alerts-heading"><Heart size={18} aria-hidden /> Alertes vitales (seuils)</h2>
                   <div className="ml-anomaly-filters">
-                    <div className="ml-filter-group">
+                    <div className="ml-filter-group" role="group" aria-label="Filtrer par statut">
                       {['OPEN', 'ALL'].map((val) => (
                         <button
                           key={val}
+                          type="button"
                           className={`ml-filter-btn ${vitalStatusFilter === val ? 'ml-filter-btn--active' : ''}`}
+                          aria-pressed={vitalStatusFilter === val}
                           onClick={() => setVitalStatusFilter(val)}
                         >
                           {val === 'OPEN' ? 'Ouvertes' : 'Toutes'}
                         </button>
                       ))}
                     </div>
+                    <div className="ml-filter-group" role="group" aria-label="Filtrer par niveau de gravité">
+                      <button
+                        type="button"
+                        className={`ml-filter-btn ${vitalSeverityFilter === '' ? 'ml-filter-btn--active' : ''}`}
+                        aria-pressed={vitalSeverityFilter === ''}
+                        onClick={() => setVitalSeverityFilter('')}
+                      >
+                        Tous niveaux
+                      </button>
+                      {Object.entries(SEVERITY_LEVEL_CONFIG).map(([key, cfg]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          className={`ml-filter-btn ${vitalSeverityFilter === key ? 'ml-filter-btn--active' : ''}`}
+                          aria-pressed={vitalSeverityFilter === key}
+                          onClick={() => setVitalSeverityFilter(key)}
+                          style={vitalSeverityFilter === key ? { borderColor: cfg.color, color: cfg.color } : undefined}
+                        >
+                          {cfg.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 {displayedVitalAlerts.length === 0 ? (
-                  <div className="ml-empty">
-                    <Info size={20} />
+                  <div className="ml-empty" role="status">
+                    <Info size={20} aria-hidden />
                     <span>Aucune alerte vitale {vitalStatusFilter === 'OPEN' ? 'ouverte' : ''}.</span>
                   </div>
                 ) : (
                   <div className="ml-anomaly-table-wrap">
-                    <table className="ml-anomaly-table">
+                    <table className="ml-anomaly-table" aria-label="Alertes vitales par seuils">
                       <thead>
                         <tr>
                           <th>Date</th>
                           <th>Patient</th>
+                          <th>Niveau</th>
                           <th>Type</th>
                           <th>Valeur / Seuil</th>
                           <th>Contexte mesure</th>
@@ -462,6 +504,7 @@ export default function DoctorMLView() {
                           const threshold = a.threshold ?? '-'
                           const rowKey = a.alert_id || `${a.device_id}-${a.metric}`
                           const isManual = a.alert_source === 'manual'
+                          const sevCfg = getSeverityConfig(a.severity_level || (isManual ? 'URGENCY' : 'CRITICAL'))
                           const snap = a.measurement_snapshot
                           const isMeasExpanded = expandedMeasurement === rowKey
                           return (
@@ -477,6 +520,15 @@ export default function DoctorMLView() {
                                 </td>
                                 <td>{patientName}</td>
                                 <td>
+                                  <span
+                                    className="ml-level-badge"
+                                    style={{ background: sevCfg.bg, color: sevCfg.color, border: `1px solid ${sevCfg.border}` }}
+                                    aria-label={`Niveau ${sevCfg.label}`}
+                                  >
+                                    {sevCfg.label}
+                                  </span>
+                                </td>
+                                <td>
                                   {isManual
                                     ? <><Siren size={14} style={{ verticalAlign: 'middle' }} /> {a.medical_label || 'Alerte patient'}</>
                                     : (a.medical_label || a.metric)
@@ -491,13 +543,17 @@ export default function DoctorMLView() {
                                 <td>
                                   {snap && !isManual ? (
                                     <button
+                                      type="button"
                                       className="ml-filter-btn"
                                       style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
+                                      aria-expanded={isMeasExpanded}
+                                      aria-controls={`meas-detail-${rowKey}`}
+                                      aria-label={isMeasExpanded ? 'Masquer le contexte de mesure' : 'Afficher le contexte de mesure déclenchante'}
                                       onClick={() => setExpandedMeasurement(isMeasExpanded ? null : rowKey)}
                                       title="Voir contexte mesure déclenchante"
                                     >
-                                      <Activity size={13} />
-                                      {isMeasExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                      <Activity size={13} aria-hidden />
+                                      {isMeasExpanded ? <ChevronUp size={12} aria-hidden /> : <ChevronDown size={12} aria-hidden />}
                                     </button>
                                   ) : <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>-</span>}
                                 </td>
@@ -536,20 +592,24 @@ export default function DoctorMLView() {
                                     {(docStatus === 'PENDING') && (
                                       <>
                                         <button
+                                          type="button"
                                           className="ml-action-btn ml-action-btn--validate"
                                           onClick={() => handleValidateVital(a.alert_id, 'VALIDATED')}
                                           disabled={validatingVitalId === a.alert_id}
+                                          aria-label="Valider l'alerte — cliniquement retenue"
                                           title="Valider - alerte cliniquement retenue"
                                         >
-                                          <ThumbsUp size={15} />
+                                          <ThumbsUp size={15} aria-hidden />
                                         </button>
                                         <button
+                                          type="button"
                                           className="ml-action-btn ml-action-btn--reject"
                                           onClick={() => handleValidateVital(a.alert_id, 'REJECTED')}
                                           disabled={validatingVitalId === a.alert_id}
+                                          aria-label="Rejeter l'alerte — faux positif ou artefact"
                                           title="Rejeter - faux positif / artefact"
                                         >
-                                          <ThumbsDown size={15} />
+                                          <ThumbsDown size={15} aria-hidden />
                                         </button>
                                       </>
                                     )}
@@ -561,18 +621,20 @@ export default function DoctorMLView() {
                                     )}
                                     {a.patient_id && (
                                       <button
+                                        type="button"
                                         className="ml-action-btn ml-action-btn--contact"
                                         onClick={() => navigate(`/doctor/patient/${encodeURIComponent(a.patient_id)}`)}
+                                        aria-label={`Prendre contact avec ${patientName}`}
                                         title="Prendre contact (voir patient, aidant)"
                                       >
-                                        <Phone size={15} />
+                                        <Phone size={15} aria-hidden />
                                       </button>
                                     )}
                                   </div>
                                 </td>
                               </tr>
                               {isMeasExpanded && snap && (
-                                <tr className="ml-measurement-context-row">
+                                <tr className="ml-measurement-context-row" id={`meas-detail-${rowKey}`}>
                                   <td colSpan={8}>
                                     <div className="ml-measurement-context">
                                       <strong><Activity size={14} /> Mesure déclenchante</strong>
@@ -672,61 +734,69 @@ export default function DoctorMLView() {
             )}
 
             {activeTab === 'ml' && (
-            <section className="ml-panel">
+            <section className="ml-panel" aria-labelledby="doctor-ml-alerts-heading">
               <div className="ml-anomaly-header">
-                <h2><AlertTriangle size={18} /> Alertes (IA)</h2>
+                <h2 id="doctor-ml-alerts-heading"><AlertTriangle size={18} aria-hidden /> Alertes (IA)</h2>
                 <div className="ml-anomaly-filters">
-                  <div className="ml-filter-group">
+                  <div className="ml-filter-group" role="group" aria-label="Filtrer par statut de validation">
                     {['', 'pending', 'validated', 'rejected'].map((val) => (
                       <button
                         key={val}
+                        type="button"
                         className={`ml-filter-btn ${statusFilter === val ? 'ml-filter-btn--active' : ''}`}
+                        aria-pressed={statusFilter === val}
                         onClick={() => setStatusFilter(val)}
                       >
                         {val === '' ? 'Toutes' : STATUS_CONFIG[val]?.label || val}
                       </button>
                     ))}
                   </div>
-                  <div className="ml-filter-group">
+                  <div className="ml-filter-group" role="group" aria-label="Filtrer par type de détection">
                     <button
+                      type="button"
                       className={`ml-filter-btn ${severityFilter === '' ? 'ml-filter-btn--active' : ''}`}
+                      aria-pressed={severityFilter === ''}
                       onClick={() => setSeverityFilter('')}
                     >
                       Tous niveaux
                     </button>
                     <button
+                      type="button"
                       className={`ml-filter-btn ${severityFilter === 'critical' ? 'ml-filter-btn--active' : ''}`}
+                      aria-pressed={severityFilter === 'critical'}
                       onClick={() => setSeverityFilter('critical')}
                     >
-                      <XCircle size={12} /> Critiques uniquement
+                      <XCircle size={12} aria-hidden /> Critiques uniquement
                     </button>
                     <button
+                      type="button"
                       className={`ml-filter-btn ${severityFilter === 'threshold' ? 'ml-filter-btn--active' : ''}`}
+                      aria-pressed={severityFilter === 'threshold'}
                       onClick={() => setSeverityFilter('threshold')}
                       title="Dépassements de seuils cliniques (FC, SpO₂, température)"
                     >
-                      <ShieldAlert size={12} /> Seuils
+                      <ShieldAlert size={12} aria-hidden /> Seuils
                     </button>
                   </div>
-                  <div className="ml-date-filters">
-                    <Clock size={14} />
+                  <div className="ml-date-filters" role="group" aria-label="Filtrer par période">
+                    <Clock size={14} aria-hidden />
                     <input
                       type="date"
                       className="ml-date-input"
                       value={dateFrom}
                       onChange={(e) => setDateFrom(e.target.value)}
-                      placeholder="Du"
+                      aria-label="Date de début"
                     />
-                    <span className="ml-date-sep">→</span>
+                    <span className="ml-date-sep" aria-hidden>→</span>
                     <input
                       type="date"
                       className="ml-date-input"
                       value={dateTo}
                       onChange={(e) => setDateTo(e.target.value)}
-                      placeholder="Au"
+                      aria-label="Date de fin"
                     />
                     {(dateFrom || dateTo) && (
-                      <button className="ml-filter-btn" onClick={() => { setDateFrom(''); setDateTo('') }}>
+                      <button type="button" className="ml-filter-btn" aria-label="Réinitialiser les filtres de date" onClick={() => { setDateFrom(''); setDateTo('') }}>
                         Réinitialiser
                       </button>
                     )}
@@ -735,8 +805,8 @@ export default function DoctorMLView() {
               </div>
 
               {anomalies.length === 0 ? (
-                <div className="ml-empty">
-                  <Info size={20} />
+                <div className="ml-empty" role="status">
+                  <Info size={20} aria-hidden />
                   <span>
                     Aucune alerte
                     {severityFilter === 'critical' ? ' critique' : severityFilter === 'threshold' ? ' de seuil' : ''}
@@ -745,7 +815,7 @@ export default function DoctorMLView() {
                 </div>
               ) : (
                 <div className="ml-anomaly-table-wrap">
-                  <table className="ml-anomaly-table">
+                  <table className="ml-anomaly-table" aria-label="Alertes détectées par intelligence artificielle">
                     <thead>
                       <tr>
                         <th>Date</th>
@@ -759,6 +829,7 @@ export default function DoctorMLView() {
                     </thead>
                     <tbody>
                       {anomalies.map((a, i) => {
+                        const sevCfg = getSeverityConfig(a.severity_level || (a.anomaly_level === 'warning' ? 'WARNING' : 'CRITICAL'))
                         const lvlCfg = LEVEL_CONFIG[a.anomaly_level] || LEVEL_CONFIG.warning
                         const stCfg = STATUS_CONFIG[a.status] || STATUS_CONFIG.pending
                         const id = a.anomaly_id || `row-${i}`
@@ -771,22 +842,29 @@ export default function DoctorMLView() {
                               <td className="ml-table-mono">{a.device_id || '-'}</td>
                               <td>{(a.anomaly_score ?? 0).toFixed(3)}</td>
                               <td>
-                                <span className="ml-level-badge" style={{ background: lvlCfg.bg, color: lvlCfg.color }}>
-                                  {lvlCfg.label}
+                                <span className="ml-level-badge" style={{ background: sevCfg.bg, color: sevCfg.color, border: `1px solid ${sevCfg.border}` }} aria-label={`Niveau ${sevCfg.label}`}>
+                                  {sevCfg.label}
+                                </span>
+                                <span className="ml-level-badge" style={{ background: lvlCfg.bg, color: lvlCfg.color, marginLeft: '0.25rem', fontSize: '0.7rem' }} aria-label={`Niveau ML ${lvlCfg.label}`}>
+                                  ML {lvlCfg.label}
                                 </span>
                               </td>
                               <td>
-                                <span className="ml-level-badge" style={{ background: stCfg.bg, color: stCfg.color }}>
+                                <span className="ml-level-badge" style={{ background: stCfg.bg, color: stCfg.color }} aria-label={`Statut ${stCfg.label}`}>
                                   {stCfg.label}
                                 </span>
                               </td>
                               <td>
                                 {hasSuggestion ? (
                                   <button
+                                    type="button"
                                     className="ml-suggestion-toggle"
+                                    aria-expanded={isExpanded}
+                                    aria-controls={`ml-suggestion-${id}`}
+                                    aria-label={isExpanded ? 'Masquer la recommandation clinique' : 'Afficher la recommandation clinique'}
                                     onClick={() => setExpandedAnomaly(isExpanded ? null : id)}
                                   >
-                                    <Stethoscope size={14} />
+                                    <Stethoscope size={14} aria-hidden />
                                     {isExpanded ? 'Masquer' : 'Voir'}
                                   </button>
                                 ) : (
@@ -797,20 +875,24 @@ export default function DoctorMLView() {
                                 {a.status === 'pending' && (
                                   <div className="ml-action-btns">
                                     <button
+                                      type="button"
                                       className="ml-action-btn ml-action-btn--validate"
                                       onClick={() => handleValidate(id, 'validated')}
                                       disabled={validatingId === id}
+                                      aria-label="Confirmer l'alerte IA"
                                       title="Confirmer l'alerte"
                                     >
-                                      <ThumbsUp size={15} />
+                                      <ThumbsUp size={15} aria-hidden />
                                     </button>
                                     <button
+                                      type="button"
                                       className="ml-action-btn ml-action-btn--reject"
                                       onClick={() => handleValidate(id, 'rejected')}
                                       disabled={validatingId === id}
+                                      aria-label="Classer l'alerte IA comme non pertinente"
                                       title="Classer comme non pertinente"
                                     >
-                                      <ThumbsDown size={15} />
+                                      <ThumbsDown size={15} aria-hidden />
                                     </button>
                                   </div>
                                 )}
@@ -822,7 +904,7 @@ export default function DoctorMLView() {
                               </td>
                             </tr>
                             {isExpanded && hasSuggestion && (
-                              <tr className="ml-suggestion-row">
+                              <tr className="ml-suggestion-row" id={`ml-suggestion-${id}`}>
                                 <td colSpan={7}>
                                   <SuggestionCard anomaly={a} />
                                 </td>

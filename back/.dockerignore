@@ -1,0 +1,13 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.env
+.git
+mosquitto/data
+mosquitto/log
+mosquitto/.venv
+mosquitto/passwd
+bdd
+*.md

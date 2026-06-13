@@ -1,8 +1,17 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { getCurrentTermsVersion } from '../services/api'
 
 export default function ConditionsUtilisation() {
+  const [termsVersion, setTermsVersion] = useState('')
+
+  useEffect(() => {
+    getCurrentTermsVersion()
+      .then((data) => setTermsVersion(data.current_version || ''))
+      .catch(() => setTermsVersion(''))
+  }, [])
+
   return (
     <div className="conditions-page">
       <header className="conditions-page__header">
@@ -109,6 +118,9 @@ export default function ConditionsUtilisation() {
       </main>
 
       <footer className="conditions-page__footer">
+        {termsVersion && (
+          <p className="conditions-page__version">Dernière révision : {termsVersion}</p>
+        )}
         <Link to="/">Retour à la page de connexion</Link>
       </footer>
     </div>

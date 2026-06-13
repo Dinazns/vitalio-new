@@ -1,16 +1,7 @@
+# Mosquitto seul (legacy). Pour la stack complète API + front + MQTT :
+#   cd .. && docker compose up --build
+#
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: vitalio-sqlserver
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserver-data:/var/opt/mssql
-    restart: unless-stopped
-
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: mosquitto
@@ -24,6 +15,3 @@ services:
       - ./mosquitto/certs:/mosquitto/certs
       - ./mosquitto/log:/mosquitto/log
     restart: unless-stopped
-
-volumes:
-  sqlserver-data:

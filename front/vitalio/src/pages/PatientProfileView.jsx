@@ -327,7 +327,7 @@ export default function PatientProfileView() {
       setLinkingMessage('')
       const token = await getAccessTokenSilently()
       const data = await acceptDoctorInvitation(token, inviteToken.trim())
-      setLinkingMessage(`Association réussie avec le médecin ${data.doctor_user_id_auth}`)
+      setLinkingMessage('Association réussie avec votre médecin.')
       setInviteToken('')
       await refreshProfile()
     } catch (e) {
@@ -341,7 +341,7 @@ export default function PatientProfileView() {
       setLinkingMessage('')
       const token = await getAccessTokenSilently()
       const data = await redeemCabinetCode(token, cabinetCode.trim())
-      setLinkingMessage(`Code valide. Association réussie avec ${data.doctor_user_id_auth}`)
+      setLinkingMessage('Code valide. Association réussie avec votre médecin.')
       setCabinetCode('')
       await refreshProfile()
     } catch (e) {

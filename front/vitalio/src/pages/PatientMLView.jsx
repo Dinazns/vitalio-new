@@ -18,6 +18,7 @@ import {
 } from 'recharts'
 import { getPatientData, getMLModelInfo, getPatientWeeklyAnalysis } from '../services/api'
 import PatientLayout from '../components/PatientLayout'
+import { getSeverityConfig, mlLevelToSeverityLevel } from '../constants/severityLevels'
 
 const LEVEL_CONFIG = {
   normal:   { color: '#047857', bg: '#ecfdf5', label: 'Normal',   Icon: CheckCircle2 },
@@ -185,6 +186,7 @@ export default function PatientMLView() {
           ts,
           ml_score: m.ml_score ?? fromWeek?.ml_score,
           ml_level: m.ml_level ?? fromWeek?.ml_level,
+          severity_level: m.severity_level ?? fromWeek?.severity_level,
         }
       })
     const historyHasMl = measurementHistory.some((m) => m.ml_score != null)
@@ -313,6 +315,8 @@ export default function PatientMLView() {
                     </thead>
                     <tbody>
                       {mlData.measurementHistory.map((m, i) => {
+                        const gridLevel = m.severity_level || mlLevelToSeverityLevel(m.ml_level)
+                        const sevCfg = getSeverityConfig(gridLevel)
                         const lvl = m.ml_level || 'normal'
                         const cfg = mlData.historyHasMl && m.ml_score != null
                           ? (LEVEL_CONFIG[lvl] || LEVEL_CONFIG.normal)
@@ -327,12 +331,14 @@ export default function PatientMLView() {
                               <>
                                 <td>{m.ml_score != null ? Number(m.ml_score).toFixed(3) : '-'}</td>
                                 <td>
-                                  {m.ml_score != null && cfg ? (
-                                    <span className="ml-level-badge" style={{ background: cfg.bg, color: cfg.color }}>
-                                      {cfg.label}
+                                  {m.ml_score != null ? (
+                                    <span className="ml-level-badge" style={{ background: sevCfg.bg, color: sevCfg.color, border: `1px solid ${sevCfg.border}` }}>
+                                      {sevCfg.label}
                                     </span>
                                   ) : (
-                                    '-'
+                                    <span className="ml-level-badge" style={{ background: sevCfg.bg, color: sevCfg.color, border: `1px solid ${sevCfg.border}` }}>
+                                      {sevCfg.label}
+                                    </span>
                                   )}
                                 </td>
                               </>

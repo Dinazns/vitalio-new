@@ -1,0 +1,1 @@
+"""VitalIO backend application package."""

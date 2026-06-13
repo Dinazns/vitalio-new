@@ -7,7 +7,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import ml_module
+from app.ml import engine as ml_module
 
 
 class TestMLFeedbackSplit(unittest.TestCase):

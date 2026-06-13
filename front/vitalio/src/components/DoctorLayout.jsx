@@ -90,7 +90,7 @@ export default function DoctorLayout({ children }) {
           </div>
         )}
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Navigation principale">
           {NAV_ITEMS.map(({ to, icon: Icon, label, end }) => (
             <NavLink
               key={to}
@@ -100,17 +100,25 @@ export default function DoctorLayout({ children }) {
                 `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
               }
               title={collapsed ? label : undefined}
+              aria-label={
+                collapsed && to === '/doctor/alertes'
+                  ? criticalCount > 0
+                    ? `${label} — ${criticalCount} ouverte${criticalCount > 1 ? 's' : ''}`
+                    : label
+                  : collapsed
+                    ? label
+                    : undefined
+              }
             >
-              <Icon size={20} />
+              <Icon size={20} aria-hidden />
               {!collapsed && <span>{label}</span>}
               {to === '/doctor/alertes' && criticalCount > 0 && (
                 collapsed ? (
-                  <span
-                    className="sidebar-badge-dot"
-                    aria-label={`${criticalCount} alerte${criticalCount > 1 ? 's' : ''}`}
-                  />
+                  <span className="sidebar-badge-dot" aria-hidden />
                 ) : (
-                  <span className="sidebar-badge sidebar-badge--critical">{criticalCount}</span>
+                  <span className="sidebar-badge sidebar-badge--critical" aria-hidden>
+                    {criticalCount}
+                  </span>
                 )
               )}
             </NavLink>
@@ -118,12 +126,12 @@ export default function DoctorLayout({ children }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="sidebar-link" onClick={() => navigate('/home')} title="Accueil">
-            <Home size={20} />
+          <button type="button" className="sidebar-link" onClick={() => navigate('/home')} title="Accueil" aria-label={collapsed ? 'Accueil' : undefined}>
+            <Home size={20} aria-hidden />
             {!collapsed && <span>Accueil</span>}
           </button>
-          <button className="sidebar-link sidebar-link--danger" onClick={handleLogout} title="Déconnexion">
-            <LogOut size={20} />
+          <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout} title="Déconnexion" aria-label={collapsed ? 'Déconnexion' : undefined}>
+            <LogOut size={20} aria-hidden />
             {!collapsed && <span>Déconnexion</span>}
           </button>
         </div>

@@ -9,6 +9,7 @@ import {
   getPatientProfile,
   triggerManualAlert,
 } from '../services/api'
+import { resolvePatientDisplayName } from '../utils/displayName'
 import PatientLayout from '../components/PatientLayout'
 import {
   isPatientWelcomeDone,
@@ -175,12 +176,7 @@ export default function PatientView() {
   }
 
   const latest = measurements[0]
-  // Auth0 met souvent user.name = email quand aucun nom n'est défini ; on l'exclut du fallback
-  const auth0Name = user?.name && !String(user.name).includes('@') ? user.name : null
-  const profileFullName = profile?.first_name || profile?.last_name
-    ? `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim()
-    : null
-  const displayName = profile?.display_name ?? auth0Name ?? profileFullName ?? ''
+  const displayName = resolvePatientDisplayName({ profile, user })
 
   const chartPoints = useMemo(() => {
     if (!measurements.length) return []
@@ -203,7 +199,7 @@ export default function PatientView() {
       <div className="patient-container patient-theme">
       <main className="patient-dashboard">
         <header className="patient-header">
-        <h1>Bonjour {displayName}</h1>
+        <h1>{displayName ? `Bonjour ${displayName}` : 'Bonjour'}</h1>
           <p>Voici vos dernières constantes vitales.</p>
         </header>
 
@@ -280,8 +276,8 @@ export default function PatientView() {
                 </button>
               )}
               {alertStep === 'confirm' && (
-                <div className="alert-trigger-confirm">
-                  <p className="alert-trigger-confirm-msg">
+                <div className="alert-trigger-confirm" role="region" aria-labelledby="alert-confirm-title">
+                  <p id="alert-confirm-title" className="alert-trigger-confirm-msg">
                     Votre médecin et votre aidant seront immédiatement notifiés.
                     En cas de danger de mort, appelez le <strong>15</strong>.
                   </p>
@@ -292,11 +288,13 @@ export default function PatientView() {
                     value={alertMessage}
                     onChange={(e) => setAlertMessage(e.target.value)}
                     maxLength={500}
+                    aria-label="Message optionnel pour l'alerte urgente"
                   />
                   <div className="alert-trigger-btns">
                     <button
                       type="button"
                       className="alert-trigger-cancel"
+                      aria-label="Annuler l'alerte urgente"
                       onClick={() => { setAlertStep('idle'); setAlertMessage('') }}
                     >
                       Annuler
@@ -304,6 +302,7 @@ export default function PatientView() {
                     <button
                       type="button"
                       className="alert-trigger-btn alert-trigger-btn--confirm"
+                      aria-label="Confirmer et envoyer l'alerte urgente"
                       onClick={handleSendAlert}
                     >
                       <Siren size={16} strokeWidth={2} aria-hidden />

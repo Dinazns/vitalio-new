@@ -167,7 +167,7 @@ export default function DoctorView() {
                     className="doctor-invite-email"
                     value={inviteDeviceId}
                     onChange={(e) => setInviteDeviceId(e.target.value)}
-                    placeholder="ESP32-0042"
+                    placeholder="VITALIO-XXXXXXXX"
                     autoComplete="off"
                     spellCheck="false"
                   />

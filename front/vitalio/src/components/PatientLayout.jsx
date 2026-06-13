@@ -11,6 +11,7 @@ import {
   Home,
   Cpu,
 } from 'lucide-react'
+import { resolvePatientDisplayName } from '../utils/displayName'
 
 const NAV_ITEMS = [
   { to: '/patient', icon: LayoutDashboard, label: 'Tableau de bord', end: true },
@@ -23,6 +24,7 @@ export default function PatientLayout({ children }) {
   const navigate = useNavigate()
   const { logout, user } = useAuth0()
   const [collapsed, setCollapsed] = useState(false)
+  const sidebarName = resolvePatientDisplayName({ user }) || 'Patient'
 
   const handleLogout = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
@@ -46,9 +48,9 @@ export default function PatientLayout({ children }) {
         {!collapsed && user && (
           <div className="sidebar-user">
             <div className="sidebar-user-avatar">
-              {(user.given_name || user.name || 'P').charAt(0).toUpperCase()}
+              {sidebarName.charAt(0).toUpperCase()}
             </div>
-            <span className="sidebar-user-name">{user.given_name || user.name || 'Patient'}</span>
+            <span className="sidebar-user-name">{sidebarName}</span>
           </div>
         )}
 

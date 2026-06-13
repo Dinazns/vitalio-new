@@ -68,6 +68,24 @@ export async function completeOnboarding(accessToken, payload) {
   })
 }
 
+export async function getCurrentTermsVersion() {
+  const res = await fetch(`${API_URL}/api/terms/current-version`)
+  if (!res.ok) throw new Error('Failed to get terms version')
+  return res.json()
+}
+
+export async function getTermsStatus(accessToken) {
+  return apiRequest('/api/me/terms', accessToken, {
+    method: 'GET',
+  })
+}
+
+export async function acceptTerms(accessToken) {
+  return apiRequest('/api/me/terms', accessToken, {
+    method: 'POST',
+  })
+}
+
 /** Phrase exacte attendue par l’API pour effacer toutes les données patient. */
 export const DELETE_PATIENT_DATA_CONFIRM = 'SUPPRIMER_MES_DONNEES'
 
@@ -109,11 +127,49 @@ export async function getPatientDevice(accessToken) {
   })
 }
 
-export async function enrollPatientDevice(accessToken, enrollmentCode) {
-  return apiRequest('/api/patient/enroll-device', accessToken, {
+export async function validateDeviceEnrollment(accessToken, deviceId) {
+  return apiRequest('/api/device/validate', accessToken, {
     method: 'POST',
-    body: JSON.stringify({ enrollment_code: enrollmentCode }),
+    body: JSON.stringify({ device_id: deviceId }),
   })
+}
+
+/** Confirmation via lien email — sans authentification. */
+export async function confirmDeviceEnrollment(token, deviceId) {
+  const url = `${API_URL}/api/device/confirm`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, device_id: deviceId }),
+  })
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || `HTTP Error: ${response.status}`)
+  }
+  return response.json()
+}
+
+/**
+ * Télécharge un QR code PNG.
+ * @param {'wifi'|'device'} type — wifi = portail 192.168.4.1, device = device_id
+ */
+export async function downloadDeviceQrcode(accessToken, { type = 'wifi', deviceId } = {}) {
+  const params = new URLSearchParams({ type })
+  if (type === 'device' && deviceId) {
+    params.set('device_id', deviceId)
+  }
+  const url = `${API_URL}/api/device/qrcode?${params.toString()}`
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}))
+    throw new Error(errData.message || `HTTP Error: ${response.status}`)
+  }
+  const blob = await response.blob()
+  const filename = type === 'wifi' ? 'vitalio-wifi-portal.png' : `${deviceId}-qr.png`
+  return { blob, filename }
 }
 
 /** Le serveur attache toujours la mesure au device_id du compte (users_devices) ; ne pas envoyer device_id. */
@@ -185,6 +241,7 @@ export async function getDoctorAlerts(accessToken, params = {}) {
   const sp = new URLSearchParams()
   if (params.status) sp.set('status', params.status)
   if (params.limit) sp.set('limit', String(params.limit))
+  if (params.severity_level) sp.set('severity_level', params.severity_level)
   const q = sp.toString()
   return apiRequest(`/api/doctor/alerts${q ? `?${q}` : ''}`, accessToken, { method: 'GET' })
 }
@@ -193,6 +250,7 @@ export async function getCaregiverAlerts(accessToken, params = {}) {
   const sp = new URLSearchParams()
   if (params.status) sp.set('status', params.status)
   if (params.limit) sp.set('limit', String(params.limit))
+  if (params.severity_level) sp.set('severity_level', params.severity_level)
   const q = sp.toString()
   return apiRequest(`/api/caregiver/alerts${q ? `?${q}` : ''}`, accessToken, { method: 'GET' })
 }
@@ -345,6 +403,14 @@ export async function adminListDoctorPatientLinks(accessToken, { page = 1, pageS
   sp.set('page', String(page))
   sp.set('page_size', String(pageSize))
   return apiRequest(`/api/admin/associations/doctor-patients?${sp.toString()}`, accessToken, { method: 'GET' })
+}
+
+export async function getAdminAuditLog(accessToken, { eventType = '', page = 1, pageSize = 50 } = {}) {
+  const sp = new URLSearchParams()
+  sp.set('page', String(page))
+  sp.set('page_size', String(pageSize))
+  if (eventType) sp.set('event_type', eventType)
+  return apiRequest(`/api/admin/audit-log?${sp.toString()}`, accessToken, { method: 'GET' })
 }
 
 export async function getMLModelInfo() {

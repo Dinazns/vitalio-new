@@ -145,21 +145,21 @@ export default function CaregiverPatientDetail() {
 
         <main className="caregiver-main">
           {loading && (
-            <div className="caregiver-loading">
-              <div className="caregiver-loading-spinner" />
+            <div className="caregiver-loading" role="status" aria-live="polite">
+              <div className="caregiver-loading-spinner" aria-hidden />
               <p>Chargement en cours...</p>
             </div>
           )}
-          {!loading && error && <p className="caregiver-error">{error}</p>}
+          {!loading && error && <p className="caregiver-error" role="alert">{error}</p>}
           {!loading && !error && (
             <>
               {alerts.length > 0 && (
-                <section className="caregiver-alerts-section">
-                  <h3><TriangleAlert size={20} /> Alertes à traiter</h3>
+                <section className="caregiver-alerts-section" aria-labelledby="patient-alerts-heading">
+                  <h3 id="patient-alerts-heading"><TriangleAlert size={20} aria-hidden /> Alertes à traiter</h3>
                   <p className="caregiver-alerts-intro">Prenez connaissance de l&apos;alerte et indiquez si l&apos;urgence est résolue.</p>
-                  <div className="caregiver-alerts-list">
+                  <div className="caregiver-alerts-list" role="list" aria-label="Alertes ouvertes pour ce patient">
                     {alerts.map((a, i) => (
-                      <article key={a.alert_id || a._id || i} className="caregiver-alert-card">
+                      <article key={a.alert_id || a._id || i} className="caregiver-alert-card" role="listitem">
                         <p className="caregiver-alert-summary">{a.summary}</p>
                         <p className="caregiver-alert-description">{a.lay_description}</p>
                         {a.caregiver_resolution_comment && (
@@ -172,15 +172,16 @@ export default function CaregiverPatientDetail() {
                             <button
                               type="button"
                               className="caregiver-alert-resolve-btn"
+                              aria-expanded={resolvingAlertId === (a.alert_id || a._id)}
                               onClick={() => setResolvingAlertId(resolvingAlertId === (a.alert_id || a._id) ? null : (a.alert_id || a._id))}
                             >
-                              <CheckCircle2 size={14} /> J&apos;ai pris connaissance - Urgence résolue
+                              <CheckCircle2 size={14} aria-hidden /> J&apos;ai pris connaissance - Urgence résolue
                             </button>
                           )}
                         </div>
                         {resolvingAlertId === (a.alert_id || a._id) && (
-                          <div className="caregiver-alert-resolve-form">
-                            <p className="caregiver-alert-resolve-hint">
+                          <div className="caregiver-alert-resolve-form" role="group" aria-label="Résolution de l'alerte">
+                            <p className="caregiver-alert-resolve-hint" id={`resolve-hint-${a.alert_id || a._id}`}>
                               Indiquez ce que vous avez fait (ex. : vérification sur place, appel au médecin).
                             </p>
                             <textarea
@@ -189,8 +190,10 @@ export default function CaregiverPatientDetail() {
                               onChange={(e) => setResolutionComment(e.target.value)}
                               placeholder="Ex. : Vérification sur place, la personne va bien. J'ai appelé le médecin."
                               rows={3}
+                              aria-labelledby={`resolve-hint-${a.alert_id || a._id}`}
+                              aria-required="true"
                             />
-                            {resolutionError && <p className="caregiver-alert-error">{resolutionError}</p>}
+                            {resolutionError && <p className="caregiver-alert-error" role="alert">{resolutionError}</p>}
                             <div className="caregiver-alert-resolve-btns">
                               <button
                                 type="button"

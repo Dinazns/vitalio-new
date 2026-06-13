@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
+  TriangleAlert,
 } from 'lucide-react'
 import { getCaregiverAlerts } from '../services/api'
 import PushPermissionBanner from './PushPermissionBanner'
@@ -45,15 +46,17 @@ export default function CaregiverLayout({ children }) {
       }
     }
     load()
-    return () => { mounted = false }
+    const t = setInterval(load, 30000)
+    return () => {
+      mounted = false
+      clearInterval(t)
+    }
   }, [getAccessTokenSilently])
 
   const handleLogout = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
     localStorage.removeItem('vitalio_user')
   }
-
-  const basePath = patientId ? `${base}/patient/${encodeURIComponent(patientId)}` : base
 
   return (
     <div className={`caregiver-layout ${collapsed ? 'caregiver-layout--collapsed' : ''}`}>
@@ -85,21 +88,59 @@ export default function CaregiverLayout({ children }) {
           </div>
         )}
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Navigation principale">
           <NavLink
-            to={basePath}
-            end={!patientId}
+            to={base}
+            end
             className={({ isActive }) =>
               `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
             }
-            title={collapsed ? 'Mon proche' : undefined}
+            title={collapsed ? 'Tableau de bord' : undefined}
+            aria-label={collapsed ? 'Tableau de bord' : undefined}
           >
-            <Heart size={20} />
-            {!collapsed && <span>Mon proche</span>}
-            {!collapsed && criticalCount > 0 && (
-              <span className="sidebar-badge sidebar-badge--critical">{criticalCount}</span>
+            <Heart size={20} aria-hidden />
+            {!collapsed && <span>Tableau de bord</span>}
+          </NavLink>
+          <NavLink
+            to={`${base}/alertes`}
+            className={({ isActive }) =>
+              `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
+            }
+            title={collapsed ? 'Alertes' : undefined}
+            aria-label={
+              collapsed
+                ? criticalCount > 0
+                  ? `Alertes — ${criticalCount} ouverte${criticalCount > 1 ? 's' : ''}`
+                  : 'Alertes'
+                : undefined
+            }
+          >
+            <TriangleAlert size={20} aria-hidden />
+            {!collapsed && <span>Alertes</span>}
+            {criticalCount > 0 && (
+              collapsed ? (
+                <span className="sidebar-badge-dot" aria-hidden />
+              ) : (
+                <span className="sidebar-badge sidebar-badge--critical" aria-hidden>
+                  {criticalCount}
+                </span>
+              )
             )}
           </NavLink>
+          {patientId && (
+            <NavLink
+              to={`${base}/patient/${encodeURIComponent(patientId)}`}
+              end
+              className={({ isActive }) =>
+                `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
+              }
+              title={collapsed ? 'Mon proche' : undefined}
+              aria-label={collapsed ? 'Mon proche' : undefined}
+            >
+              <Heart size={20} aria-hidden />
+              {!collapsed && <span>Mon proche</span>}
+            </NavLink>
+          )}
           {patientId && (
             <NavLink
               to={`${base}/patient/${encodeURIComponent(patientId)}/ml`}
@@ -107,20 +148,21 @@ export default function CaregiverLayout({ children }) {
                 `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
               }
               title={collapsed ? 'Analyses' : undefined}
+              aria-label={collapsed ? 'Analyses' : undefined}
             >
-              <BrainCircuit size={20} />
+              <BrainCircuit size={20} aria-hidden />
               {!collapsed && <span>Analyses</span>}
             </NavLink>
           )}
         </nav>
 
         <div className="sidebar-footer">
-          <button className="sidebar-link" onClick={() => navigate('/home')} title="Retour à l'accueil">
-            <Home size={20} />
+          <button type="button" className="sidebar-link" onClick={() => navigate('/home')} title="Retour à l'accueil" aria-label={collapsed ? 'Retour à l\'accueil' : undefined}>
+            <Home size={20} aria-hidden />
             {!collapsed && <span>Accueil</span>}
           </button>
-          <button className="sidebar-link sidebar-link--danger" onClick={handleLogout} title="Déconnexion">
-            <LogOut size={20} />
+          <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout} title="Déconnexion" aria-label={collapsed ? 'Déconnexion' : undefined}>
+            <LogOut size={20} aria-hidden />
             {!collapsed && <span>Déconnexion</span>}
           </button>
         </div>

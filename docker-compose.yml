@@ -1,0 +1,76 @@
+# Stack VitalIO — API + front + Mosquitto
+# Usage :
+#   copy .env.docker.example .env          (variables VITE_* pour le build front)
+#   renseigner back/.env                   (MongoDB, Auth0, MQTT, SMTP…)
+#   docker compose up --build
+#
+# Front : http://localhost:8080
+# API   : http://localhost:5000
+# MQTT  : localhost:8883 (TLS)
+
+name: vitalio
+
+services:
+  api:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: vitalio-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./back/.env
+    environment:
+      MQTT_BROKER: mosquitto
+      MQTT_CA_CERT: /app/mosquitto/certs/ca.crt
+      FRONTEND_URL: http://localhost:8080
+      CORS_ORIGINS: http://localhost:8080
+    volumes:
+      - ./back/mosquitto/certs:/app/mosquitto/certs:ro
+    depends_on:
+      mosquitto:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  front:
+    build:
+      context: ./front/vitalio
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000}
+        VITE_AUTH0_DOMAIN: ${VITE_AUTH0_DOMAIN}
+        VITE_AUTH0_CLIENT_ID: ${VITE_AUTH0_CLIENT_ID}
+        VITE_AUTH0_AUDIENCE: ${VITE_AUTH0_AUDIENCE}
+    container_name: vitalio-front
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: vitalio-mosquitto
+    restart: unless-stopped
+    ports:
+      - "8883:8883"
+    volumes:
+      - ./back/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./back/mosquitto/conf.d:/mosquitto/config/conf.d
+      - ./back/mosquitto/data:/mosquitto/data
+      - ./back/mosquitto/mosquitto.passwd:/mosquitto/passwd
+      - ./back/mosquitto/certs:/mosquitto/certs
+      - ./back/mosquitto/log:/mosquitto/log

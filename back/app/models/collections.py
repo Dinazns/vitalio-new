@@ -1,0 +1,5 @@
+"""MongoDB database and collection names."""
+from app.config import MONGODB_IDENTITY_DB, MONGODB_MEDICAL_DB
+
+IDENTITY_DB = MONGODB_IDENTITY_DB
+MEDICAL_DB = MONGODB_MEDICAL_DB

@@ -8,7 +8,7 @@ from bson import ObjectId
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from services.alert_ml_audit import create_or_merge_alert_for_validated_ml, ML_METRIC, ML_OPERATOR
+from app.services.alert_ml_audit import create_or_merge_alert_for_validated_ml, ML_METRIC, ML_OPERATOR
 
 
 class TestAlertMlAudit(unittest.TestCase):
