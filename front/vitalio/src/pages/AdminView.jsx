@@ -1,13 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { ArrowLeft, Search, Server, RefreshCw, Link2, Ban, CheckCircle2, Stethoscope, User, ArrowRight, LogOut, ScrollText } from 'lucide-react';
+import { ArrowLeft, Search, Server, RefreshCw, Link2, Ban, CheckCircle2, Stethoscope, User, ArrowRight, LogOut, ScrollText, Trash2, Users, ChevronDown, Cpu } from 'lucide-react';
 import {
     adminListDevices,
     adminUpdateDeviceStatus,
     adminListDoctorPatientLinks,
     adminAssociateDoctorPatient,
     getAdminAuditLog,
+    adminListUsers,
+    adminDeleteUser,
 } from '../services/api';
 
 const AUDIT_EVENT_LABELS = {
@@ -17,6 +19,7 @@ const AUDIT_EVENT_LABELS = {
     patient_measurements_read: 'Consultation mesures patient',
     admin_association_created: 'Association médecin-patient',
     admin_caregiver_association_created: 'Association aidant-patient',
+    admin_user_deleted: 'Suppression utilisateur',
     device_status_changed: 'Changement statut device',
     alert_manual_trigger: 'Alerte manuelle patient',
     alert_doctor_triage: 'Triage alerte médecin',
@@ -71,6 +74,50 @@ const personLabel = (person) => {
     return person.display_name || fullName || person.email || person.user_id_auth || '—';
 };
 
+const ROLE_LABELS = {
+    patient: 'Patient',
+    doctor: 'Médecin',
+    medecin: 'Médecin',
+    superuser: 'Médecin',
+    caregiver: 'Aidant',
+    aidant: 'Aidant',
+    admin: 'Administrateur',
+};
+
+const roleLabel = (role) => ROLE_LABELS[String(role || '').toLowerCase()] || role || '—';
+
+function AdminCollapsibleSection({ id, title, icon: Icon, count, expanded, onToggle, children }) {
+    return (
+        <section className={`admin-panel ${expanded ? 'admin-panel--open' : 'admin-panel--collapsed'}`}>
+            <button
+                type="button"
+                className="admin-panel__toggle"
+                onClick={onToggle}
+                aria-expanded={expanded}
+                aria-controls={`${id}-panel-body`}
+            >
+                <span className="admin-panel__title">
+                    <Icon size={18} aria-hidden="true" />
+                    {title}
+                </span>
+                <span className="admin-panel__meta">
+                    <span className="admin-panel__count">{count}</span>
+                    <ChevronDown
+                        size={18}
+                        className={`admin-panel__chevron ${expanded ? 'admin-panel__chevron--open' : ''}`}
+                        aria-hidden="true"
+                    />
+                </span>
+            </button>
+            {expanded && (
+                <div id={`${id}-panel-body`} className="admin-panel__body">
+                    {children}
+                </div>
+            )}
+        </section>
+    );
+}
+
 export default function AdminView() {
     const navigate = useNavigate();
     const { getAccessTokenSilently, logout } = useAuth0();
@@ -102,6 +149,17 @@ export default function AdminView() {
     const [auditFilter, setAuditFilter] = React.useState('');
     const [auditLoading, setAuditLoading] = React.useState(false);
 
+    const [users, setUsers] = React.useState([]);
+    const [usersTotal, setUsersTotal] = React.useState(0);
+    const [userSearch, setUserSearch] = React.useState('');
+    const [userRoleFilter, setUserRoleFilter] = React.useState('');
+    const [usersLoading, setUsersLoading] = React.useState(false);
+    const [busyUserId, setBusyUserId] = React.useState('');
+    const [usersExpanded, setUsersExpanded] = React.useState(false);
+    const [linksExpanded, setLinksExpanded] = React.useState(false);
+    const [devicesExpanded, setDevicesExpanded] = React.useState(false);
+    const [auditExpanded, setAuditExpanded] = React.useState(false);
+
     const loadAuditLog = React.useCallback(async (eventType = auditFilter) => {
         setAuditLoading(true);
         try {
@@ -115,6 +173,25 @@ export default function AdminView() {
             setAuditLoading(false);
         }
     }, [getAccessTokenSilently, auditFilter]);
+
+    const loadUsers = React.useCallback(async (opts = {}) => {
+        setUsersLoading(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await adminListUsers(token, {
+                q: opts.q ?? userSearch,
+                role: opts.role ?? userRoleFilter,
+                pageSize: 50,
+            });
+            setUsers(res.users || []);
+            setUsersTotal(res.count || 0);
+        } catch (err) {
+            console.error('Users load failed:', err);
+            setError(err.message || 'Impossible de charger les utilisateurs');
+        } finally {
+            setUsersLoading(false);
+        }
+    }, [getAccessTokenSilently, userSearch, userRoleFilter]);
 
     const loadAll = React.useCallback(async (opts = {}) => {
         setLoading(true);
@@ -138,6 +215,7 @@ export default function AdminView() {
     React.useEffect(() => {
         loadAll();
         loadAuditLog('');
+        loadUsers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -173,6 +251,38 @@ export default function AdminView() {
             setError(e.message || 'Impossible de mettre à jour le statut du dispositif');
         } finally {
             setBusyDevice('');
+        }
+    };
+
+    const handleUserSearchSubmit = (event) => {
+        event.preventDefault();
+        loadUsers();
+    };
+
+    const handleUserRoleFilterChange = (value) => {
+        setUserRoleFilter(value);
+        loadUsers({ role: value });
+    };
+
+    const handleDeleteUser = async (user) => {
+        const label = personLabel(user);
+        const role = roleLabel(user.role);
+        const warning = role === 'Patient'
+            ? 'Toutes les mesures, alertes et liens associés seront supprimés.'
+            : 'Le profil VitalIO et les associations seront supprimés.';
+        if (!window.confirm(`Supprimer ${label} (${role}) ?\n\n${warning}\n\nLe compte Auth0 ne sera pas supprimé automatiquement.`)) {
+            return;
+        }
+        setBusyUserId(user.user_id_auth);
+        setError('');
+        try {
+            const token = await getAccessTokenSilently();
+            await adminDeleteUser(token, user.user_id_auth);
+            await Promise.all([loadUsers(), loadAll(), loadAuditLog()]);
+        } catch (e) {
+            setError(e.message || "Impossible de supprimer l'utilisateur");
+        } finally {
+            setBusyUserId('');
         }
     };
 
@@ -251,13 +361,13 @@ export default function AdminView() {
                     <div className="app-info-block">
                         <h1 className="app-title">
                             <Server size={18} className="icon" />
-                            VitalIO_Admin
+                            Administration VitalIO
                         </h1>
-                        <p className="version">Gestion des dispositifs &amp; associations</p>
+                        <p className="version">Gestion des comptes, dispositifs et associations</p>
                     </div>
                 </div>
                 <div className="nav-right">
-                    <span className="status-dot animate-pulse"></span>
+                    <span className="status-dot" />
                     <span className="status-text">{loading ? 'Chargement' : 'Connecté'}</span>
                     <button
                         type="button"
@@ -297,61 +407,111 @@ export default function AdminView() {
                     </div>
                 </div>
 
-                <div className="toolbar">
-                    <form className="search-box" onSubmit={handleSearchSubmit}>
-                        <Search className="icon" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Rechercher ID dispositif, email ou nom patient..."
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                        />
-                    </form>
-                    <div className="toolbar-controls">
-                        <select
-                            className="admin-select doctor-filter"
-                            value={doctorFilter}
-                            onChange={(event) => setDoctorFilter(event.target.value)}
-                            aria-label="Filtrer par médecin"
-                        >
-                            <option value="">Tous les médecins</option>
-                            {doctorOptions.map((doctor) => (
-                                <option key={doctor.user_id_auth} value={doctor.user_id_auth}>
-                                    {personLabel(doctor)}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            className="admin-select"
-                            value={statusFilter}
-                            onChange={(event) => handleFilterChange(event.target.value)}
-                            aria-label="Filtrer par statut"
-                        >
-                            <option value="">Tous les statuts</option>
-                            <option value="active">Actifs</option>
-                            <option value="suspended">Suspendus</option>
-                        </select>
-                        <button className="refresh-btn" onClick={() => loadAll()} type="button">
-                            <RefreshCw size={16} /> Actualiser
-                        </button>
-                    </div>
-                </div>
+                {error && <p className="admin-error-banner" role="alert">{error}</p>}
 
-                {error && <p className="doctor-error" style={{ marginBottom: '16px' }}>{error}</p>}
-
-                <section className="association-section">
-                    <div className="section-header">
-                        <h3>
-                            <Link2 size={18} />
-                            Liaison médecin / patient
-                        </h3>
-                        <span className="section-count">
-                            {doctorFilter
-                                ? `${filteredLinks.length} patient${filteredLinks.length !== 1 ? 's' : ''}`
-                                : `${links.length} lien${links.length !== 1 ? 's' : ''}`}
-                        </span>
+                <AdminCollapsibleSection
+                    id="users"
+                    title="Utilisateurs"
+                    icon={Users}
+                    count={`${usersTotal} compte${usersTotal !== 1 ? 's' : ''}`}
+                    expanded={usersExpanded}
+                    onToggle={() => setUsersExpanded((open) => !open)}
+                >
+                    <div className="toolbar" style={{ marginBottom: 0 }}>
+                        <form className="search-box" onSubmit={handleUserSearchSubmit}>
+                            <Search className="icon" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Rechercher email, nom ou identifiant…"
+                                value={userSearch}
+                                onChange={(event) => setUserSearch(event.target.value)}
+                            />
+                        </form>
+                        <div className="toolbar-controls">
+                            <select
+                                className="admin-select"
+                                value={userRoleFilter}
+                                onChange={(event) => handleUserRoleFilterChange(event.target.value)}
+                                aria-label="Filtrer par rôle"
+                            >
+                                <option value="">Tous les rôles</option>
+                                <option value="patient">Patients</option>
+                                <option value="doctor">Médecins</option>
+                                <option value="caregiver">Aidants</option>
+                            </select>
+                            <button className="refresh-btn" type="button" onClick={() => loadUsers()} disabled={usersLoading}>
+                                <RefreshCw size={16} /> {usersLoading ? 'Chargement…' : 'Actualiser'}
+                            </button>
+                        </div>
                     </div>
 
+                    {usersLoading && users.length === 0 ? (
+                        <p className="admin-empty">Chargement des utilisateurs…</p>
+                    ) : users.length === 0 ? (
+                        <p className="admin-empty">Aucun utilisateur trouvé.</p>
+                    ) : (
+                        <div className="admin-table-wrap">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Email</th>
+                                        <th>Rôle</th>
+                                        <th>Identifiant</th>
+                                        <th style={{ width: '72px' }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.map((user) => {
+                                        const isAdminAccount = String(user.role || '').toLowerCase() === 'admin';
+                                        return (
+                                            <tr key={user.user_id_auth}>
+                                                <td>{personLabel(user)}</td>
+                                                <td>{user.email || '—'}</td>
+                                                <td>{roleLabel(user.role)}</td>
+                                                <td
+                                                    style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                                    title={user.user_id_auth}
+                                                >
+                                                    {user.user_id_auth || '—'}
+                                                </td>
+                                                <td>
+                                                    {!isAdminAccount ? (
+                                                        <button
+                                                            type="button"
+                                                            className="admin-delete-user-btn"
+                                                            title="Supprimer l'utilisateur"
+                                                            disabled={busyUserId === user.user_id_auth}
+                                                            onClick={() => handleDeleteUser(user)}
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    ) : (
+                                                        <span className="admin-empty" style={{ fontSize: '0.75rem' }}>—</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </AdminCollapsibleSection>
+
+                <AdminCollapsibleSection
+                    id="links"
+                    title="Liaison médecin / patient"
+                    icon={Link2}
+                    count={
+                        doctorFilter
+                            ? `${filteredLinks.length} patient${filteredLinks.length !== 1 ? 's' : ''}`
+                            : `${links.length} lien${links.length !== 1 ? 's' : ''}`
+                    }
+                    expanded={linksExpanded}
+                    onToggle={() => setLinksExpanded((open) => !open)}
+                >
+                    <div className="association-section association-section--flat">
                     <div className="association-form">
                         <div className="association-field">
                             <label htmlFor="admin-doctor-id">
@@ -441,82 +601,132 @@ export default function AdminView() {
                             </div>
                         )}
                     </div>
-                </section>
+                    </div>
+                </AdminCollapsibleSection>
 
-                {loading && filteredDevices.length === 0 && devices.length === 0 ? (
-                    <p style={{ color: '#64748b' }}>Chargement des dispositifs...</p>
-                ) : filteredDevices.length === 0 ? (
-                    <p style={{ color: '#64748b' }}>
-                        {doctorFilter
-                            ? `Aucun dispositif pour ${selectedDoctorLabel}.`
-                            : 'Aucun dispositif trouvé.'}
-                    </p>
-                ) : (
-                    <div className="devices-grid">
-                        {filteredDevices.map((device) => (
-                            <div key={device.device_id} className="device-card group">
-                                {device.status === 'suspended' && <div className="warning-overlay"></div>}
+                <AdminCollapsibleSection
+                    id="devices"
+                    title="Dispositifs"
+                    icon={Cpu}
+                    count={`${filteredDevices.length} affiché${filteredDevices.length !== 1 ? 's' : ''}`}
+                    expanded={devicesExpanded}
+                    onToggle={() => setDevicesExpanded((open) => !open)}
+                >
+                    <div className="toolbar">
+                        <form className="search-box" onSubmit={handleSearchSubmit}>
+                            <Search className="icon" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Rechercher ID dispositif, email ou nom patient…"
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                            />
+                        </form>
+                        <div className="toolbar-controls">
+                            <select
+                                className="admin-select doctor-filter"
+                                value={doctorFilter}
+                                onChange={(event) => setDoctorFilter(event.target.value)}
+                                aria-label="Filtrer par médecin"
+                            >
+                                <option value="">Tous les médecins</option>
+                                {doctorOptions.map((doctor) => (
+                                    <option key={doctor.user_id_auth} value={doctor.user_id_auth}>
+                                        {personLabel(doctor)}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                className="admin-select"
+                                value={statusFilter}
+                                onChange={(event) => handleFilterChange(event.target.value)}
+                                aria-label="Filtrer par statut"
+                            >
+                                <option value="">Tous les statuts</option>
+                                <option value="active">Actifs</option>
+                                <option value="suspended">Suspendus</option>
+                            </select>
+                            <button className="refresh-btn" onClick={() => loadAll()} type="button">
+                                <RefreshCw size={16} /> Actualiser
+                            </button>
+                        </div>
+                    </div>
 
-                                <div className="card-header">
-                                    <div>
-                                        <h3>{personLabel(device.patient)}</h3>
-                                        <p className="id-text">{device.device_id}</p>
-                                    </div>
-                                    <StatusBadge status={device.status} />
-                                </div>
+                    {loading && filteredDevices.length === 0 && devices.length === 0 ? (
+                        <p className="admin-empty">Chargement des dispositifs…</p>
+                    ) : filteredDevices.length === 0 ? (
+                        <p className="admin-empty">
+                            {doctorFilter
+                                ? `Aucun dispositif pour ${selectedDoctorLabel}.`
+                                : 'Aucun dispositif trouvé.'}
+                        </p>
+                    ) : (
+                        <div className="devices-grid">
+                            {filteredDevices.map((device) => (
+                                <div key={device.device_id} className="device-card group">
+                                    {device.status === 'suspended' && <div className="warning-overlay" />}
 
-                                <div className="info-list">
-                                    <div className="info-row border-b">
-                                        <span className="label">Email</span>
-                                        <span className="val">{device.patient?.email || '—'}</span>
-                                    </div>
-                                    <div className="info-row">
-                                        <span className="label">Médecins liés</span>
-                                        <span className="val">
-                                            {device.doctors && device.doctors.length > 0
-                                                ? device.doctors.map((d) => personLabel(d)).join(', ')
-                                                : '—'}
-                                        </span>
-                                    </div>
-                                    <div className="info-row">
-                                        <span className="label">Appairage</span>
-                                        <EnrolledBadge enrolled={device.enrolled} />
-                                    </div>
-                                    {device.status === 'suspended' && device.suspension_reason && (
-                                        <div className="info-row">
-                                            <span className="label">Motif</span>
-                                            <span className="val">{device.suspension_reason}</span>
+                                    <div className="card-header">
+                                        <div>
+                                            <h3>{personLabel(device.patient)}</h3>
+                                            <p className="id-text">{device.device_id}</p>
                                         </div>
-                                    )}
-                                </div>
+                                        <StatusBadge status={device.status} />
+                                    </div>
 
-                                <div className="actions">
-                                    <button
-                                        title={device.status === 'suspended' ? 'Réactiver' : 'Suspendre'}
-                                        onClick={() => handleToggleStatus(device)}
-                                        disabled={busyDevice === device.device_id}
-                                    >
-                                        {device.status === 'suspended'
-                                            ? <CheckCircle2 size={16} />
-                                            : <Ban size={16} />}
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                                    <div className="info-list">
+                                        <div className="info-row border-b">
+                                            <span className="label">Email</span>
+                                            <span className="val">{device.patient?.email || '—'}</span>
+                                        </div>
+                                        <div className="info-row">
+                                            <span className="label">Médecins liés</span>
+                                            <span className="val">
+                                                {device.doctors && device.doctors.length > 0
+                                                    ? device.doctors.map((d) => personLabel(d)).join(', ')
+                                                    : '—'}
+                                            </span>
+                                        </div>
+                                        <div className="info-row">
+                                            <span className="label">Appairage</span>
+                                            <EnrolledBadge enrolled={device.enrolled} />
+                                        </div>
+                                        {device.status === 'suspended' && device.suspension_reason && (
+                                            <div className="info-row">
+                                                <span className="label">Motif</span>
+                                                <span className="val">{device.suspension_reason}</span>
+                                            </div>
+                                        )}
+                                    </div>
 
-                <section className="association-section" style={{ marginTop: '2rem' }}>
-                    <div className="section-header">
-                        <h3>
-                            <ScrollText size={18} />
-                            Journal d&apos;audit
-                        </h3>
-                        <span className="section-count">
-                            {auditTotal} événement{auditTotal !== 1 ? 's' : ''}
-                        </span>
-                    </div>
-                    <div className="toolbar-controls" style={{ marginBottom: '12px' }}>
+                                    <div className="actions">
+                                        <button
+                                            type="button"
+                                            title={device.status === 'suspended' ? 'Réactiver' : 'Suspendre'}
+                                            onClick={() => handleToggleStatus(device)}
+                                            disabled={busyDevice === device.device_id}
+                                        >
+                                            {device.status === 'suspended'
+                                                ? <CheckCircle2 size={16} />
+                                                : <Ban size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </AdminCollapsibleSection>
+
+                <AdminCollapsibleSection
+                    id="audit"
+                    title="Journal d'audit"
+                    icon={ScrollText}
+                    count={`${auditTotal} événement${auditTotal !== 1 ? 's' : ''}`}
+                    expanded={auditExpanded}
+                    onToggle={() => setAuditExpanded((open) => !open)}
+                >
+                    <div className="toolbar">
+                    <div className="toolbar-controls">
                         <select
                             className="admin-select"
                             value={auditFilter}
@@ -535,43 +745,44 @@ export default function AdminView() {
                             <RefreshCw size={16} /> {auditLoading ? 'Chargement…' : 'Actualiser'}
                         </button>
                     </div>
+                    </div>
                     {auditLoading && auditEvents.length === 0 ? (
-                        <p style={{ color: '#64748b' }}>Chargement du journal…</p>
+                        <p className="admin-empty">Chargement du journal…</p>
                     ) : auditEvents.length === 0 ? (
-                        <p style={{ color: '#64748b' }}>Aucun événement enregistré pour le moment.</p>
+                        <p className="admin-empty">Aucun événement enregistré pour le moment.</p>
                     ) : (
-                        <div className="association-links">
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                        <div className="admin-table-wrap">
+                            <table className="admin-table">
                                 <thead>
-                                    <tr style={{ textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
-                                        <th style={{ padding: '8px 4px' }}>Date</th>
-                                        <th style={{ padding: '8px 4px' }}>Type</th>
-                                        <th style={{ padding: '8px 4px' }}>Acteur</th>
-                                        <th style={{ padding: '8px 4px' }}>Rôle</th>
-                                        <th style={{ padding: '8px 4px' }}>Ressource</th>
-                                        <th style={{ padding: '8px 4px' }}>Action</th>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Acteur</th>
+                                        <th>Rôle</th>
+                                        <th>Ressource</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {auditEvents.map((ev) => (
-                                        <tr key={ev.id || `${ev.created_at}-${ev.event_type}`} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                            <td style={{ padding: '8px 4px', whiteSpace: 'nowrap' }}>{formatAuditDate(ev.created_at)}</td>
-                                            <td style={{ padding: '8px 4px' }}>{AUDIT_EVENT_LABELS[ev.event_type] || ev.event_type}</td>
-                                            <td style={{ padding: '8px 4px', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.actor_user_id_auth}>
+                                        <tr key={ev.id || `${ev.created_at}-${ev.event_type}`}>
+                                            <td style={{ whiteSpace: 'nowrap' }}>{formatAuditDate(ev.created_at)}</td>
+                                            <td>{AUDIT_EVENT_LABELS[ev.event_type] || ev.event_type}</td>
+                                            <td style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.actor_user_id_auth}>
                                                 {ev.actor_user_id_auth ? String(ev.actor_user_id_auth).slice(-12) : '—'}
                                             </td>
-                                            <td style={{ padding: '8px 4px' }}>{ev.actor_role || '—'}</td>
-                                            <td style={{ padding: '8px 4px', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.resource_id}>
+                                            <td>{ev.actor_role || '—'}</td>
+                                            <td style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.resource_id}>
                                                 {ev.resource_id || '—'}
                                             </td>
-                                            <td style={{ padding: '8px 4px' }}>{ev.action || '—'}</td>
+                                            <td>{ev.action || '—'}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
                     )}
-                </section>
+                </AdminCollapsibleSection>
 
             </div>
         </div>

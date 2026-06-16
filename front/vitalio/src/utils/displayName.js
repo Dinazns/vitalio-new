@@ -52,3 +52,29 @@ export function resolvePatientListDisplayName(patient) {
   if (email.includes('@')) return email
   return ''
 }
+
+/**
+ * Prénom + nom pour l’UI (suivi avancé, en-têtes) — jamais d’identifiant technique.
+ */
+export function resolvePatientFullName({ profile, analysis } = {}) {
+  const firstCandidates = [
+    profile?.first_name,
+    analysis?.patient_first_name,
+  ]
+  const lastCandidates = [
+    profile?.last_name,
+    analysis?.patient_last_name,
+  ]
+
+  const first = firstCandidates.map((v) => String(v || '').trim()).find((v) => v && !isAuthProviderId(v)) || ''
+  const last = lastCandidates.map((v) => String(v || '').trim()).find((v) => v && !isAuthProviderId(v)) || ''
+  const full = `${first} ${last}`.trim()
+  if (full) return full
+
+  for (const src of [profile?.display_name, analysis?.patient_display]) {
+    const candidate = pickDisplayCandidate(src)
+    if (candidate) return candidate
+  }
+
+  return ''
+}

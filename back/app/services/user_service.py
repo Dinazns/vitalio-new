@@ -17,6 +17,11 @@ from app.services.field_encryption import decrypt_profile_fields
 OBJECTID_PATTERN = re.compile(r"^[a-fA-F0-9]{24}$")
 _AUTH0_ID_RE = re.compile(r"^(auth0|google-oauth2|windowslive|github)\|")
 
+from app.services.device_constants import (
+    DEVICE_STATUS_ACTIVE,
+    DEVICE_STATUS_SUSPENDED,
+    active_device_assignment_fields,
+)
 
 def is_auth_provider_id(value: Optional[str]) -> bool:
     """True when value looks like a raw Auth0/OAuth subject (e.g. auth0|abc123)."""
@@ -121,14 +126,14 @@ def get_device_status(device_id: str) -> Optional[str]:
         return None
     if not doc:
         return None
-    return doc.get("status") or "active"
+    return doc.get("status") or DEVICE_STATUS_ACTIVE
 
 
 def is_device_active(device_id: str) -> bool:
     """True only when the device exists and is not suspended.
 
     Unknown devices are rejected so callers can gate ingestion safely."""
-    return get_device_status(device_id) == "active"
+    return get_device_status(device_id) == DEVICE_STATUS_ACTIVE
 
 
 def get_device_measurements(device_id: str) -> List[Dict[str, Any]]:

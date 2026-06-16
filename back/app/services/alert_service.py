@@ -282,7 +282,6 @@ def upsert_open_alert(
     pseudo = get_patient_pseudo_id_for_device(device_id)
     if pseudo:
         set_fields["patient_pseudo_id"] = pseudo
-        set_on_insert["patient_pseudo_id"] = pseudo
     # measurement_id is NOT duplicated in $setOnInsert - it lives only in $set above
     result = get_medical_db().alerts.update_one(
         query,
@@ -357,7 +356,6 @@ def upsert_near_threshold_alert(
     pseudo = get_patient_pseudo_id_for_device(device_id)
     if pseudo:
         set_fields["patient_pseudo_id"] = pseudo
-        set_on_insert["patient_pseudo_id"] = pseudo
     result = get_medical_db().alerts.update_one(
         query,
         {"$set": set_fields, "$setOnInsert": set_on_insert},
@@ -449,7 +447,6 @@ def upsert_ml_warning_alert(
     pseudo = get_patient_pseudo_id_for_device(device_id)
     if pseudo:
         set_fields["patient_pseudo_id"] = pseudo
-        set_on_insert["patient_pseudo_id"] = pseudo
     result = get_medical_db().alerts.update_one(
         query,
         {"$set": set_fields, "$setOnInsert": set_on_insert},
@@ -514,7 +511,6 @@ def upsert_open_alert_from_ml_critical(
     pseudo = get_patient_pseudo_id_for_device(device_id)
     if pseudo:
         set_fields["patient_pseudo_id"] = pseudo
-        set_on_insert["patient_pseudo_id"] = pseudo
     result = get_medical_db().alerts.update_one(
         query,
         {"$set": set_fields, "$setOnInsert": set_on_insert},

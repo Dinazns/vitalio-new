@@ -16,6 +16,7 @@ from jose import jwt, JWTError
 
 from app.config import AUTH0_DOMAIN, API_AUDIENCE, AUTH0_ALGORITHMS, AUTH0_ROLE_CLAIM
 from app.database import get_identity_db, get_medical_db
+from app.services.device_constants import active_device_assignment_fields
 from app.exceptions import AuthError, DatabaseError
 from app.services.field_encryption import encrypt_profile_fields
 from app.services.patient_pseudo_service import ensure_patient_pseudo_id
@@ -331,7 +332,7 @@ def _ensure_patient_device(user_id_auth: str) -> None:
     device_id = _get_next_sim_esp32_device_id()
     identity_db.users_devices.update_one(
         {"user_id_auth": user_id_auth},
-        {"$set": {"user_id_auth": user_id_auth, "device_id": device_id}},
+        {"$set": active_device_assignment_fields(user_id_auth, device_id)},
         upsert=True,
     )
     logger.info("Auto-assigned device for patient: %s -> %s", user_id_auth, device_id)
@@ -387,7 +388,7 @@ def _provision_user_if_new(user_id_auth: str, jwt_payload: Dict[str, Any]) -> Op
         device_id = _get_next_sim_esp32_device_id()
         get_identity_db().users_devices.update_one(
             {"user_id_auth": user_id_auth},
-            {"$set": {"user_id_auth": user_id_auth, "device_id": device_id}},
+            {"$set": active_device_assignment_fields(user_id_auth, device_id)},
             upsert=True,
         )
         logger.info("JIT provisioned patient: %s -> %s", user_id_auth, device_id)

@@ -31,6 +31,7 @@ from app.services.user_service import (
     ensure_patient_access_or_403, resolve_patient_id_to_user_id_auth, get_user_db_id,
     parse_iso_datetime, normalize_user_id_auth, get_user_profile, _split_display_name,
     datetime_to_iso_utc, get_address_dict_from_profile, resolve_patient_display_name,
+    is_auth_provider_id,
 )
 from app.services.invitation_service import (
     hash_secret_token, generate_invite_token, generate_cabinet_code,
@@ -436,11 +437,19 @@ def _apply_patient_identity_to_ml_payload(payload: Dict[str, Any], user_doc: Opt
     payload["patient_display"] = resolve_patient_display_name(user_doc)
     fn = (user_doc.get("first_name") or "").strip()
     ln = (user_doc.get("last_name") or "").strip()
+    if is_auth_provider_id(fn):
+        fn = ""
+    if is_auth_provider_id(ln):
+        ln = ""
     if not fn and not ln:
         disp = (user_doc.get("display_name") or "").strip()
-        if disp:
+        if disp and not is_auth_provider_id(disp):
             a, b = _split_display_name(disp)
             fn, ln = (a or "").strip(), (b or "").strip()
+            if is_auth_provider_id(fn):
+                fn = ""
+            if is_auth_provider_id(ln):
+                ln = ""
     payload["patient_first_name"] = fn or None
     payload["patient_last_name"] = ln or None
 

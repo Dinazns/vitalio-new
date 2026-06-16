@@ -2,7 +2,6 @@
 MQTT subscriber for IoT device measurements.
 """
 import json
-import os
 import threading
 from datetime import datetime, timezone
 from typing import Optional
@@ -21,9 +20,12 @@ from app.services.ml_service import run_ml_scoring
 from app.services.ml_retrain_scheduler import schedule_retrain_after_new_measurement
 from app.services.user_service import get_patient_id_from_device, get_user_profile, is_device_active
 from app.services.patient_pseudo_service import attach_patient_pseudo_to_doc
+from app.mqtt_tls import resolve_mqtt_ca_cert
 
 _mqtt_client: Optional[mqtt.Client] = None
 _mqtt_thread: Optional[threading.Thread] = None
+_mqtt_started = False
+_mqtt_start_lock = threading.Lock()
 
 
 def on_mqtt_message(client, userdata, msg):
@@ -70,7 +72,12 @@ def on_mqtt_message(client, userdata, msg):
         try:
             ins = get_medical_db().measurements.insert_one(measurement_doc)
             measurement_doc["_id"] = ins.inserted_id
-            print(f"Measurement inserted for device {device_id} (status: {validation['status']})")
+        except PyMongoError as db_error:
+            print(f"Error inserting measurement for device {device_id}: {str(db_error)}")
+            return
+
+        print(f"Measurement inserted for device {device_id} (status: {validation['status']})")
+        try:
             pathology_ctx = None
             pid = get_patient_id_from_device(device_id)
             if pid:
@@ -99,7 +106,7 @@ def on_mqtt_message(client, userdata, msg):
                 except Exception as sched_err:
                     print(f"Warning: schedule ML retrain after MQTT measurement failed: {sched_err}")
         except PyMongoError as db_error:
-            print(f"Error inserting measurement for device {device_id}: {str(db_error)}")
+            print(f"Error processing measurement for device {device_id}: {str(db_error)}")
 
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON payload in MQTT message - {str(e)}")
@@ -125,8 +132,8 @@ def _on_mqtt_subscribe(client, userdata, mid, granted_qos, properties=None):
 
 
 def start_mqtt_subscriber():
-    """Start MQTT subscriber in a background thread."""
-    global _mqtt_client, _mqtt_thread
+    """Start MQTT subscriber in a background thread (idempotent per process)."""
+    global _mqtt_client, _mqtt_thread, _mqtt_started
 
     if not MQTT_ENABLED:
         print("MQTT subscriber disabled (MQTT_ENABLED=false)")
@@ -134,6 +141,13 @@ def start_mqtt_subscriber():
     if not MQTT_BROKER:
         print("MQTT_BROKER not configured, skipping MQTT subscriber")
         return
+
+    with _mqtt_start_lock:
+        if _mqtt_started:
+            return
+        if _mqtt_thread is not None and _mqtt_thread.is_alive():
+            return
+        _mqtt_started = True
 
     def mqtt_thread_function():
         global _mqtt_client
@@ -146,14 +160,10 @@ def start_mqtt_subscriber():
             _mqtt_client.on_subscribe = _on_mqtt_subscribe
             _mqtt_client.on_message = on_mqtt_message
 
-            if not os.path.exists(MQTT_CA_CERT):
-                raise FileNotFoundError(
-                    f"CA certificate not found: {MQTT_CA_CERT}\n"
-                    "Please generate certificates using: mosquitto/generate_certificates.ps1"
-                )
+            ca_certs_path, ca_label = resolve_mqtt_ca_cert(MQTT_CA_CERT)
 
             _mqtt_client.tls_set(
-                ca_certs=MQTT_CA_CERT,
+                ca_certs=ca_certs_path,
                 certfile=None,
                 keyfile=None,
                 tls_version=mqtt.ssl.PROTOCOL_TLSv1_2,
@@ -168,7 +178,10 @@ def start_mqtt_subscriber():
 
             _mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
-            print(f"Connecting to MQTT broker via TLS {MQTT_BROKER}:{MQTT_PORT}...")
+            print(
+                f"Connecting to MQTT broker via TLS {MQTT_BROKER}:{MQTT_PORT} "
+                f"(CA: {ca_label})..."
+            )
             _mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
             _mqtt_client.loop_forever()
 

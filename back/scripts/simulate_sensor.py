@@ -18,6 +18,7 @@ load_dotenv(env_path)
 
 # Même logique DNS que l’API (MONGODB_DNS_SERVERS dans config) pour mongodb+srv
 from app import config  # noqa: E402, F401 — exécute apply_mongodb_dns_resolver()
+from app.mqtt_tls import resolve_mqtt_ca_cert  # noqa: E402
 
 BROKER_ADDRESS=os.getenv("MQTT_BROKER","localhost")
 PORT=int(os.getenv("MQTT_PORT","8883"))
@@ -74,9 +75,10 @@ def demarrer_simulation():
         except Exception as e:
             print(f"WARNING: Unexpected MongoDB initialization error: {e}")
 
-    if not os.path.exists(CA_CERT_PATH):
-        print(f"ERROR: CA certificate not found: {CA_CERT_PATH}")
-        print("   Please generate certificates using: mosquitto/generate_certificates.ps1")
+    try:
+        ca_certs_path, ca_label = resolve_mqtt_ca_cert(CA_CERT_PATH)
+    except FileNotFoundError as e:
+        print(f"ERROR: {e}")
         sys.exit(1)
 
     if not MQTT_USERNAME or not MQTT_PASSWORD:
@@ -92,14 +94,14 @@ def demarrer_simulation():
 
     try:
         client.tls_set(
-            ca_certs=CA_CERT_PATH,
+            ca_certs=ca_certs_path,
             certfile=None,
             keyfile=None,
             tls_version=ssl.PROTOCOL_TLSv1_2,
             cert_reqs=ssl.CERT_REQUIRED,
             ciphers=None
         )
-        print(f"TLS configured (CA: {CA_CERT_PATH})")
+        print(f"TLS configured (CA: {ca_label})")
 
         client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
         print(f"Authentication configured (Username: {MQTT_USERNAME})")

@@ -7,6 +7,7 @@ from pymongo.errors import PyMongoError
 from app.database import get_identity_db
 from app.exceptions import DatabaseError
 from app.services.user_service import resolve_patient_id_to_user_id_auth
+from app.services.device_constants import active_device_assignment_fields
 
 
 def normalize_email(email_raw: str):
@@ -62,12 +63,17 @@ def apply_patient_device_assignment(
         get_identity_db().users_devices.update_one(
             {"user_id_auth": patient_user_id_auth},
             {
-                "$set": {
-                    "user_id_auth": patient_user_id_auth,
-                    "device_id": device_id,
-                    "assigned_by": assigned_by_user_id_auth,
-                    "assigned_at": now,
-                }
+                "$set": active_device_assignment_fields(
+                    patient_user_id_auth,
+                    device_id,
+                    assigned_by=assigned_by_user_id_auth,
+                    assigned_at=now,
+                ),
+                "$unset": {
+                    "suspension_reason": "",
+                    "status_updated_at": "",
+                    "status_updated_by": "",
+                },
             },
             upsert=True,
         )

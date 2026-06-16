@@ -260,3 +260,61 @@ def erase_patient_all_data(user_id_auth: str) -> Dict[str, int]:
         raise DatabaseError({"code": "erase_identity_error", "message": str(e)}, 500)
 
     return counts
+
+
+def erase_user_all_data(user_id_auth: str) -> Dict[str, int]:
+    """
+    Supprime un utilisateur VitalIO et les données associées à son rôle.
+    N'efface pas le compte Auth0 (déconnexion / suppression Auth0 séparées).
+    """
+    identity = get_identity_db()
+    medical = get_medical_db()
+    try:
+        user_doc = identity.users.find_one({"user_id_auth": user_id_auth}, {"_id": 1, "role": 1})
+    except PyMongoError as e:
+        raise DatabaseError({"code": "user_lookup_error", "message": str(e)}, 500)
+
+    if not user_doc:
+        raise DatabaseError({"code": "user_not_found", "message": "Utilisateur introuvable"}, 404)
+
+    raw_role = str(user_doc.get("role") or "").strip().lower()
+    if raw_role in ("medecin", "superuser"):
+        role = "doctor"
+    elif raw_role == "aidant":
+        role = "caregiver"
+    else:
+        role = raw_role
+
+    if role == "patient":
+        return erase_patient_all_data(user_id_auth)
+
+    counts: Dict[str, int] = {}
+
+    try:
+        if role == "doctor":
+            r = identity.doctor_patients.delete_many({"doctor_user_id_auth": user_id_auth})
+            counts["doctor_patients"] = r.deleted_count
+            r = identity.doctor_invites.delete_many({"doctor_user_id_auth": user_id_auth})
+            counts["doctor_invites"] = r.deleted_count
+            r = medical.doctor_feedback.delete_many({"doctor_user_id_auth": user_id_auth})
+            counts["doctor_feedback"] = r.deleted_count
+            r = identity.audit_links.delete_many({"doctor_user_id_auth": user_id_auth})
+            counts["audit_links_doctor"] = r.deleted_count
+
+        if role == "caregiver":
+            r = identity.caregiver_patients.delete_many({"caregiver_user_id_auth": user_id_auth})
+            counts["caregiver_patients"] = r.deleted_count
+
+        r = identity.doctor_invites.delete_many({"created_by_user_id_auth": user_id_auth})
+        counts["doctor_invites_created_by"] = r.deleted_count
+        r = identity.push_subscriptions.delete_many({"user_id_auth": user_id_auth})
+        counts["push_subscriptions"] = r.deleted_count
+        r = identity.users.delete_one({"user_id_auth": user_id_auth})
+        counts["users_deleted"] = r.deleted_count
+    except PyMongoError as e:
+        raise DatabaseError({"code": "erase_user_error", "message": str(e)}, 500)
+
+    if counts.get("users_deleted", 0) == 0:
+        raise DatabaseError({"code": "user_not_found", "message": "Utilisateur introuvable"}, 404)
+
+    return counts

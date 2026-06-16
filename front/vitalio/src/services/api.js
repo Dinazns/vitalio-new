@@ -442,6 +442,22 @@ export async function getAdminAuditLog(accessToken, { eventType = '', page = 1, 
   return apiRequest(`/api/admin/audit-log?${sp.toString()}`, accessToken, { method: 'GET' })
 }
 
+export async function adminListUsers(accessToken, { q = '', role = '', page = 1, pageSize = 50 } = {}) {
+  const sp = new URLSearchParams()
+  if (q) sp.set('q', q)
+  if (role) sp.set('role', role)
+  sp.set('page', String(page))
+  sp.set('page_size', String(pageSize))
+  return apiRequest(`/api/admin/users?${sp.toString()}`, accessToken, { method: 'GET' })
+}
+
+export async function adminDeleteUser(accessToken, userIdAuth) {
+  return apiRequest(`/api/admin/users/${encodeURIComponent(userIdAuth)}`, accessToken, {
+    method: 'DELETE',
+    body: JSON.stringify({ confirm: 'SUPPRIMER_UTILISATEUR' }),
+  })
+}
+
 export async function getMLModelInfo() {
   const url = `${API_URL}/api/ml/info`
   const res = await fetch(url)

@@ -26,24 +26,25 @@ def weekly_risk_bundle(max_severity: int) -> Tuple[str, str, str]:
     if max_severity >= 3:
         return (
             "high",
-            "Consultez votre médecin ou un professionnel de santé pour interpréter ces variations.",
-            "Si vous ne vous sentez pas bien (douleur, essoufflement, malaise), appelez vite votre médecin ou le 15.",
+            "Approfondir l'évaluation clinique ; recontacter le patient en cas de symptômes ou de persistance des anomalies.",
+            "Consultez votre médecin ou un professionnel de santé pour interpréter ces variations. "
+            "En cas de malaise aiguë (douleur, essoufflement), appelez le 15.",
         )
     if max_severity >= 2:
         return (
             "moderate",
-            "Restez vigilant aux prochaines mesures ; en cas de symptômes ou persistance des alertes, demandez un avis médical.",
+            "Surveiller l'évolution des constantes ; prévoir un échange avec le patient si les alertes persistent.",
             "Poursuivez le suivi à domicile. Si l'inquiétude ou des symptômes durent plus de quelques jours, contactez votre médecin ou votre infirmier.",
         )
     if max_severity >= 1:
         return (
             "low",
-            "Poursuivez la surveillance habituelle et signalez tout changement notable à votre soignant.",
+            "Poursuivre la surveillance habituelle ; ajuster le suivi en cas d'aggravation.",
             "Continuez vos mesures comme d'habitude. Prévenez la personne qui s'occupe de vous en cas de changement net.",
         )
     return (
         "minimal",
-        "Pas d'action particulière nécessaire ; continuez vos mesures régulières.",
+        "Pas d'action particulière ; poursuivre le suivi habituel.",
         "Rien de particulier à changer si vous vous sentez bien. Continuez simplement à enregistrer vos relevés.",
     )
 
@@ -64,9 +65,9 @@ def build_clinical_weekly_narrative(analysis: Dict[str, Any], max_severity: int)
     """Detailed, statistical narrative for clinicians (médecin / équipe soignante)."""
     if analysis.get("status") == "insufficient_data":
         return {
-            "text": "Pas assez de données pour générer un résumé. Continuez à enregistrer vos mesures.",
+            "text": "Pas assez de données pour générer un résumé clinique sur la période.",
             "risk_level": "unknown",
-            "recommended_action": "Enregistrer plus de mesures cette semaine.",
+            "recommended_action": "Encourager le patient à enregistrer davantage de mesures.",
         }
     vitals = analysis.get("vitals", {})
     labels_fr = {"heart_rate": "Fréquence cardiaque", "spo2": "Oxygène dans le sang", "temperature": "Température"}
@@ -174,7 +175,7 @@ def build_clinical_weekly_narrative(analysis: Dict[str, Any], max_severity: int)
         sense = "varient souvent dans le même sens" if float(hr_spo2) > 0 else "varient souvent en sens opposé"
         paragraphs.append(
             f"Lien entre fréquence cardiaque et oxygénation : corrélation notable ({float(hr_spo2):.2f}) — les deux courbes {sense} "
-            "sur la semaine, ce qui peut correspondre à des épisodes conjoints à interpréter avec un professionnel de santé si cela vous concerne."
+            "sur la semaine, ce qui peut correspondre à des épisodes conjoints à interpréter dans le contexte clinique du patient."
         )
 
     timeline = analysis.get("timeline") or []
@@ -183,15 +184,15 @@ def build_clinical_weekly_narrative(analysis: Dict[str, Any], max_severity: int)
     if ml_crit or ml_warn:
         paragraphs.append(
             f"Modèle d'aide à l'analyse : {ml_crit + ml_warn} mesure(s) classées en vigilance ou alerte sur la période "
-            f"({ml_crit} critique(s), {ml_warn} vigilance(s)) — à rapprocher des valeurs brutes et de votre ressenti."
+            f"({ml_crit} critique(s), {ml_warn} vigilance(s)) — à rapprocher des valeurs brutes et du contexte clinique."
         )
 
     if vital_paragraph_count == 0:
         if len(paragraphs) == 0:
             return {
-                "text": "Vos constantes vitales de la semaine sont dans les plages habituelles.",
+                "text": "Les constantes vitales du patient sont dans les plages habituelles sur la période.",
                 "risk_level": "minimal",
-                "recommended_action": "Continuez à surveiller vos mesures.",
+                "recommended_action": "Pas d'action particulière ; poursuivre le suivi habituel.",
             }
         risk, action_clin, _ = weekly_risk_bundle(max_severity)
         return {"text": "\n\n".join(paragraphs), "risk_level": risk, "recommended_action": action_clin}

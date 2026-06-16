@@ -500,41 +500,6 @@ def get_doctor_patient_trends(patient_id: str):
     return jsonify({"patient_id": patient_id, "device_id": device_id, "trends": {"7d": trend_7, "30d": trend_30}}), 200
 
 
-def apply_patient_device_assignment(
-    patient_user_id_auth: str,
-    device_id: str,
-    assigned_by_user_id_auth: str,
-):
-    """Associe un boîtier à un patient. Retourne (True, now) ou (False, body_dict, http_status)."""
-    existing = get_identity_db().users_devices.find_one({"device_id": device_id})
-    if existing and existing.get("user_id_auth") != patient_user_id_auth:
-        return (
-            False,
-            {
-                "code": "device_already_assigned",
-                "message": "Ce device est déjà assigné à un autre patient",
-            },
-            409,
-        )
-    now = datetime.now(timezone.utc)
-    try:
-        get_identity_db().users_devices.update_one(
-            {"user_id_auth": patient_user_id_auth},
-            {
-                "$set": {
-                    "user_id_auth": patient_user_id_auth,
-                    "device_id": device_id,
-                    "assigned_by": assigned_by_user_id_auth,
-                    "assigned_at": now,
-                }
-            },
-            upsert=True,
-        )
-    except PyMongoError as e:
-        raise DatabaseError({"code": "device_assign_error", "message": str(e)}, 500)
-    return (True, now)
-
-
 @doctor_bp.route("/api/doctor/patients/<patient_id>/device", methods=["POST"])
 @requires_auth
 @requires_role("doctor", "superuser", "medecin")

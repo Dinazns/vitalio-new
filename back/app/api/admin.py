@@ -57,7 +57,7 @@ from app.services.ml_service import run_ml_scoring
 from app.services.ml_retrain_scheduler import schedule_retrain_after_new_measurement
 from app.services.alert_ml_audit import create_or_merge_alert_for_validated_ml
 from app.services.ml_thresholds_store import save_ml_thresholds_to_db
-from app.services.patient_data_portability import build_patient_export, erase_patient_all_data
+from app.services.patient_data_portability import build_patient_export, erase_patient_all_data, erase_user_all_data
 from app.services.audit_service import log_audit_event, query_audit_log
 from app.services.field_encryption import encrypt_profile_fields
 from app.services.patient_pseudo_service import ensure_patient_pseudo_id, attach_patient_pseudo_to_doc
@@ -427,4 +427,132 @@ def admin_list_audit_log():
         "events": events,
     }), 200
 
+
+def _admin_user_role_filter(role_filter: str) -> Optional[Dict[str, Any]]:
+    role_filter = (role_filter or "").strip().lower()
+    if not role_filter:
+        return None
+    if role_filter == "doctor":
+        return {"role": {"$in": ["doctor", "medecin", "superuser"]}}
+    if role_filter == "caregiver":
+        return {"role": {"$in": ["caregiver", "aidant"]}}
+    return {"role": role_filter}
+
+
+@admin_bp.route("/api/admin/users", methods=["GET"])
+@requires_auth
+@requires_role("admin")
+def admin_list_users():
+    """Paginated registry of VitalIO users."""
+    identity_db = get_identity_db()
+    q = (request.args.get("q") or "").strip()
+    role_filter = (request.args.get("role") or "").strip().lower()
+    page = max(request.args.get("page", default=1, type=int) or 1, 1)
+    page_size = min(max(request.args.get("page_size", default=50, type=int) or 50, 1), 200)
+
+    conditions: List[Dict[str, Any]] = []
+    role_cond = _admin_user_role_filter(role_filter)
+    if role_cond:
+        conditions.append(role_cond)
+    if q:
+        regex = {"$regex": re.escape(q), "$options": "i"}
+        conditions.append({"$or": [
+            {"email": regex},
+            {"display_name": regex},
+            {"first_name": regex},
+            {"last_name": regex},
+            {"user_id_auth": regex},
+        ]})
+
+    mongo_filter = {"$and": conditions} if conditions else {}
+    projection = {
+        "_id": 0,
+        "user_id_auth": 1,
+        "role": 1,
+        "display_name": 1,
+        "email": 1,
+        "first_name": 1,
+        "last_name": 1,
+        "created_at": 1,
+    }
+
+    try:
+        total = identity_db.users.count_documents(mongo_filter)
+        rows = list(
+            identity_db.users
+            .find(mongo_filter, projection)
+            .sort("created_at", -1)
+            .skip((page - 1) * page_size)
+            .limit(page_size)
+        )
+    except PyMongoError as e:
+        raise DatabaseError({"code": "admin_users_query_error", "message": str(e)}, 500)
+
+    users = []
+    for row in rows:
+        uid = row.get("user_id_auth")
+        summary = admin_user_summary(row, uid) or {"user_id_auth": uid}
+        summary["role"] = row.get("role")
+        summary["created_at"] = datetime_to_iso_utc(row.get("created_at")) if row.get("created_at") else None
+        users.append(summary)
+
+    return jsonify({"count": total, "page": page, "page_size": page_size, "users": users}), 200
+
+
+@admin_bp.route("/api/admin/users/<path:user_id_auth>", methods=["DELETE"])
+@requires_auth
+@requires_role("admin")
+def admin_delete_user(user_id_auth: str):
+    """Delete a VitalIO user and role-specific linked data (not Auth0)."""
+    user_id_auth = str(user_id_auth or "").strip()
+    if not user_id_auth:
+        return jsonify({"code": "missing_user_id", "message": "user_id_auth requis"}), 400
+
+    body = request.get_json(silent=True) or {}
+    if body.get("confirm") != "SUPPRIMER_UTILISATEUR":
+        return jsonify({
+            "code": "confirmation_required",
+            "message": 'Confirmation requise : envoyer {"confirm":"SUPPRIMER_UTILISATEUR"} dans le corps JSON.',
+        }), 400
+
+    if user_id_auth == g.user_id_auth:
+        return jsonify({"code": "self_delete_forbidden", "message": "Vous ne pouvez pas supprimer votre propre compte admin."}), 403
+
+    try:
+        target = get_identity_db().users.find_one({"user_id_auth": user_id_auth}, {"_id": 0, "role": 1, "email": 1})
+    except PyMongoError as e:
+        raise DatabaseError({"code": "user_lookup_error", "message": str(e)}, 500)
+
+    if not target:
+        return jsonify({"code": "user_not_found", "message": "Utilisateur introuvable"}), 404
+
+    target_role = str(target.get("role") or "").strip().lower()
+    if target_role == "admin":
+        return jsonify({"code": "admin_delete_forbidden", "message": "La suppression d'un compte administrateur n'est pas autorisée."}), 403
+
+    log_audit_event(
+        event_type="admin_user_deleted",
+        actor_user_id_auth=g.user_id_auth,
+        actor_role=audit_actor_role(),
+        resource_type="user",
+        resource_id=user_id_auth,
+        action="delete",
+        details={
+            "deleted_role": target.get("role"),
+            "deleted_email": target.get("email"),
+            "endpoint": f"/api/admin/users/{user_id_auth}",
+        },
+        request=request,
+    )
+
+    try:
+        counts = erase_user_all_data(user_id_auth)
+    except DatabaseError:
+        raise
+
+    return jsonify({
+        "message": "Utilisateur supprimé de VitalIO.",
+        "user_id_auth": user_id_auth,
+        "deleted": counts,
+    }), 200
 

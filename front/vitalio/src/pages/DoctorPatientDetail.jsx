@@ -17,7 +17,9 @@ import {
 } from '../services/api'
 import { DEVICE_ID_PREFIX, isDeviceIdPrefixOnly, normalizeDeviceIdInput } from '../utils/parseDeviceId'
 import DoctorLayout from '../components/DoctorLayout'
+import { getFeedbackSeverityLabel } from '../constants/feedbackSeverity'
 import { resolvePatientDisplayName, resolvePatientListDisplayName } from '../utils/displayName'
+import { formatMeasurementQualityHint, formatMeasurementQualityLabel } from '../utils/measurementStatus'
 
 /** Message API quand aucun enregistrement users_devices n’expose encore de device_id mesurable. */
 const NO_PATIENT_DEVICE_MESSAGE = 'No device record found for patient'
@@ -459,7 +461,7 @@ export default function DoctorPatientDetail() {
                       <th>SpO2</th>
                       <th>FC</th>
                       <th>Température</th>
-                      <th>Statut</th>
+                      <th>Qualité</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -469,7 +471,9 @@ export default function DoctorPatientDetail() {
                         <td>{measurement.spo2}</td>
                         <td>{measurement.heart_rate}</td>
                         <td>{measurement.temperature}</td>
-                        <td>{measurement.status || '-'}</td>
+                        <td title={formatMeasurementQualityHint(measurement)}>
+                          {formatMeasurementQualityLabel(measurement.status)}
+                        </td>
                       </tr>
                     ))}
                     {!measurements.length && (
@@ -683,7 +687,7 @@ export default function DoctorPatientDetail() {
                     {feedback.map((item, index) => (
                       <tr key={`${item.created_at || index}-${index}`}>
                         <td>{item.created_at ? new Date(item.created_at).toLocaleString('fr-FR') : '-'}</td>
-                        <td>{item.severity || '-'}</td>
+                        <td>{getFeedbackSeverityLabel(item.severity, '-')}</td>
                         <td>{item.message || '-'}</td>
                       </tr>
                     ))}

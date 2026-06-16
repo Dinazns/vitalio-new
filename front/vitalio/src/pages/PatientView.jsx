@@ -15,6 +15,7 @@ import {
   isPatientWelcomeDone,
   markPatientWelcomeDone,
 } from '../constants/patientWelcome'
+import { getFeedbackSeverityLabel } from '../constants/feedbackSeverity'
 
 const formatDateLabel = (isoValue) => {
   if (!isoValue) return ''
@@ -356,9 +357,8 @@ export default function PatientView() {
                   </thead>
                   <tbody>
                     {feedback.map((item, index) => {
-                      const severityLabels = { low: 'Faible', medium: 'Moyenne', high: 'Haute' }
                       const severityKey = (item.severity || 'medium').toLowerCase()
-                      const severityLabel = severityLabels[severityKey] || severityLabels.medium
+                      const severityLabel = getFeedbackSeverityLabel(severityKey, 'Moyenne')
                       const severityClass = severityKey === 'high' ? 'feedback-severity--high' : severityKey === 'low' ? 'feedback-severity--low' : 'feedback-severity--medium'
                       return (
                         <tr key={`${item.created_at || index}-${index}`}>

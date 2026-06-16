@@ -220,24 +220,25 @@ def _weekly_risk_bundle(max_severity: int) -> Tuple[str, str, str]:
     if max_severity >= 3:
         return (
             "high",
-            "Consultez votre médecin ou un professionnel de santé pour interpréter ces variations.",
-            "Si vous ne vous sentez pas bien (douleur, essoufflement, malaise), appelez vite votre médecin ou le 15.",
+            "Approfondir l'évaluation clinique ; recontacter le patient en cas de persistance des anomalies.",
+            "Consultez votre médecin ou un professionnel de santé pour interpréter ces variations. "
+            "En cas de malaise aiguë (douleur, essoufflement), appelez le 15.",
         )
     if max_severity >= 2:
         return (
             "moderate",
-            "Restez vigilant aux prochaines mesures ; en cas de symptômes ou persistance des alertes, demandez un avis médical.",
+            "Surveiller l'évolution des constantes ; prévoir un échange avec le patient si les alertes persistent.",
             "Poursuivez le suivi à domicile. Si l'inquiétude ou des symptômes durent plus de quelques jours, contactez votre médecin ou votre infirmier.",
         )
     if max_severity >= 1:
         return (
             "low",
-            "Poursuivez la surveillance habituelle et signalez tout changement notable à votre soignant.",
+            "Poursuivre la surveillance habituelle ; ajuster le suivi en cas d'aggravation.",
             "Continuez vos mesures comme d'habitude. Prévenez la personne qui s'occupe de vous en cas de changement net.",
         )
     return (
         "minimal",
-        "Pas d'action particulière nécessaire ; continuez vos mesures régulières.",
+        "Pas d'action particulière ; poursuivre le suivi habituel.",
         "Rien de particulier à changer si vous vous sentez bien. Continuez simplement à enregistrer vos relevés.",
     )
 

@@ -21,4 +21,4 @@ ENV PYTHONUNBUFFERED=1 \
 EXPOSE 5000
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["gunicorn", "api:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "--timeout", "120"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "api:app"]

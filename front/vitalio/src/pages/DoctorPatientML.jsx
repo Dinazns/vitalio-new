@@ -33,8 +33,9 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend, Brush,
 } from 'recharts'
-import { getPatientMLAnalysis, getMLForecast, patchDoctorAlert } from '../services/api'
+import { getPatientMLAnalysis, getMLForecast, patchDoctorAlert, getPatientProfileForDoctor } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
+import { resolvePatientFullName } from '../utils/displayName'
 
 const VITAL_CONFIG = {
   heart_rate: {
@@ -183,12 +184,32 @@ export default function DoctorPatientML() {
   const [forecastLoading, setForecastLoading] = useState(false)
   const [error, setError] = useState('')
   const [analysis, setAnalysis] = useState(null)
+  const [patientProfile, setPatientProfile] = useState(null)
   const [days, setDays] = useState(90)
   const [activeVital, setActiveVital] = useState('heart_rate')
   const [showMA, setShowMA] = useState(true)
   const [showAnomalies, setShowAnomalies] = useState(true)
   const [variabilityWindow, setVariabilityWindow] = useState(6)
   const [patchingAlerts, setPatchingAlerts] = useState({})
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const token = await getAccessTokenSilently()
+        const profileRes = await getPatientProfileForDoctor(token, patientId).catch(() => ({ profile: null }))
+        if (mounted) setPatientProfile(profileRes?.profile || null)
+      } catch {
+        if (mounted) setPatientProfile(null)
+      }
+    })()
+    return () => { mounted = false }
+  }, [getAccessTokenSilently, patientId])
+
+  const patientName = useMemo(
+    () => resolvePatientFullName({ profile: patientProfile, analysis }),
+    [patientProfile, analysis],
+  )
 
   const loadAnalysis = useCallback(async () => {
     try {
@@ -452,7 +473,7 @@ export default function DoctorPatientML() {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h1><BrainCircuit size={26} /> Suivi avancé - {[analysis?.patient_first_name, analysis?.patient_last_name].filter(Boolean).join(' ') || analysis?.patient_display || patientId}</h1>
+              <h1><BrainCircuit size={26} /> Suivi avancé{patientName ? ` - ${patientName}` : ''}</h1>
               <p>Tendances, détection des signes d'alerte et prévisions des constantes vitales</p>
             </div>
           </div>

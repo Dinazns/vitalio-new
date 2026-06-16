@@ -19,6 +19,8 @@ import {
   getCaregiverPatients,
   patchCaregiverAlert,
 } from '../services/api'
+import { getFeedbackSeverityLabel } from '../constants/feedbackSeverity'
+import { formatMeasurementQualityHint, formatMeasurementQualityLabel } from '../utils/measurementStatus'
 
 export default function CaregiverPatientDetail() {
   const { patientId } = useParams()
@@ -290,7 +292,7 @@ export default function CaregiverPatientDetail() {
                           </span>
                           {item.severity && (
                             <span className={`caregiver-feedback-severity caregiver-feedback-severity--${item.severity.toLowerCase()}`}>
-                              {item.severity}
+                              {getFeedbackSeverityLabel(item.severity)}
                             </span>
                           )}
                         </div>
@@ -313,7 +315,7 @@ export default function CaregiverPatientDetail() {
                         <th>SpO2</th>
                         <th>FC</th>
                         <th>Température</th>
-                        <th>Statut</th>
+                        <th>Qualité</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -323,7 +325,9 @@ export default function CaregiverPatientDetail() {
                           <td>{measurement.spo2 ?? '-'}</td>
                           <td>{measurement.heart_rate ?? '-'}</td>
                           <td>{measurement.temperature ?? '-'}</td>
-                          <td>{measurement.status || '-'}</td>
+                          <td title={formatMeasurementQualityHint(measurement)}>
+                            {formatMeasurementQualityLabel(measurement.status)}
+                          </td>
                         </tr>
                       ))}
                       {!measurements.length && (
