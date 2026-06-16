@@ -30,7 +30,7 @@ from app.services.user_service import (
     get_assigned_doctor_ids_for_patient, get_assigned_caregiver_ids_for_patient,
     ensure_patient_access_or_403, resolve_patient_id_to_user_id_auth, get_user_db_id,
     parse_iso_datetime, normalize_user_id_auth, get_user_profile, _split_display_name,
-    datetime_to_iso_utc, get_address_dict_from_profile,
+    datetime_to_iso_utc, get_address_dict_from_profile, is_auth_provider_id,
 )
 from app.services.invitation_service import (
     hash_secret_token, generate_invite_token, generate_cabinet_code,
@@ -276,17 +276,30 @@ def patch_my_profile():
                 continue
             updates[field] = str(payload[field] or "").strip()[:max_len] or None
 
-    if not updates:
-        return jsonify({"message": "No fields to update"}), 400
-
     profile = get_user_profile(g.user_id_auth) or {}
     payload_jwt = getattr(g, "jwt_payload", {}) or {}
+    ns = "https://vitalio.app/"
     known_email = (
         updates.get("email")
         or profile.get("email")
         or payload_jwt.get("email")
-        or payload_jwt.get("https://vitalio.app/email")
+        or payload_jwt.get(f"{ns}email")
     )
+    known_email = str(known_email or "").strip()[:256] if known_email else None
+    if known_email and "@" not in known_email:
+        known_email = None
+
+    if known_email and not profile.get("email") and "email" not in updates:
+        updates["email"] = known_email
+
+    for field in ("first_name", "last_name", "display_name"):
+        existing = str(profile.get(field) or "").strip()
+        if existing and is_auth_provider_id(existing) and field not in updates:
+            updates[field] = None
+
+    if not updates:
+        return jsonify({"message": "No fields to update"}), 400
+
     for name_field in ("first_name", "last_name", "display_name"):
         if name_field not in updates:
             continue
@@ -294,7 +307,6 @@ def patch_my_profile():
         updates[name_field] = sanitized if sanitized else None
 
     set_doc = encrypt_profile_fields({**updates, "updated_at": datetime.now(timezone.utc)})
-    ns = "https://vitalio.app/"
     jwt_role = (payload_jwt.get(f"{ns}role") or payload_jwt.get("role") or "").strip().lower()
     role_map = {"doctor": "medecin", "medecin": "medecin", "superuser": "medecin", "patient": "patient",
                 "caregiver": "aidant", "aidant": "aidant", "admin": "admin"}
@@ -303,15 +315,32 @@ def patch_my_profile():
         "user_id_auth": g.user_id_auth, "role": default_role, "created_at": datetime.now(timezone.utc),
     }
 
-    # À la première connexion (ou mise à jour profil), display_name = first_name + last_name
+    if known_email and not profile.get("email"):
+        set_doc["email"] = known_email
+
     first_name_val = str(updates.get("first_name") or profile.get("first_name") or "").strip()
     last_name_val = str(updates.get("last_name") or profile.get("last_name") or "").strip()
+    if is_auth_provider_id(first_name_val):
+        first_name_val = ""
+    if is_auth_provider_id(last_name_val):
+        last_name_val = ""
     if first_name_val or last_name_val:
-        computed_display = f"{first_name_val} {last_name_val}".strip()
-        if computed_display:
-            set_doc["display_name"] = computed_display[:128]
+        set_doc["display_name"] = f"{first_name_val} {last_name_val}".strip()[:128]
+    elif known_email:
+        existing_display = str(profile.get("display_name") or "").strip()
+        if (
+            updates.get("display_name") is None
+            or is_auth_provider_id(existing_display)
+            or not existing_display
+        ):
+            set_doc["display_name"] = known_email[:128]
+
     if "display_name" not in set_doc:
-        set_on_insert["display_name"] = updates.get("display_name") or g.user_id_auth
+        insert_display = updates.get("display_name") or known_email
+        if insert_display and not is_auth_provider_id(str(insert_display)):
+            set_on_insert["display_name"] = str(insert_display)[:128]
+        elif known_email:
+            set_on_insert["display_name"] = known_email[:128]
 
     try:
         get_identity_db().users.update_one(

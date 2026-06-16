@@ -17,6 +17,7 @@ import {
   getCaregiverPatients,
   patchCaregiverAlert,
 } from '../services/api'
+import { resolvePatientListDisplayName } from '../utils/displayName'
 import { getSeverityConfig, SEVERITY_LEVEL_CONFIG } from '../constants/severityLevels'
 
 const formatTime = (iso) => {
@@ -52,8 +53,11 @@ export default function CaregiverAlertsView() {
   const patientNames = useMemo(() => {
     const m = {}
     patients.forEach((p) => {
+      const label = resolvePatientListDisplayName(p)
+      if (!label) return
       const key = p.id || p.patient_id
-      if (key) m[key] = p.display_name || p.patient_id
+      if (key) m[key] = label
+      if (p.patient_id && p.patient_id !== key) m[p.patient_id] = label
     })
     return m
   }, [patients])
@@ -233,7 +237,7 @@ export default function CaregiverAlertsView() {
                     const isManual = a.alert_source === 'manual'
                     const sevCfg = getSeverityConfig(a.severity_level || (isManual ? 'URGENCY' : 'CRITICAL'))
                     const isExpanded = expandedId === aid
-                    const patientName = patientNames[a.patient_id] || a.patient_id || '-'
+                    const patientName = patientNames[a.patient_id] || '-'
                     return (
                       <React.Fragment key={aid}>
                         <tr className={isManual ? 'ml-vital-row--manual' : ''}>

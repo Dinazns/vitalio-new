@@ -35,5 +35,20 @@ export function resolvePatientDisplayName({ profile, user } = {}) {
   for (const candidate of candidates) {
     if (candidate) return candidate
   }
+
+  const email = String(profile?.email || user?.email || '').trim()
+  if (email.includes('@')) return email
+  return ''
+}
+
+/**
+ * Display label for patient rows returned by doctor/caregiver list APIs.
+ */
+export function resolvePatientListDisplayName(patient) {
+  if (!patient) return ''
+  const fromApi = String(patient.display_name || '').trim()
+  if (fromApi && !isAuthProviderId(fromApi)) return fromApi
+  const email = String(patient.email || '').trim()
+  if (email.includes('@')) return email
   return ''
 }

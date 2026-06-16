@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import { ArrowLeft, BrainCircuit, Copy, Cpu, FileText, Heart, Mail, PhoneCall, Thermometer, User, Users, Wind } from 'lucide-react'
+import { ArrowLeft, BrainCircuit, Copy, Cpu, FileText, Heart, Mail, PhoneCall, Thermometer, Trash2, User, Users, Wind } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import {
   assignDoctorPatientDevice,
@@ -13,8 +13,11 @@ import {
   getPatientCaregiverInfo,
   getPatientProfileForDoctor,
   getPatientMLAnalysis,
+  removeDoctorPatient,
 } from '../services/api'
+import { DEVICE_ID_PREFIX, isDeviceIdPrefixOnly, normalizeDeviceIdInput } from '../utils/parseDeviceId'
 import DoctorLayout from '../components/DoctorLayout'
+import { resolvePatientDisplayName, resolvePatientListDisplayName } from '../utils/displayName'
 
 /** Message API quand aucun enregistrement users_devices n’expose encore de device_id mesurable. */
 const NO_PATIENT_DEVICE_MESSAGE = 'No device record found for patient'
@@ -62,16 +65,16 @@ function ProfileField({ label, value, link }) {
   const display = String(v).trim() || '-'
   if (link && display !== '-') {
     return (
-      <div>
-        <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>{label}</span>
-        <a href={link} style={{ color: '#2563eb', textDecoration: 'none' }}>{display}</a>
+      <div className="doctor-profile-field">
+        <span className="doctor-profile-field__label">{label}</span>
+        <a href={link} className="doctor-profile-field__link">{display}</a>
       </div>
     )
   }
   return (
-    <div>
-      <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>{label}</span>
-      <strong>{display}</strong>
+    <div className="doctor-profile-field">
+      <span className="doctor-profile-field__label">{label}</span>
+      <strong className="doctor-profile-field__value">{display}</strong>
     </div>
   )
 }
@@ -95,8 +98,10 @@ export default function DoctorPatientDetail() {
   const [caregivers, setCaregivers] = useState([])
   const [patientProfile, setPatientProfile] = useState(null)
   const [patientDevice, setPatientDevice] = useState(null)
-  const [deviceIdInput, setDeviceIdInput] = useState('')
+  const [deviceIdInput, setDeviceIdInput] = useState(DEVICE_ID_PREFIX)
   const [deviceSaving, setDeviceSaving] = useState(false)
+  const [removePatientSubmitting, setRemovePatientSubmitting] = useState(false)
+  const [removePatientError, setRemovePatientError] = useState('')
   const [deviceError, setDeviceError] = useState('')
   const [deviceSuccess, setDeviceSuccess] = useState('')
   const [weeklyClinicalSummary, setWeeklyClinicalSummary] = useState(null)
@@ -138,7 +143,7 @@ export default function DoctorPatientDetail() {
           setCaregivers(Array.isArray(caregiverRes?.caregivers) ? caregiverRes.caregivers : [])
           setPatientProfile(profileRes?.profile || null)
           setPatientDevice(deviceDoc)
-          setDeviceIdInput(deviceDoc?.device_id ? String(deviceDoc.device_id) : '')
+          setDeviceIdInput(deviceDoc?.device_id ? String(deviceDoc.device_id) : DEVICE_ID_PREFIX)
         }
       } catch (fetchError) {
         if (mounted) {
@@ -184,8 +189,8 @@ export default function DoctorPatientDetail() {
 
   const submitPatientDevice = async () => {
     const trimmed = deviceIdInput.trim()
-    if (!trimmed) {
-      setDeviceError('Indiquez l’identifiant inscrit sur le boîtier (ex. ESP32-0042).')
+    if (!trimmed || isDeviceIdPrefixOnly(trimmed)) {
+      setDeviceError('Indiquez l’identifiant complet inscrit sur le boîtier (ex. VITALIO-XXXXXXXX).')
       return
     }
     try {
@@ -252,6 +257,28 @@ export default function DoctorPatientDetail() {
     ? CLINICAL_RISK_BADGE[weeklyClinicalSummary.risk_level] || CLINICAL_RISK_BADGE.unknown
     : null
 
+  const handleRemovePatient = async () => {
+    const patientName = resolvePatientDisplayName({ profile: patientProfile })
+      || resolvePatientListDisplayName(patientProfile)
+      || 'ce patient'
+    const confirmed = window.confirm(
+      `Retirer ${patientName} de votre liste de suivi ?\n\nLe patient sera averti par email. Ses données VitalIO restent sur son compte.`,
+    )
+    if (!confirmed) return
+
+    try {
+      setRemovePatientSubmitting(true)
+      setRemovePatientError('')
+      const token = await getAccessTokenSilently()
+      await removeDoctorPatient(token, patientId)
+      navigate('/doctor')
+    } catch (e) {
+      setRemovePatientError(e.message || 'Impossible de retirer ce patient.')
+    } finally {
+      setRemovePatientSubmitting(false)
+    }
+  }
+
   const submitFeedback = async () => {
     const trimmedMessage = feedbackMessage.trim()
     if (!trimmedMessage) {
@@ -314,12 +341,12 @@ export default function DoctorPatientDetail() {
                 <section className="doctor-patients-section">
                   <div className="doctor-patients-card">
                     <div className="section-header">
-                      <h3><User size={20} /> Profil patient - données complètes</h3>
+                      <h3><User size={20} /> Profil patient</h3>
                     </div>
-                    <div className="doctor-profile-sections" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div className="doctor-profile-sections">
                       <div>
-                        <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem' }}>Identité</h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem 2rem' }}>
+                        <h4 className="doctor-profile-block__title">Identité</h4>
+                        <div className="doctor-profile-grid">
                           <ProfileField label="Prénom" value={patientProfile.first_name} />
                           <ProfileField label="Nom" value={patientProfile.last_name} />
                           <ProfileField label="Date de naissance" value={patientProfile.birthdate ? new Date(patientProfile.birthdate).toLocaleDateString('fr-FR') : null} />
@@ -328,26 +355,25 @@ export default function DoctorPatientDetail() {
                         </div>
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem' }}>Contact</h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem 2rem' }}>
+                        <h4 className="doctor-profile-block__title">Contact</h4>
+                        <div className="doctor-profile-grid">
                           <ProfileField label="Téléphone" value={patientProfile.phone} link={patientProfile.phone ? `tel:${patientProfile.phone.replace(/\s/g, '')}` : null} />
                           <ProfileField label="Email" value={patientProfile.email} link={patientProfile.email ? `mailto:${patientProfile.email}` : null} />
                         </div>
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem' }}>Urgences - adresse &amp; SAMU</h4>
-                        <p style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', color: '#64748b' }}>
+                        <h4 className="doctor-profile-block__title">Urgences — adresse &amp; SAMU</h4>
+                        <p className="doctor-profile-note">
                           À utiliser si vous devez orienter les secours vers le domicile du patient.
                         </p>
                         {formatPatientAddressLines(patientProfile).length > 0 ? (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
-                            <p style={{ margin: 0, lineHeight: 1.5, flex: '1 1 200px' }}>
+                          <div className="doctor-profile-address-row">
+                            <p>
                               {formatPatientAddressLines(patientProfile).join(', ')}
                             </p>
                             <button
                               type="button"
                               className="doctor-btn doctor-btn-secondary"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
                               onClick={() => {
                                 const t = formatPatientAddressLines(patientProfile).join(', ')
                                 navigator.clipboard.writeText(t).catch(() => {})
@@ -357,24 +383,35 @@ export default function DoctorPatientDetail() {
                             </button>
                           </div>
                         ) : (
-                          <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.875rem' }}>Adresse non renseignée par le patient.</p>
+                          <p className="doctor-profile-empty">Adresse non renseignée par le patient.</p>
                         )}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem' }}>Antécédents médicaux</h4>
-                        <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{patientProfile.medical_history || 'Non renseigné'}</p>
+                        <h4 className="doctor-profile-block__title">Antécédents médicaux</h4>
+                        <p className="doctor-profile-text">{patientProfile.medical_history || 'Non renseigné'}</p>
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem' }}>Statut</h4>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            backgroundColor: patientProfile.onboarding_completed ? '#22c55e' : '#eab308',
-                          }} />
+                        <h4 className="doctor-profile-block__title">Statut</h4>
+                        <span className="doctor-profile-status">
+                          <span className={`doctor-profile-status__dot ${patientProfile.onboarding_completed ? 'doctor-profile-status__dot--ok' : 'doctor-profile-status__dot--pending'}`} />
                           {patientProfile.onboarding_completed ? 'Onboarding complété' : 'Onboarding en attente'}
                         </span>
+                      </div>
+                      <div className="doctor-profile-divider">
+                        <h4 className="doctor-profile-block__title">Association</h4>
+                        <p className="doctor-profile-note">
+                          Retirer ce patient de votre liste de suivi. Il sera informé par email et conservera l&apos;accès à son compte VitalIO.
+                        </p>
+                        <button
+                          type="button"
+                          className="doctor-btn doctor-btn-danger-outline"
+                          onClick={handleRemovePatient}
+                          disabled={removePatientSubmitting}
+                        >
+                          <Trash2 size={16} />
+                          {removePatientSubmitting ? 'Retrait en cours...' : 'Retirer ce patient'}
+                        </button>
+                        {removePatientError && <p className="doctor-error" style={{ marginTop: '0.75rem' }}>{removePatientError}</p>}
                       </div>
                     </div>
                   </div>
@@ -496,7 +533,7 @@ export default function DoctorPatientDetail() {
                     <h3><Cpu size={20} /> Boîtier patient</h3>
                   </div>
                   <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
-                    Saisissez ou scannez l’identifiant matériel affiché sur le boîtier (ex.&nbsp;ESP32-0042).
+                    Saisissez ou scannez l’identifiant matériel affiché sur le boîtier.
                     Une fois enregistré, le patient peut terminer l’enrôlement à domicile.
                   </p>
                   {patientDevice?.assigned_at && (
@@ -517,9 +554,9 @@ export default function DoctorPatientDetail() {
                           border: '1px solid #e2e8f0',
                           fontSize: '0.95rem',
                         }}
-                        placeholder="ESP32-0042"
+                        placeholder="VITALIO-XXXXXXXX"
                         value={deviceIdInput}
-                        onChange={(ev) => setDeviceIdInput(ev.target.value)}
+                        onChange={(ev) => setDeviceIdInput(normalizeDeviceIdInput(ev.target.value))}
                         autoComplete="off"
                         spellCheck="false"
                       />

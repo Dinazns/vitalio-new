@@ -23,10 +23,20 @@ export async function apiRequest(endpoint, accessToken, options = {}) {
     ...options.headers,
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  })
+  let response
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    })
+  } catch (err) {
+    if (err instanceof TypeError) {
+      throw new Error(
+        'Impossible de joindre le serveur API (délai dépassé ou réseau). Réessayez dans quelques instants.'
+      )
+    }
+    throw err
+  }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
@@ -127,6 +137,19 @@ export async function getPatientDevice(accessToken) {
   })
 }
 
+export async function enrollPatientDevice(accessToken, enrollmentCode) {
+  return apiRequest('/api/patient/enroll-device', accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ enrollment_code: enrollmentCode }),
+  })
+}
+
+export async function requestEnrollmentCodeEmail(accessToken) {
+  return apiRequest('/api/patient/enrollment/send-code-email', accessToken, {
+    method: 'POST',
+  })
+}
+
 export async function validateDeviceEnrollment(accessToken, deviceId) {
   return apiRequest('/api/device/validate', accessToken, {
     method: 'POST',
@@ -183,6 +206,12 @@ export async function submitPatientMeasurement(accessToken, measurement) {
 export async function getDoctorPatients(accessToken) {
   return apiRequest('/api/doctor/patients', accessToken, {
     method: 'GET',
+  })
+}
+
+export async function removeDoctorPatient(accessToken, patientId) {
+  return apiRequest(`/api/doctor/patients/${encodeURIComponent(patientId)}`, accessToken, {
+    method: 'DELETE',
   })
 }
 

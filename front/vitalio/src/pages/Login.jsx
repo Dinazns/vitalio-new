@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { LogIn, UserPlus, AlertCircle, CheckCircle2 } from 'lucide-react';
 import vitalioLogo from '../assets/vitalio-logo.png';
 import { acceptTerms, getTermsStatus } from '../services/api';
+import { isAuthProviderId } from '../utils/displayName';
 
 const SIGNUP_TERMS_KEY = 'vitalio_signup_terms';
 
@@ -43,6 +44,11 @@ function pickRoleFromCandidate(candidate) {
 function isEmailLike(value) {
     if (!value) return false;
     return String(value).includes('@');
+}
+
+function isSafePersonName(value) {
+    if (!value || isEmailLike(value) || isAuthProviderId(value)) return false;
+    return true;
 }
 
 function extractRole(user) {
@@ -90,22 +96,22 @@ export default function Login() {
 
     async function syncProfile(token) {
         const profilePayload = {};
-        if (user.given_name && !isEmailLike(user.given_name)) {
+        if (user.given_name && isSafePersonName(user.given_name)) {
             profilePayload.first_name = user.given_name;
         }
-        if (user.family_name && !isEmailLike(user.family_name)) {
+        if (user.family_name && isSafePersonName(user.family_name)) {
             profilePayload.last_name = user.family_name;
         }
-        if ((!profilePayload.first_name || !profilePayload.last_name) && user.name && !isEmailLike(user.name)) {
+        if ((!profilePayload.first_name || !profilePayload.last_name) && user.name && isSafePersonName(user.name)) {
             const parts = String(user.name).trim().split(/\s+/);
             if (parts.length >= 2 && !profilePayload.first_name) profilePayload.first_name = parts[0];
             if (parts.length >= 2 && !profilePayload.last_name) profilePayload.last_name = parts.slice(1).join(' ');
         }
-        if (user.name && !isEmailLike(user.name)) profilePayload.display_name = user.name;
+        if (user.name && isSafePersonName(user.name)) profilePayload.display_name = user.name;
         if (user.email) profilePayload.email = user.email;
         if (user.picture) profilePayload.picture = user.picture;
 
-        if (Object.keys(profilePayload).length === 0) return;
+        if (!profilePayload.email && Object.keys(profilePayload).length === 0) return;
 
         await fetch(`${import.meta.env.VITE_API_URL}/api/me/profile`, {
             method: 'PATCH',

@@ -3,7 +3,9 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Cpu, Mail, QrCode, Search, Send, TriangleAlert, Users } from 'lucide-react'
-import { createCabinetCode, createDoctorInvitation, getDoctorPatients, getDoctorAlerts } from '../services/api'
+import { createDoctorInvitation, getDoctorPatients, getDoctorAlerts } from '../services/api'
+import { resolvePatientListDisplayName } from '../utils/displayName'
+import { DEVICE_ID_PREFIX, isDeviceIdPrefixOnly, normalizeDeviceIdInput } from '../utils/parseDeviceId'
 import DoctorLayout from '../components/DoctorLayout'
 
 function formatLastTime(timestamp) {
@@ -20,9 +22,8 @@ export default function DoctorView() {
   const [error, setError] = useState('')
   const [patients, setPatients] = useState([])
   const [inviteInfo, setInviteInfo] = useState(null)
-  const [cabinetCodeInfo, setCabinetCodeInfo] = useState(null)
   const [patientEmail, setPatientEmail] = useState('')
-  const [inviteDeviceId, setInviteDeviceId] = useState('')
+  const [inviteDeviceId, setInviteDeviceId] = useState(DEVICE_ID_PREFIX)
   const [sendEmail, setSendEmail] = useState(false)
   const [actionError, setActionError] = useState('')
   const [criticalCount, setCriticalCount] = useState(0)
@@ -64,10 +65,10 @@ export default function DoctorView() {
     const keyword = query.trim().toLowerCase()
     if (!keyword) return patients
     return patients.filter((patient) => {
-      const name = String(patient.display_name || '').toLowerCase()
-      const id = String(patient.id || patient.patient_id || '').toLowerCase()
+      const name = resolvePatientListDisplayName(patient).toLowerCase()
+      const email = String(patient.email || '').toLowerCase()
       const device = String(patient.device_id || '').toLowerCase()
-      return name.includes(keyword) || id.includes(keyword) || device.includes(keyword)
+      return name.includes(keyword) || email.includes(keyword) || device.includes(keyword)
     })
   }, [patients, query])
 
@@ -83,7 +84,7 @@ export default function DoctorView() {
         payload.send_email = true
       }
       const trimmedDevice = inviteDeviceId.trim()
-      if (trimmedDevice) {
+      if (trimmedDevice && !isDeviceIdPrefixOnly(trimmedDevice)) {
         payload.device_id = trimmedDevice
       }
       const data = await createDoctorInvitation(token, payload)
@@ -93,25 +94,14 @@ export default function DoctorView() {
     }
   }
 
-  const handleGenerateCabinetCode = async () => {
-    try {
-      setActionError('')
-      const token = await getAccessTokenSilently()
-      const data = await createCabinetCode(token, { ttl_minutes: 15 })
-      setCabinetCodeInfo(data)
-    } catch (e) {
-      setActionError(e.message || 'Impossible de générer le code cabinet')
-    }
-  }
-
   return (
     <DoctorLayout>
       <div className="doctor-container doctor-theme">
         <div className="main-content">
           <header className="doctor-header">
             <div className="doctor-header-left">
-              <h1 className="doctor-title">Tableau de bord médecin</h1>
-              <p className="doctor-subtitle">Suivez vos patients et gérez les associations</p>
+              <h1 className="doctor-title">Tableau de bord</h1>
+              <p className="doctor-subtitle">Suivi de vos patients, invitations et alertes cliniques</p>
             </div>
             <div className="header-actions">
               <Link to="/doctor/alertes" className="doctor-btn doctor-btn-secondary doctor-alertes-link">
@@ -157,7 +147,7 @@ export default function DoctorView() {
                   </h3>
                 </div>
                 <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#64748b', lineHeight: 1.5 }}>
-                  Saisissez ou scannez l&apos;identifiant matériel affiché sur le boîtier (ex.&nbsp;ESP32-0042). Une fois
+                  Saisissez ou scannez l&apos;identifiant matériel affiché sur le boîtier. Une fois
                   enregistré, le patient peut terminer l&apos;enrôlement à domicile.
                 </p>
                 <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
@@ -166,7 +156,7 @@ export default function DoctorView() {
                     type="text"
                     className="doctor-invite-email"
                     value={inviteDeviceId}
-                    onChange={(e) => setInviteDeviceId(e.target.value)}
+                    onChange={(e) => setInviteDeviceId(normalizeDeviceIdInput(e.target.value))}
                     placeholder="VITALIO-XXXXXXXX"
                     autoComplete="off"
                     spellCheck="false"
@@ -202,7 +192,7 @@ export default function DoctorView() {
                     {sendEmail && patientEmail ? (
                       <>
                         <Send size={18} />
-                        Générer et envoyer invitation
+                        Envoyer une invitation
                       </>
                     ) : (
                       <>
@@ -211,22 +201,17 @@ export default function DoctorView() {
                       </>
                     )}
                   </button>
-                  <button
-                    className="doctor-btn doctor-btn-secondary"
-                    onClick={handleGenerateCabinetCode}
-                  >
-                    <QrCode size={18} />
-                    Code cabinet / QR
-                  </button>
                 </div>
               </div>
               {actionError && <p className="doctor-error">{actionError}</p>}
               {inviteInfo && (
                 <div className="doctor-invite-result">
-                  {inviteInfo.email_sent && (
+                  {(inviteInfo.email_queued || inviteInfo.email_sent) && (
                     <div className="doctor-invite-success">
                       <span className="doctor-invite-success-dot" />
-                      Email envoyé au patient avec le QR code.
+                      {inviteInfo.email_queued
+                        ? 'Email en cours d\'envoi au patient (lien d\'invitation).'
+                        : 'Email envoyé au patient avec le lien d\'invitation.'}
                     </div>
                   )}
                   {inviteInfo.pending_device_id && (
@@ -254,15 +239,6 @@ export default function DoctorView() {
                       <p>Scannez pour accepter l'invitation</p>
                     </div>
                   )}
-                </div>
-              )}
-              {cabinetCodeInfo && (
-                <div className="doctor-invite-result doctor-cabinet-result">
-                  <span className="doctor-invite-token-label">Code cabinet</span>
-                  <code>{cabinetCodeInfo.code}</code>
-                  <span className="doctor-invite-expiry">
-                    Expire le {new Date(cabinetCodeInfo.expires_at).toLocaleString('fr-FR')}
-                  </span>
                 </div>
               )}
             </div>
@@ -302,7 +278,7 @@ export default function DoctorView() {
                         >
                           <td>
                             <span className="doctor-table-name">
-                              {patient.display_name || 'Patient inconnu'}
+                              {resolvePatientListDisplayName(patient)}
                             </span>
                           </td>
                           <td>{formatLastTime(patient.last_measurement?.timestamp)}</td>

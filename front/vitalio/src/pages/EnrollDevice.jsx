@@ -5,35 +5,74 @@ import {
   CheckCircle2,
   Cpu,
   Mail,
-  QrCode,
   Download,
   Camera,
   Wifi,
   ChevronRight,
+  KeyRound,
+  Monitor,
 } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
 import {
-  validateDeviceEnrollment,
+  enrollPatientDevice,
   getPatientDevice,
   downloadDeviceQrcode,
+  requestEnrollmentCodeEmail,
 } from '../services/api'
 import { DEVICE_WIFI_PORTAL_URL, DEVICE_WIFI_AP_SSID } from '../constants/deviceSetup'
-import { isWifiPortalQr, parseDeviceIdFromQr } from '../utils/parseDeviceId'
+import { isWifiPortalQr } from '../utils/parseDeviceId'
+import {
+  buildEspWifiConnectUrl,
+  parseWifiCredentialsFromQr,
+} from '../utils/parseWifiQr'
 import PatientLayout from '../components/PatientLayout'
 
 const SCANNER_ID = 'vitalio-qr-reader'
+
+const CODE_SOURCE = {
+  DEVICE: 'device',
+  EMAIL: 'email',
+}
+
+function CodeSourceOption({ active, onClick, icon: Icon, title, description }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        flex: '1 1 200px',
+        textAlign: 'left',
+        padding: '1rem',
+        borderRadius: 10,
+        border: active ? '2px solid #2563eb' : '2px solid #e2e8f0',
+        background: active ? '#eff6ff' : '#fff',
+        cursor: 'pointer',
+      }}
+    >
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <Icon size={22} style={{ color: '#2563eb', flexShrink: 0, marginTop: 2 }} aria-hidden />
+        <div>
+          <strong style={{ display: 'block', marginBottom: 4 }}>{title}</strong>
+          <span style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.45 }}>{description}</span>
+        </div>
+      </div>
+    </button>
+  )
+}
 
 export default function EnrollDevice() {
   const navigate = useNavigate()
   const { getAccessTokenSilently } = useAuth0()
   const scannerRef = useRef(null)
-  const validatingRef = useRef(false)
+  const enrollingRef = useRef(false)
 
   const [step, setStep] = useState(1)
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [enrollmentCode, setEnrollmentCode] = useState('')
+  const [codeSource, setCodeSource] = useState(null)
+  const [emailSending, setEmailSending] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
-  const [manualDeviceId, setManualDeviceId] = useState('')
   const [associatedDeviceId, setAssociatedDeviceId] = useState(null)
   const [doctorAssignedDevice, setDoctorAssignedDevice] = useState(false)
   const [deviceEnrolled, setDeviceEnrolled] = useState(false)
@@ -41,15 +80,19 @@ export default function EnrollDevice() {
   const [scannerActive, setScannerActive] = useState(false)
   const [scannerError, setScannerError] = useState(null)
   const [downloadingQr, setDownloadingQr] = useState(false)
+  const [wifiSsid, setWifiSsid] = useState('')
+  const [wifiPassword, setWifiPassword] = useState('')
+  const [wifiFromScan, setWifiFromScan] = useState(false)
+  const [showWifiForm, setShowWifiForm] = useState(false)
 
   const loadDeviceInfo = useCallback(async () => {
     const token = await getAccessTokenSilently()
     const data = await getPatientDevice(token)
     const did = data?.device_id ? String(data.device_id) : null
     setAssociatedDeviceId(did)
-    setManualDeviceId((prev) => prev || did || '')
     setDoctorAssignedDevice(Boolean(data?.doctor_assigned_device))
     setDeviceEnrolled(Boolean(data?.device_enrolled))
+    return data
   }, [getAccessTokenSilently])
 
   useEffect(() => {
@@ -90,6 +133,18 @@ export default function EnrollDevice() {
     setStep(2)
   }, [])
 
+  const sendWifiToDevice = useCallback((ssid, password) => {
+    const normalizedSsid = String(ssid || '').trim()
+    if (!normalizedSsid) {
+      setStatus('Indiquez le nom du réseau Wi-Fi.')
+      return
+    }
+    setStatus(null)
+    const connectUrl = buildEspWifiConnectUrl(normalizedSsid, password)
+    // Navigation directe vers l'ESP (téléphone connecté au Wi-Fi Dispositif-Medical).
+    window.location.assign(connectUrl)
+  }, [])
+
   const handleQrScan = useCallback(
     async (raw) => {
       if (isWifiPortalQr(raw)) {
@@ -98,45 +153,64 @@ export default function EnrollDevice() {
         setStatus(null)
         return
       }
-      const deviceId = parseDeviceIdFromQr(raw)
-      if (deviceId) {
-        setManualDeviceId(deviceId)
-        setStep(2)
+
+      const wifi = parseWifiCredentialsFromQr(raw)
+      if (wifi) {
         await stopScanner()
+        setWifiSsid(wifi.ssid)
+        setWifiPassword(wifi.password)
+        setWifiFromScan(true)
+        setShowWifiForm(true)
+        setStatus(
+          `Réseau détecté : ${wifi.ssid}. Connectez-vous au Wi-Fi ${DEVICE_WIFI_AP_SSID}, puis envoyez la configuration au boîtier.`,
+        )
         return
       }
-      setStatus('QR code non reconnu. Scannez le QR Wi-Fi (192.168.4.1) ou saisissez votre identifiant boîtier.')
+
+      setStatus(
+        'Scannez le QR Wi-Fi de votre box (réseau domestique) ou le QR du portail boîtier (192.168.4.1).',
+      )
     },
     [openWifiPortal, stopScanner],
   )
 
-  const submitValidation = useCallback(
-    async (deviceId) => {
-      const normalized = parseDeviceIdFromQr(deviceId) || String(deviceId || '').trim().toUpperCase()
-      if (!normalized || !/^VITALIO-[A-F0-9]+$/i.test(normalized)) {
-        setStatus('Identifiant invalide (format attendu : VITALIO-XXXXXXXX).')
-        return
-      }
-      if (validatingRef.current) return
-      validatingRef.current = true
-      setLoading(true)
-      setStatus(null)
-      try {
-        await stopScanner()
-        const token = await getAccessTokenSilently()
-        await validateDeviceEnrollment(token, normalized)
-        setEmailSent(true)
-        setManualDeviceId(normalized)
-        await loadDeviceInfo()
-      } catch (e) {
-        setStatus(e.message || 'Erreur lors de la validation')
-      } finally {
-        setLoading(false)
-        validatingRef.current = false
-      }
-    },
-    [getAccessTokenSilently, loadDeviceInfo, stopScanner],
-  )
+  const submitEnrollmentCode = useCallback(async () => {
+    const code = enrollmentCode.replace(/\D/g, '').slice(0, 6)
+    if (code.length !== 6) {
+      setStatus('Saisissez le code à 6 chiffres (écran du boîtier ou e-mail).')
+      return
+    }
+    if (enrollingRef.current) return
+    enrollingRef.current = true
+    setLoading(true)
+    setStatus(null)
+    try {
+      const token = await getAccessTokenSilently()
+      await enrollPatientDevice(token, code)
+      await loadDeviceInfo()
+      setEnrollmentCode('')
+    } catch (e) {
+      setStatus(e.message || 'Code invalide ou expiré. Redémarrez le boîtier pour en recevoir un nouveau.')
+    } finally {
+      setLoading(false)
+      enrollingRef.current = false
+    }
+  }, [enrollmentCode, getAccessTokenSilently, loadDeviceInfo])
+
+  const handleSendCodeEmail = useCallback(async () => {
+    setEmailSending(true)
+    setStatus(null)
+    try {
+      const token = await getAccessTokenSilently()
+      await requestEnrollmentCodeEmail(token)
+      setEmailSent(true)
+    } catch (e) {
+      setEmailSent(false)
+      setStatus(e.message || "Impossible d'envoyer le code par e-mail.")
+    } finally {
+      setEmailSending(false)
+    }
+  }, [getAccessTokenSilently])
 
   const startScanner = async () => {
     setScannerError(null)
@@ -220,29 +294,6 @@ export default function EnrollDevice() {
     )
   }
 
-  if (emailSent) {
-    return (
-      <PatientLayout>
-        <div className="patient-container patient-theme">
-          <main className="patient-dashboard" style={{ maxWidth: 480, margin: '0 auto' }}>
-            <section className="panel" style={{ textAlign: 'center' }}>
-              <Mail size={40} style={{ color: '#2563eb', marginBottom: '1rem' }} aria-hidden />
-              <h2 style={{ marginTop: 0 }}>Email envoyé</h2>
-              <p>
-                Consultez votre boîte mail et cliquez sur le lien de confirmation pour finaliser
-                l&apos;enregistrement du boîtier{' '}
-                <strong style={{ letterSpacing: '0.03em' }}>{manualDeviceId}</strong>.
-              </p>
-              <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                Le lien est valable 24 h. Le boîtier affichera « Dispositif enregistré » une fois confirmé.
-              </p>
-            </section>
-          </main>
-        </div>
-      </PatientLayout>
-    )
-  }
-
   return (
     <PatientLayout>
       <div className="patient-container patient-theme">
@@ -254,8 +305,8 @@ export default function EnrollDevice() {
             </h1>
             {showFlow ? (
               <p>
-                Scannez le QR code collé sur votre boîtier pour configurer le Wi-Fi, puis confirmez
-                l&apos;enregistrement par email dans VitalIO.
+                Connectez-vous au Wi-Fi du boîtier, scannez le QR de votre réseau domestique pour le configurer
+                automatiquement, puis saisissez le code à 6 chiffres.
               </p>
             ) : (
               <p>
@@ -306,11 +357,28 @@ export default function EnrollDevice() {
                     Connectez votre téléphone au Wi-Fi <strong>{DEVICE_WIFI_AP_SSID}</strong> (émis par le boîtier).
                   </li>
                   <li>
-                    Scannez le QR code sur le boîtier (il ouvre{' '}
-                    <strong>{DEVICE_WIFI_PORTAL_URL}</strong>) ou ouvrez ce lien manuellement.
+                    Scannez le <strong>QR Wi-Fi de votre box</strong> (réseau domestique) : VitalIO transmet le nom
+                    et le mot de passe au boîtier.
                   </li>
-                  <li>Choisissez votre réseau domestique et entrez le mot de passe.</li>
+                  <li>
+                    Ou ouvrez le portail <strong>{DEVICE_WIFI_PORTAL_URL}</strong> pour saisir le réseau manuellement.
+                  </li>
                 </ol>
+                <p
+                  style={{
+                    margin: '0 0 1rem',
+                    padding: '0.75rem',
+                    fontSize: '0.85rem',
+                    lineHeight: 1.45,
+                    color: '#92400e',
+                    background: '#fffbeb',
+                    border: '1px solid #fde68a',
+                    borderRadius: 8,
+                  }}
+                >
+                  Important : votre téléphone doit être connecté à <strong>{DEVICE_WIFI_AP_SSID}</strong> pour que
+                  l&apos;envoi au boîtier fonctionne.
+                </p>
                 <div
                   id={SCANNER_ID}
                   style={{
@@ -325,7 +393,7 @@ export default function EnrollDevice() {
                   {!scannerActive && (
                     <button type="button" className="primary-button" onClick={startScanner} disabled={loading}>
                       <Camera size={18} aria-hidden />
-                      Scanner le QR Wi-Fi
+                      Scanner le QR Wi-Fi (box / routeur)
                     </button>
                   )}
                   {scannerActive && (
@@ -334,8 +402,77 @@ export default function EnrollDevice() {
                     </button>
                   )}
                   <button type="button" className="secondary-button" onClick={openWifiPortal}>
-                    Ouvrir {DEVICE_WIFI_PORTAL_URL}
+                    Ouvrir le portail {DEVICE_WIFI_PORTAL_URL}
                   </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => setShowWifiForm(true)}
+                  >
+                    Saisir le Wi-Fi manuellement
+                  </button>
+                  {showWifiForm && (
+                    <div
+                      style={{
+                        marginTop: 4,
+                        padding: '1rem',
+                        borderRadius: 10,
+                        border: '1px solid #bfdbfe',
+                        background: '#f8fafc',
+                      }}
+                    >
+                      <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>
+                        {wifiFromScan ? 'Réseau détecté par scan' : 'Saisie manuelle'}
+                      </p>
+                      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Nom du réseau (SSID)</span>
+                        <input
+                          type="text"
+                          value={wifiSsid}
+                          onChange={(e) => {
+                            setWifiSsid(e.target.value)
+                            setWifiFromScan(false)
+                            if (status) setStatus(null)
+                          }}
+                          style={{
+                            width: '100%',
+                            marginTop: 4,
+                            padding: '0.65rem 0.75rem',
+                            borderRadius: 8,
+                            border: '1px solid #e2e8f0',
+                          }}
+                          autoComplete="off"
+                        />
+                      </label>
+                      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Mot de passe Wi-Fi</span>
+                        <input
+                          type="password"
+                          value={wifiPassword}
+                          onChange={(e) => {
+                            setWifiPassword(e.target.value)
+                            if (status) setStatus(null)
+                          }}
+                          style={{
+                            width: '100%',
+                            marginTop: 4,
+                            padding: '0.65rem 0.75rem',
+                            borderRadius: 8,
+                            border: '1px solid #e2e8f0',
+                          }}
+                          autoComplete="off"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ width: '100%' }}
+                        onClick={() => sendWifiToDevice(wifiSsid, wifiPassword)}
+                      >
+                        Envoyer au boîtier et configurer le Wi-Fi
+                      </button>
+                    </div>
+                  )}
                   <button
                     type="button"
                     className="secondary-button"
@@ -357,6 +494,7 @@ export default function EnrollDevice() {
                   </button>
                 </div>
                 {scannerError && <p className="error-text" style={{ marginTop: '0.75rem' }}>{scannerError}</p>}
+                {status && <p className={status.includes('Réseau détecté') ? undefined : 'error-text'} style={{ marginTop: '0.75rem', color: status.includes('Réseau détecté') ? '#1d4ed8' : undefined }}>{status}</p>}
               </section>
 
               {step >= 2 && (
@@ -376,33 +514,93 @@ export default function EnrollDevice() {
                     >
                       2
                     </span>
-                    <QrCode size={18} aria-hidden />
-                    Confirmer le boîtier par email
+                    <KeyRound size={18} aria-hidden />
+                    Saisir le code à 6 chiffres
                   </h2>
-                  <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                    Vérifiez que l&apos;identifiant ci-dessous correspond à celui imprimé à côté du QR sur
-                    votre boîtier, puis validez pour recevoir l&apos;email de confirmation.
+
+                  <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '1rem' }}>
+                    Choisissez comment récupérer votre code (valable environ 10 minutes) :
                   </p>
-                  <label htmlFor="manual-device-id" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-                    Identifiant du boîtier
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+                    <CodeSourceOption
+                      active={codeSource === CODE_SOURCE.DEVICE}
+                      onClick={() => {
+                        setCodeSource(CODE_SOURCE.DEVICE)
+                        setEmailSent(false)
+                        if (status) setStatus(null)
+                      }}
+                      icon={Monitor}
+                      title="Sur l'écran du boîtier"
+                      description="Le code s'affiche sur le dispositif une fois le Wi-Fi configuré."
+                    />
+                    <CodeSourceOption
+                      active={codeSource === CODE_SOURCE.EMAIL}
+                      onClick={() => {
+                        setCodeSource(CODE_SOURCE.EMAIL)
+                        setEmailSent(false)
+                        if (status) setStatus(null)
+                      }}
+                      icon={Mail}
+                      title="Par e-mail"
+                      description="Recevez le code à l'adresse associée à votre compte VitalIO."
+                    />
+                  </div>
+
+                  {codeSource === CODE_SOURCE.DEVICE && (
+                    <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '1rem' }}>
+                      Regardez l&apos;écran de votre boîtier et saisissez le code à 6 chiffres ci-dessous.
+                    </p>
+                  )}
+
+                  {codeSource === CODE_SOURCE.EMAIL && (
+                    <div style={{ marginBottom: '1rem' }}>
+                      <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '0.75rem' }}>
+                        Demandez l&apos;envoi du code, consultez votre boîte mail, puis saisissez-le ci-dessous.
+                      </p>
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={handleSendCodeEmail}
+                        disabled={emailSending}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                      >
+                        <Mail size={16} aria-hidden />
+                        {emailSending ? 'Envoi…' : emailSent ? 'Renvoyer le code par e-mail' : 'Recevoir le code par e-mail'}
+                      </button>
+                      {emailSent && (
+                        <p style={{ color: '#047857', fontSize: '0.875rem', marginTop: '0.75rem' }}>
+                          E-mail envoyé. Vérifiez votre boîte de réception (et les spams).
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {codeSource && (
+                    <>
+                  <label htmlFor="enrollment-code" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                    Code à 6 chiffres
                   </label>
                   <input
-                    id="manual-device-id"
+                    id="enrollment-code"
                     type="text"
-                    value={manualDeviceId}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    value={enrollmentCode}
                     onChange={(e) => {
-                      setManualDeviceId(e.target.value.toUpperCase())
+                      setEnrollmentCode(e.target.value.replace(/\D/g, '').slice(0, 6))
                       if (status) setStatus(null)
                     }}
-                    placeholder="VITALIO-CA836AE4"
-                    autoComplete="off"
+                    placeholder="123456"
+                    autoComplete="one-time-code"
                     spellCheck={false}
                     style={{
                       width: '100%',
                       padding: '0.875rem',
-                      fontSize: '1rem',
+                      fontSize: '1.5rem',
                       fontFamily: 'monospace',
-                      letterSpacing: '0.04em',
+                      letterSpacing: '0.35em',
+                      textAlign: 'center',
                       border: '2px solid #e2e8f0',
                       borderRadius: 8,
                       marginBottom: '1rem',
@@ -413,11 +611,13 @@ export default function EnrollDevice() {
                     type="button"
                     className="primary-button"
                     style={{ width: '100%' }}
-                    onClick={() => submitValidation(manualDeviceId)}
-                    disabled={!manualDeviceId.trim() || loading}
+                    onClick={submitEnrollmentCode}
+                    disabled={enrollmentCode.length !== 6 || loading}
                   >
-                    {loading ? 'Envoi…' : "Recevoir l'email de confirmation"}
+                    {loading ? 'Vérification…' : 'Enregistrer mon boîtier'}
                   </button>
+                    </>
+                  )}
                 </section>
               )}
             </>

@@ -7,7 +7,10 @@ from pymongo.errors import PyMongoError
 
 from app.database import get_medical_db, get_identity_db
 from app.exceptions import DatabaseError
-from app.services.user_service import get_device_id, get_user_profile, get_user_db_id, datetime_to_iso_utc
+from app.services.user_service import (
+    get_device_id, get_user_profile, get_user_db_id, datetime_to_iso_utc,
+    resolve_patient_display_name, normalize_patient_email,
+)
 from app.services.alert_service import device_has_actionable_open_alert
 from app.services.severity_level import resolve_measurement_display_level
 
@@ -269,6 +272,9 @@ def build_assigned_patients_payload(
     for patient_user_id_auth in patient_ids:
         device_id = get_device_id(patient_user_id_auth)
         profile = get_user_profile(patient_user_id_auth)
+        display_name = resolve_patient_display_name(profile)
+        if not display_name:
+            continue
         db_id = get_user_db_id(patient_user_id_auth)
         latest_measurement = get_latest_device_measurement(device_id) if device_id else None
         measured_at = latest_measurement.get("measured_at") if latest_measurement else None
@@ -282,7 +288,8 @@ def build_assigned_patients_payload(
         patients.append({
             "id": db_id or patient_user_id_auth,
             "patient_id": patient_user_id_auth,
-            "display_name": profile.get("display_name") or profile.get("email") or patient_user_id_auth,
+            "display_name": display_name,
+            "email": normalize_patient_email(profile),
             "device_id": device_id,
             "last_measurement": {
                 "timestamp": measured_at_iso,

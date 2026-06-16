@@ -24,6 +24,7 @@ import {
   ChevronUp,
 } from 'lucide-react'
 import { getMLModelInfo, getMLAnomalies, getDoctorAlerts, getDoctorPatients, getPatientMLAnalysis, patchDoctorAlert, apiRequest } from '../services/api'
+import { resolvePatientListDisplayName } from '../utils/displayName'
 import DoctorLayout from '../components/DoctorLayout'
 import { getSeverityConfig, SEVERITY_LEVEL_CONFIG } from '../constants/severityLevels'
 
@@ -204,9 +205,11 @@ export default function DoctorMLView() {
   const patientNames = React.useMemo(() => {
     const m = {}
     patients.forEach((p) => {
+      const label = resolvePatientListDisplayName(p)
+      if (!label) return
       const key = p.id || p.patient_id
-      if (key) m[key] = p.display_name || p.patient_id
-      if (p.patient_id && p.patient_id !== key) m[p.patient_id] = p.display_name || p.patient_id
+      if (key) m[key] = label
+      if (p.patient_id && p.patient_id !== key) m[p.patient_id] = label
     })
     return m
   }, [patients])
@@ -499,7 +502,7 @@ export default function DoctorMLView() {
                         {displayedVitalAlerts.map((a) => {
                           const docStatus = (a.doctor_status || 'PENDING').toUpperCase()
                           const dsCfg = DOCTOR_STATUS_CONFIG[docStatus] || DOCTOR_STATUS_CONFIG.PENDING
-                          const patientName = patientNames[a.patient_id] || a.patient_id || '-'
+                          const patientName = patientNames[a.patient_id] || '-'
                           const value = a.latest_value ?? a.value ?? '-'
                           const threshold = a.threshold ?? '-'
                           const rowKey = a.alert_id || `${a.device_id}-${a.metric}`

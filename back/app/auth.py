@@ -245,13 +245,17 @@ def get_or_create_user(auth0_sub: str, jwt_payload: Optional[Dict[str, Any]] = N
         display_name = (
             profile.get("display_name")
             or _sanitize_person_name(jwt_payload.get("name") if jwt_payload else None, email)
-            or (email or "")
+            or email
         )
+        if display_name and _is_auth_provider_id(str(display_name)):
+            display_name = email
+        if not display_name and email:
+            display_name = email
         doc = {
             "user_id_auth": auth0_sub,
             "email": email,
             "role": role,
-            "display_name": display_name,
+            "display_name": display_name or None,
             "first_name": profile.get("first_name"),
             "last_name": profile.get("last_name"),
             "picture": profile.get("picture"),

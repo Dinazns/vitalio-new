@@ -1,16 +1,12 @@
 """HTTP routes — device_routes."""
-import io
 import json
 import logging
 import os
-import qrcode
 import re
-import secrets
-import threading
 from datetime import datetime, timedelta, timezone, date
 from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Blueprint, request, jsonify, g, Response, send_file
+from flask import Blueprint, request, jsonify, g, Response
 from pymongo.errors import PyMongoError
 from bson import ObjectId
 
@@ -38,9 +34,10 @@ from app.services.user_service import (
 from app.services.invitation_service import (
     hash_secret_token, generate_invite_token, generate_cabinet_code,
     log_link_audit_event, create_doctor_patient_link, get_invite_document_or_404,
-    send_invitation_email, send_device_confirmation_email,
-    invite_emergency_contact_if_needed, log_caregiver_audit_event,
+    send_invitation_email, invite_emergency_contact_if_needed, log_caregiver_audit_event,
+    send_device_enrollment_code_email,
 )
+from app.services.mailjet_service import is_mailjet_configured
 from app.services.auth0_service import create_auth0_user_if_not_exists
 from app.services.terms_service import CURRENT_TERMS_VERSION, get_terms_status, accept_terms
 from app.services.measurement_service import (
@@ -83,24 +80,48 @@ logger = logging.getLogger(__name__)
 
 device_bp = Blueprint("device", __name__)
 
-# Portail captif ESP32 (QR collé sur le boîtier)
-DEVICE_WIFI_PORTAL_URL = "http://192.168.4.1/"
+
+def _active_enrollment_for_device(device_id: str) -> Optional[Dict[str, Any]]:
+    """Retourne l'enrollment en attente non expiré pour un device, ou None."""
+    doc = get_identity_db().device_enrollments.find_one({
+        "device_id": device_id,
+        "enrolled": False,
+    })
+    if not doc:
+        return None
+    expires_at = doc.get("expires_at")
+    if isinstance(expires_at, datetime):
+        exp = expires_at.replace(tzinfo=timezone.utc) if expires_at.tzinfo is None else expires_at
+        if exp < datetime.now(timezone.utc):
+            return None
+    return doc
 
 
-def _qr_png_response(payload: str, download_name: str = "qrcode.png"):
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
+def _send_enrollment_code_email_for_patient(
+    patient_user_id_auth: str,
+    device_id: str,
+    enrollment_code: str,
+    expires_at: datetime,
+) -> None:
+    if not is_mailjet_configured():
+        raise ValueError("Mailjet non configuré: envoi e-mail impossible")
+    profile = get_user_profile(patient_user_id_auth) or {}
+    patient_email = normalize_email(profile.get("email"))
+    if not patient_email:
+        raise ValueError("Aucune adresse e-mail associée à votre compte")
+    display_name = (
+        profile.get("display_name")
+        or profile.get("first_name")
+        or patient_email
     )
-    qr.add_data(payload)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    img_io = io.BytesIO()
-    img.save(img_io, "PNG")
-    img_io.seek(0)
-    return send_file(img_io, mimetype="image/png", as_attachment=False, download_name=download_name)
+    send_device_enrollment_code_email(
+        patient_email,
+        display_name,
+        device_id,
+        enrollment_code,
+        expires_at,
+    )
+
 
 @device_bp.route("/api/device/measurements", methods=["POST"])
 def submit_device_measurement():
@@ -163,39 +184,50 @@ def submit_device_measurement():
 
 
 @device_bp.route("/api/device/enrollment", methods=["POST"])
-def register_device_enrollment_pending():
-    """ESP32 connecté : signale que le boîtier attend la confirmation patient (sans code 6 chiffres)."""
+def create_enrollment_code():
+    """ESP32 soumet un code d'enrollment - stocké 10 minutes en base."""
     payload = request.get_json(silent=True) or {}
     device_id = str(payload.get("device_id") or "").strip()
+    enrollment_code = str(payload.get("enrollment_code") or "").strip()
 
-    if not device_id:
-        return jsonify({"code": "missing_device_id", "message": "device_id requis"}), 400
+    if not device_id or not enrollment_code:
+        return jsonify({"code": "missing_fields", "message": "device_id et enrollment_code requis"}), 400
 
     device_doc = get_identity_db().users_devices.find_one({"device_id": device_id})
     if not device_doc:
         return jsonify({"code": "unknown_device", "message": "Device inconnu"}), 403
 
     now = datetime.now(timezone.utc)
+    expires_at = now + timedelta(minutes=10)
+
     try:
         get_identity_db().device_enrollments.update_one(
             {"device_id": device_id},
-            {
-                "$set": {"device_id": device_id, "enrolled": False, "updated_at": now},
-                "$setOnInsert": {"created_at": now},
-            },
+            {"$set": {
+                "device_id": device_id,
+                "enrollment_code": enrollment_code,
+                "enrolled": False,
+                "created_at": now,
+                "expires_at": expires_at,
+            }},
             upsert=True,
         )
     except PyMongoError as e:
         logger.warning("device_enrollments upsert failed: %s", e)
         return jsonify({"code": "enrollment_store_error", "message": str(e)}), 500
 
-    logger.info("Device %s en attente de confirmation email", device_id)
-    return jsonify({"message": "Device en attente de confirmation", "device_id": device_id}), 201
+    logger.info("Enrollment code created for device %s", device_id)
+
+    return jsonify({
+        "message": "Code enrollment enregistre",
+        "device_id": device_id,
+        "expires_at": datetime_to_iso_utc(expires_at),
+    }), 201
 
 
 @device_bp.route("/api/device/enrollment/status", methods=["GET"])
 def check_enrollment_status():
-    """ESP32 vérifie si le patient a confirmé l'enrollment via email."""
+    """ESP32 vérifie si le patient a validé le code."""
     device_id = request.args.get("device_id", "").strip()
     if not device_id:
         return jsonify({"code": "missing_device_id"}), 400
@@ -204,168 +236,118 @@ def check_enrollment_status():
     if not doc:
         return jsonify({"enrolled": False}), 200
 
-    if doc.get("enrolled"):
-        return jsonify({"enrolled": True}), 200
-
-    expires_at = doc.get("confirmation_expires_at")
+    expires_at = doc.get("expires_at")
     if isinstance(expires_at, datetime):
         exp = expires_at.replace(tzinfo=timezone.utc) if expires_at.tzinfo is None else expires_at
         if exp < datetime.now(timezone.utc):
-            return jsonify({"enrolled": False, "reason": "confirmation_expired"}), 200
+            return jsonify({"enrolled": False, "reason": "expired"}), 200
 
-    return jsonify({"enrolled": False}), 200
+    return jsonify({"enrolled": doc.get("enrolled", False)}), 200
 
 
-@device_bp.route("/api/device/validate", methods=["POST"])
+@device_bp.route("/api/patient/enrollment/send-code-email", methods=["POST"])
 @requires_auth
 @requires_role("patient")
-def validate_device_enrollment():
-    """Patient confirme son boîtier (device_id) — envoi email de confirmation 24h."""
-    payload = request.get_json(silent=True) or {}
-    device_id = str(payload.get("device_id") or "").strip()
+def patient_request_enrollment_code_email():
+    """Patient demande l'envoi du code à 6 chiffres par e-mail (boîtier déjà connecté)."""
+    device_doc = get_identity_db().users_devices.find_one({"user_id_auth": g.user_id_auth})
+    if not device_doc or not device_doc.get("device_id"):
+        return jsonify({
+            "code": "no_device_assigned",
+            "message": "Aucun boîtier assigné à votre compte",
+        }), 404
 
-    if not device_id:
-        return jsonify({"code": "missing_device_id", "message": "device_id requis"}), 400
+    device_id = str(device_doc["device_id"])
+    enrollment = _active_enrollment_for_device(device_id)
+    if not enrollment:
+        return jsonify({
+            "code": "no_active_code",
+            "message": "Aucun code actif. Vérifiez que le boîtier est connecté au Wi-Fi.",
+        }), 404
 
-    device_doc = get_identity_db().users_devices.find_one({"device_id": device_id})
-    if not device_doc:
-        return jsonify({"code": "device_not_found", "message": "Device introuvable"}), 404
-
-    if device_doc.get("user_id_auth") != g.user_id_auth:
-        return jsonify({"code": "device_not_yours", "message": "Ce device n'est pas assigne a votre compte"}), 403
-
-    enrollment_doc = get_identity_db().device_enrollments.find_one({"device_id": device_id})
-    if enrollment_doc and enrollment_doc.get("enrolled"):
-        return jsonify({"code": "already_enrolled", "message": "Device deja enregistre"}), 400
-
-    raw_token = secrets.token_urlsafe(32)
-    token_hash = hash_secret_token(raw_token)
-    now = datetime.now(timezone.utc)
-    expires_at = now + timedelta(hours=24)
+    expires_at = enrollment.get("expires_at")
+    if not isinstance(expires_at, datetime):
+        return jsonify({"code": "invalid_enrollment", "message": "Enrollment invalide"}), 500
 
     try:
-        get_identity_db().device_enrollments.update_one(
-            {"device_id": device_id},
-            {"$set": {
-                "device_id": device_id,
-                "user_id_auth": g.user_id_auth,
-                "enrolled": False,
-                "confirmation_token": token_hash,
-                "confirmation_expires_at": expires_at,
-                "created_at": now,
-            }},
-            upsert=True,
-        )
-    except PyMongoError as e:
-        logger.warning("device_enrollments upsert failed: %s", e)
-        return jsonify({"code": "enrollment_store_error", "message": str(e)}), 500
-
-    try:
-        user_profile = get_user_profile(g.user_id_auth)
-        patient_email = (user_profile.get("email") or "").strip()
-        first = (user_profile.get("first_name") or "").strip()
-        last = (user_profile.get("last_name") or "").strip()
-        patient_name = f"{first} {last}".strip() or (user_profile.get("display_name") or "Patient")
-    except Exception as e:
-        logger.warning("Failed to get patient profile: %s", e)
-        return jsonify({"code": "profile_error", "message": "Profil patient introuvable"}), 500
-
-    if not patient_email:
-        return jsonify({"code": "missing_email", "message": "Aucune adresse email sur votre compte"}), 400
-
-    confirmation_url = f"{FRONTEND_URL}/device/confirm?token={raw_token}&device_id={device_id}"
-
-    try:
-        send_device_confirmation_email(
-            patient_email=patient_email,
-            patient_display_name=patient_name,
-            confirmation_url=confirmation_url,
-            device_id=device_id,
-            expires_at=expires_at,
+        _send_enrollment_code_email_for_patient(
+            g.user_id_auth,
+            device_id,
+            str(enrollment.get("enrollment_code") or ""),
+            expires_at,
         )
     except ValueError as e:
-        logger.warning("Failed to send confirmation email: %s", e)
-        return jsonify({"code": "email_error", "message": str(e)}), 500
+        return jsonify({"code": "email_send_failed", "message": str(e)}), 400
+    except Exception as e:
+        logger.exception("Envoi email code enrollment demandé par patient échoué: %s", e)
+        return jsonify({"code": "email_send_failed", "message": "Envoi e-mail impossible"}), 500
 
-    logger.info("Confirmation email sent for device %s", device_id)
+    logger.info("Code enrollment envoyé par e-mail (demande patient, device %s)", device_id)
     return jsonify({
-        "message": "Email de confirmation envoyé",
+        "message": "Code envoyé par e-mail",
         "device_id": device_id,
-        "expires_in_hours": 24,
-    }), 201
+        "expires_at": datetime_to_iso_utc(expires_at),
+    }), 200
 
 
-@device_bp.route("/api/device/confirm", methods=["POST"])
-def confirm_device_enrollment():
-    """Confirme l'enrollment via le lien reçu par email (sans authentification)."""
+@device_bp.route("/api/patient/enroll-device", methods=["POST"])
+@requires_auth
+@requires_role("patient")
+def patient_enroll_device():
+    """Patient entre le code à 6 chiffres pour lier le device à son compte."""
     payload = request.get_json(silent=True) or {}
-    token = str(payload.get("token") or "").strip()
-    device_id = str(payload.get("device_id") or "").strip()
+    enrollment_code = str(payload.get("enrollment_code") or "").strip()
 
-    if not token or not device_id:
-        return jsonify({"code": "missing_params", "message": "token et device_id requis"}), 400
+    if not enrollment_code:
+        return jsonify({"code": "missing_code", "message": "enrollment_code requis"}), 400
+    if len(enrollment_code) != 6 or not enrollment_code.isdigit():
+        return jsonify({"code": "invalid_format", "message": "Le code doit contenir exactement 6 chiffres"}), 400
 
     now = datetime.now(timezone.utc)
-    token_hash = hash_secret_token(token)
-    enrollment_doc = get_identity_db().device_enrollments.find_one({
-        "device_id": device_id,
-        "confirmation_token": token_hash,
+    doc = get_identity_db().device_enrollments.find_one({
+        "enrollment_code": enrollment_code,
+        "enrolled": False,
     })
 
-    if not enrollment_doc:
-        return jsonify({"code": "invalid_token", "message": "Token invalide"}), 404
+    if not doc:
+        return jsonify({"code": "invalid_code", "message": "Code invalide ou deja utilise"}), 404
 
-    expires_at = enrollment_doc.get("confirmation_expires_at")
+    expires_at = doc.get("expires_at")
     if isinstance(expires_at, datetime):
         exp = expires_at.replace(tzinfo=timezone.utc) if expires_at.tzinfo is None else expires_at
         if exp < now:
-            return jsonify({"code": "expired_token", "message": "Token expire"}), 410
+            return jsonify({"code": "expired_code", "message": "Code expire, redemandez-en un"}), 410
+
+    device_id = doc["device_id"]
+
+    device_doc = get_identity_db().users_devices.find_one({
+        "device_id": device_id,
+        "user_id_auth": g.user_id_auth,
+    })
+    if not device_doc:
+        return jsonify({
+            "code": "device_not_yours",
+            "message": "Ce device n'est pas assigne a votre compte",
+        }), 403
 
     try:
         get_identity_db().device_enrollments.update_one(
-            {"_id": enrollment_doc["_id"]},
+            {"_id": doc["_id"]},
             {"$set": {
                 "enrolled": True,
                 "enrolled_at": now,
-                "enrolled_by": enrollment_doc.get("user_id_auth"),
-                "confirmation_token": None,
+                "enrolled_by": g.user_id_auth,
             }},
         )
     except PyMongoError as e:
         logger.warning("device_enrollments finalize failed: %s", e)
-        return jsonify({"code": "enrollment_error", "message": str(e)}), 500
+        return jsonify({"code": "enrollment_update_error", "message": str(e)}), 500
 
-    logger.info("Device %s enrolled via email confirmation", device_id)
-    return jsonify({"message": "Device enregistre avec succes", "device_id": device_id}), 200
-
-
-@device_bp.route("/api/device/qrcode", methods=["GET"])
-@requires_auth
-@requires_role("patient")
-def get_device_qrcode():
-    """
-    Génère un QR code PNG.
-    - type=wifi (défaut) : portail ESP32 http://192.168.4.1/ (config Wi-Fi)
-    - type=device : QR avec device_id (étiquette boîtier), device_id requis
-    """
-    qr_type = (request.args.get("type") or "wifi").strip().lower()
-    device_id = request.args.get("device_id", "").strip()
-
-    if qr_type == "wifi":
-        return _qr_png_response(DEVICE_WIFI_PORTAL_URL, "vitalio-wifi-portal.png")
-
-    if qr_type == "device":
-        if not device_id:
-            return jsonify({"code": "missing_device_id", "message": "device_id requis pour type=device"}), 400
-        device_doc = get_identity_db().users_devices.find_one({
-            "device_id": device_id,
-            "user_id_auth": g.user_id_auth,
-        })
-        if not device_doc:
-            return jsonify({"code": "device_not_found", "message": "Device non trouve"}), 404
-        return _qr_png_response(device_id, f"{device_id}-qr.png")
-
-    return jsonify({"code": "invalid_type", "message": "type doit etre wifi ou device"}), 400
+    logger.info("Device %s enrolled by patient %s", device_id, g.user_id_auth)
+    return jsonify({
+        "message": "Device enregistre avec succes",
+        "device_id": device_id,
+    }), 200
 
 
 # ============================================================================

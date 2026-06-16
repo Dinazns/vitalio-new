@@ -1,5 +1,21 @@
 import { DEVICE_WIFI_PORTAL_URL } from '../constants/deviceSetup'
 
+export const DEVICE_ID_PREFIX = 'VITALIO-'
+
+/** Garde le préfixe VITALIO- lors de la saisie manuelle. */
+export function normalizeDeviceIdInput(value) {
+  let v = String(value ?? '').toUpperCase()
+  if (!v.startsWith(DEVICE_ID_PREFIX)) {
+    const suffix = v.replace(/^VITALIO-?/i, '')
+    v = `${DEVICE_ID_PREFIX}${suffix}`
+  }
+  return v
+}
+
+export function isDeviceIdPrefixOnly(value) {
+  return String(value || '').trim().toUpperCase() === DEVICE_ID_PREFIX
+}
+
 /** true si le QR pointe vers le portail Wi-Fi ESP32. */
 export function isWifiPortalQr(text) {
   if (!text || typeof text !== 'string') return false

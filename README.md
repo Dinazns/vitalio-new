@@ -1,9 +1,13 @@
 # VitalIO
 
-Plateforme de télésurveillance médicale connectée. VitalIO collecte des mesures physiologiques issues de dispositifs IoT, les stocke de manière sécurisée, déclenche des alertes cliniques et assiste les professionnels de santé via un module d'analyse par apprentissage automatique.
+Plateforme de télésurveillance médicale connectée. VitalIO collecte des mesures physiologiques issues de capteurs depuis un dispositifs IoT, les stocke de manière sécurisée, déclenche des alertes cliniques et assiste les professionnels de santé via un module d'analyse par apprentissage automatique.
 
-**Frontend** : [Vercel](https://vitalio-new.vercel.app)  
-**Backend** : API Flask hébergée sur Render
+| Composant | Hébergement |
+|-----------|-------------|
+| **Frontend** | [Vercel](https://vitalio-new.vercel.app) |
+| **Backend API** | Render (Flask / Gunicorn) |
+| **Base de données** | MongoDB Atlas |
+| **Broker MQTT** | [HiveMQ Cloud](https://www.hivemq.com/mqtt-cloud/) (MQTTS) |
 
 ---
 
@@ -15,12 +19,13 @@ Plateforme de télésurveillance médicale connectée. VitalIO collecte des mesu
 4. [Prérequis](#prérequis)
 5. [Installation locale](#installation-locale)
 6. [Variables d'environnement](#variables-denvironnement)
-7. [Déploiement](#déploiement)
-8. [Broker MQTT (développement)](#broker-mqtt-développement)
+7. [Broker MQTT (HiveMQ Cloud)](#broker-mqtt-hivemq-cloud)
+8. [Déploiement](#déploiement)
 9. [Rôles et parcours utilisateur](#rôles-et-parcours-utilisateur)
-10. [Tests](#tests)
-11. [Sécurité et conformité](#sécurité-et-conformité)
-12. [Documentation complémentaire](#documentation-complémentaire)
+10. [Alertes](#alertes-info--warning--critical--urgency)
+11. [Tests](#tests)
+12. [Sécurité et conformité](#sécurité-et-conformité)
+13. [Documentation complémentaire](#documentation-complémentaire)
 
 ---
 
@@ -28,57 +33,41 @@ Plateforme de télésurveillance médicale connectée. VitalIO collecte des mesu
 
 | Domaine | Description |
 |---------|-------------|
-| **IoT** | Ingestion MQTT (TLS) des mesures cardiaques, SpO2 et température |
+| **IoT** | Ingestion MQTT (TLS) des mesures cardiaques, SpO₂ et température via HiveMQ Cloud |
 | **Stockage** | MongoDB Atlas, bases séparées identité et données médicales |
-| **Alertes** | Taxonomie Info / Warning / Critical / Urgency, seuils, alerte manuelle, escalade SAMU |
+| **Alertes** | Info / Warning / Critical / Urgency, seuils, alerte manuelle, escalade SAMU |
 | **IA** | Détection d'anomalies (Isolation Forest), tendances et prévisions |
 | **Authentification** | Auth0, JWT, contrôle d'accès par rôle (RBAC) |
-| **Notifications** | E-mail (SMTP) et notifications push navigateur (VAPID) |
+| **Notifications** | E-mail (Mailjet) et notifications push navigateur (VAPID) |
 | **RGPD** | Export et suppression des données patient |
 
 ---
 
 ## Architecture
 
-```
-                    TLS (HTTPS)                         TLS (HTTPS)
-  Navigateur  <------------------------->  React SPA (Vercel)
-       |                                           |
-       |              TLS (HTTPS) + JWT             |
-       +------------------------------------------>  API Flask (Render)
-                                                          |
-                    TLS (mongodb+srv)                     |
-       +-------------------------------------------------> MongoDB Atlas
-       |                    Identity + Medical           |
-       |                                                 |
-  Capteur / simulateur                                    |
-       |                                                  |
-       |  TLS MQTT (port 8883, certificat CA)             |
-       +------------------->  Mosquitto (Docker local) ---+ (ingestion mesures)
-```
-
-**Chiffrement en transit**
+### Chiffrement en transit
 
 | Liaison | Protocole |
 |---------|-----------|
 | Navigateur ↔ Front Vercel | HTTPS (TLS) |
 | Front ↔ API Render | HTTPS (TLS) |
 | API ↔ MongoDB Atlas | TLS (`mongodb+srv`) |
-| Device ↔ Mosquitto | MQTTS (TLS, port 8883) |
-| Auth0 ↔ API | JWT signé RS256 sur HTTPS |
+| Device / API ↔ HiveMQ Cloud | MQTTS |
+| Auth0 ↔ API | JWT |
 
-**Séparation et pseudonymisation**
+### Séparation et pseudonymisation
 
 - **Vitalio_Identity** : Auth0 sub, profils, liens, `patient_pseudo_id` (UUID).
-- **Vitalio_Medical** : mesures et alertes via `device_id` + `patient_pseudo_id` (sans Auth0 sub).
+- **Vitalio_Medical** : mesures et alertes via `device_id` + `patient_pseudo_id` (sans JWT sub).
 - Profils : téléphone, adresse et historique chiffrés au repos (Fernet, `FIELD_ENCRYPTION_KEY`).
 
-**Flux d'une mesure**
+### Flux d'une mesure
 
-1. Un device publie sur le topic `vitalio/dev/{device_id}/measurements`.
-2. L'API (ou le simulateur `scripts/simulate_sensor.py`) insère la mesure dans `Vitalio_Medical.measurements`.
-3. Le moteur d'alertes évalue les seuils et le module ML calcule un score d'anomalie.
-4. Le médecin et l'aidant consultent les alertes via le tableau de bord React.
+1. Un device publie sur le topic `vitalio/dev/{device_id}/measurements` sur **HiveMQ Cloud**.
+2. L'API Flask (Render) est abonnée au même broker et reçoit le message en temps réel.
+3. L'API insère la mesure dans `Vitalio_Medical.measurements`.
+4. Le moteur d'alertes évalue les seuils et le module ML calcule un score d'anomalie.
+5. Le médecin et l'aidant consultent les alertes via le tableau de bord.
 
 ---
 
@@ -87,37 +76,28 @@ Plateforme de télésurveillance médicale connectée. VitalIO collecte des mesu
 ```
 vitalio/
 ├── README.md
-├── docker-compose.yml           # Stack API + front + Mosquitto
-├── .env.docker.example          # Variables VITE_* pour le build front
-├── docs/                        # Guides Auth0, MQTT, tests E2E
-├── .env.example                 # Modèle global (optionnel)
+├── docker-compose.yml           # Stack locale optionnelle (API + front + Mosquitto)
+├── .env.docker.example
+├── docs/                        # Auth0, MQTT (legacy Mosquitto), tests E2E
 ├── back/
 │   ├── api.py                   # Point d'entrée (python api.py / gunicorn api:app)
-│   ├── Dockerfile               # Image API
-│   ├── docker-entrypoint.sh     # init ML + MQTT puis Gunicorn
+│   ├── Dockerfile
+│   ├── docker-entrypoint.sh
 │   ├── app/
-│   │   ├── main.py              # Factory Flask (create_app)
+│   │   ├── main.py              # Factory Flask
 │   │   ├── config.py            # Variables d'environnement
-│   │   ├── database.py          # Client MongoDB et index
-│   │   ├── auth.py              # JWT Auth0 et décorateurs RBAC
-│   │   ├── mqtt_handler.py      # Abonnement MQTT
-│   │   ├── ml/engine.py         # Détection d'anomalies et prévisions
-│   │   ├── api/                 # Blueprints Flask (auth, patients, alerts…)
-│   │   ├── services/            # Logique métier
-│   │   └── models/              # Constantes collections MongoDB
-│   ├── scripts/                 # seed_db, simulate_sensor, migrations…
-│   ├── auth0/                   # Action post-login Auth0
-│   ├── docker-compose.yml       # Broker Mosquitto (local)
+│   │   ├── mqtt_handler.py      # Abonné MQTT → persistance + alertes
+│   │   ├── ml/engine.py
+│   │   ├── api/
+│   │   └── services/
+│   ├── scripts/
+│   ├── docker-compose.yml       # Mosquitto seul
+│   ├── mosquitto/               # Config TLS legacy (dev local uniquement)
 │   ├── requirements.txt
 │   ├── .env.example
-│   ├── tests/
-│   └── mosquitto/               # Configuration TLS du broker
+│   └── tests/
 └── front/
-    └── vitalio/
-        ├── Dockerfile           # Build Vite + nginx
-        ├── src/                 # Pages React par rôle
-        ├── .env.example
-        └── package.json
+    └── vitalio/                 # SPA React (Vite)
 ```
 
 ---
@@ -128,9 +108,10 @@ vitalio/
 |-------|------------------|
 | Python | 3.11+ |
 | Node.js | 20+ |
-| Docker | Pour Mosquitto en local |
 | Compte Auth0 | Application SPA + API |
-| Cluster MongoDB Atlas | Deux bases logiques (Identity, Medical) |
+| Cluster MongoDB Atlas | Bases Identity + Medical |
+| Cluster HiveMQ Cloud | Broker MQTTS + identifiants (username / password) |
+| Docker | Optionnel (stack locale avec Mosquitto) |
 
 ---
 
@@ -139,7 +120,7 @@ vitalio/
 ### 1. Cloner le dépôt
 
 ```bash
-git clone <url-du-depot>
+git clone https://github.com/klueko/vitalio.git
 cd vitalio
 ```
 
@@ -160,16 +141,13 @@ copy .env.example .env        # Windows
 # cp .env.example .env        # Linux / macOS
 ```
 
-Renseigner `back/.env` avec vos identifiants Auth0, MongoDB et MQTT.
+Renseigner `back/.env` : Auth0, MongoDB Atlas, **HiveMQ Cloud** (voir [Broker MQTT](#broker-mqtt-hivemq-cloud)), Mailjet, VAPID, etc.
 
-Démarrer l'API :
+Démarrer l'API (l'abonné MQTT démarre automatiquement si `MQTT_ENABLED=true`) :
 
 ```bash
 python api.py
 ```
-
-L'API écoute par défaut sur `http://localhost:5000`.  
-Endpoint de santé : `GET /health`
 
 ### 3. Frontend
 
@@ -180,7 +158,7 @@ copy .env.example .env
 npm run dev
 ```
 
-Interface disponible sur `http://localhost:5173`.
+Interface : http://localhost:5173
 
 ### 4. Association patient / device (première utilisation)
 
@@ -191,16 +169,13 @@ python scripts/seed_db.py
 
 Nécessite `SEED_USER_ID_AUTH` (sub Auth0 du patient) et `SEED_DEVICE_ID` dans `.env`.
 
-### 5. Docker (stack complète)
+### 5. Docker (optionnel - stack locale complète)
 
-Alternative pour une démo ou un environnement reproductible (API + front + Mosquitto) :
+Alternative pour une démo **sans HiveMQ** (broker Mosquitto embarqué) :
 
 ```bash
 # À la racine du dépôt
-copy .env.docker.example .env          # Windows — variables VITE_* pour le build front
-# cp .env.docker.example .env          # Linux / macOS
-
-# Renseigner back/.env (MongoDB Atlas, Auth0, MQTT, SMTP…)
+copy .env.docker.example .env
 docker compose up --build
 ```
 
@@ -208,49 +183,114 @@ docker compose up --build
 |---------|-----|
 | Front | http://localhost:8080 |
 | API | http://localhost:5000 |
-| Mosquitto (TLS) | localhost:8883 |
+| Mosquitto (TLS, local) | localhost:8883 |
 
-**Auth0** : ajouter `http://localhost:8080` aux callbacks, logout URLs et web origins.
-
-**MQTT dans Docker** : le service `api` se connecte au broker via le hostname `mosquitto` (défini dans `docker-compose.yml`). Les certificats TLS doivent être présents dans `back/mosquitto/certs/` (voir `docs/mqtt-quick-start.md`).
-
-Pour Mosquitto seul (sans API conteneurisée) : `cd back && docker compose up -d`.
+En production et en dev « cloud », préférez **HiveMQ Cloud** plutôt que Mosquitto. Voir [Broker MQTT](#broker-mqtt-hivemq-cloud).
 
 ---
 
 ## Variables d'environnement
 
-Les secrets ne doivent jamais être commités. Utiliser les fichiers modèles :
-
 | Fichier | Usage |
 |---------|-------|
-| `back/.env.example` | API, MongoDB, MQTT, SMTP, VAPID |
-| `front/vitalio/.env.example` | Auth0 et URL de l'API (`VITE_*`) |
-| `.env.example` | Vue d'ensemble pour un setup racine |
+| `back/.env.example` | Modèle API (Auth0, MongoDB, HiveMQ, Mailjet, VAPID…) |
+| `front/vitalio/.env.example` | Auth0 SPA + URL API |
 
-Copier chaque `.env.example` vers `.env` et remplacer les placeholders.
-
-Variables principales côté backend (détail dans `back/app/config.py`) :
+### Backend (principales)
 
 | Variable | Rôle |
 |----------|------|
 | `AUTH0_DOMAIN` | Tenant Auth0 |
 | `AUTH0_AUDIENCE` | Audience JWT |
-| `MONGODB_URI` | Connexion Atlas ou locale |
-| `MQTT_BROKER`, `MQTT_PORT` | Broker Mosquitto |
+| `MONGODB_URI` | Connexion Atlas |
+| `MQTT_BROKER` | Hostname HiveMQ Cloud (ex. `xxxx.s1.eu.hivemq.cloud`) |
+| `MQTT_PORT` | `8883` (MQTTS) |
+| `MQTT_USERNAME` / `MQTT_PASSWORD` | Identifiants du cluster HiveMQ |
+| `MQTT_CA_CERT` | Certificat CA pour valider le TLS du broker |
+| `MQTT_TOPIC` | Topic d'écoute (défaut : `vitalio/dev/+/measurements`) |
+| `MQTT_ENABLED` | `true` pour activer l'abonné au démarrage de l'API |
 | `FRONTEND_URL` | URL du front (CORS, liens e-mail) |
-| `SMTP_*` | Envoi d'e-mails |
+| `SMTP_USER` / `SMTP_PASSWORD` | Clés API Mailjet |
+| `EMAIL_FROM` | Expéditeur validé Mailjet |
 | `VAPID_*` | Notifications push |
-| `FIELD_ENCRYPTION_KEY` | Clé Fernet pour chiffrer téléphone, adresse, historique (générer via `python scripts/generate_field_encryption_key.py`) |
+| `FIELD_ENCRYPTION_KEY` | Fernet - `python scripts/generate_field_encryption_key.py` |
 
-Variables frontend :
+### Frontend
 
 | Variable | Rôle |
 |----------|------|
 | `VITE_AUTH0_DOMAIN` | Tenant Auth0 |
 | `VITE_AUTH0_CLIENT_ID` | Client SPA |
 | `VITE_AUTH0_AUDIENCE` | Audience API |
-| `VITE_API_URL` | URL de l'API Flask |
+| `VITE_API_URL` | URL de l'API Flask (Render en prod) |
+
+---
+
+## Broker MQTT (HiveMQ Cloud)
+
+VitalIO utilise **HiveMQ Cloud** comme broker MQTT managé en production. L'API Render et les devices se connectent au **même cluster** en MQTTS (port 8883).
+
+### Configuration dans HiveMQ Cloud
+
+1. Créer un cluster sur [HiveMQ Cloud](https://console.hivemq.cloud/) (région EU recommandée pour Atlas / Render EU).
+2. Récupérer dans le dashboard :
+   - **Broker URL** (hostname)
+   - **Port** : 8883
+   - **Username** et **Password** (credentials du cluster)
+3. Télécharger le certificat CA HiveMQ (`hivemq-ca.pem` ou équivalent) et le placer dans `back/certs/` (ou un chemin de votre choix).
+
+### Exemple `back/.env`
+
+```env
+MQTT_BROKER=xxxxxxxx.s1.eu.hivemq.cloud
+MQTT_PORT=8883
+MQTT_USERNAME=votre-utilisateur-hivemq
+MQTT_PASSWORD=votre-mot-de-passe-hivemq
+MQTT_CA_CERT=./certs/hivemq-ca.pem
+MQTT_TOPIC=vitalio/dev/+/measurements
+MQTT_ENABLED=true
+```
+
+### Topic et payload
+
+| Élément | Valeur |
+|---------|--------|
+| Topic publish | `vitalio/dev/{device_id}/measurements` |
+| QoS | 1 (recommandé) |
+| Format | JSON (`heart_rate`, `spo2`, `temperature`, `timestamp`…) |
+
+Exemple de payload :
+
+```json
+{
+  "heart_rate": 72,
+  "spo2": 98,
+  "temperature": 36.6,
+  "timestamp": "2026-06-15T10:30:00Z"
+}
+```
+
+### Simuler un capteur (dev / test)
+
+Le script publie sur le broker configuré dans `.env` (HiveMQ ou Mosquitto local) :
+
+```bash
+cd back
+python scripts/simulate_sensor.py
+```
+
+Variables utiles : `DEVICE_ID`, `MQTT_BROKER`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `MQTT_CA_CERT`.
+
+### Mosquitto local (optionnel)
+
+Pour travailler **sans** HiveMQ (offline, CI, démo Docker), un broker Mosquitto peut tourner en local :
+
+```bash
+cd back
+docker compose up -d
+```
+
+Guides TLS Mosquitto (legacy) : `docs/mqtt-quick-start.md`, `docs/mqtt-tls.md`.
 
 ---
 
@@ -259,45 +299,25 @@ Variables frontend :
 ### Backend (Render)
 
 - **Build** : `pip install -r requirements.txt`
-- **Start** : `gunicorn api:app --bind 0.0.0.0:$PORT`
-- Configurer toutes les variables listées dans `back/.env.example` dans le dashboard Render.
-- Sur Render, définir `MQTT_ENABLED=false` si aucun broker MQTT n'est accessible depuis le cloud.
+- **Start** : `gunicorn api:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120`
+- Configurer toutes les variables de `back/.env.example` dans le dashboard Render.
+- **MQTT** : renseigner les variables HiveMQ (`MQTT_BROKER`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `MQTT_CA_CERT`) et laisser `MQTT_ENABLED=true` pour que l'API consomme les mesures en temps réel.
+- Placer le certificat CA HiveMQ sur l'instance (variable `MQTT_CA_CERT` pointant vers le fichier) ou l'inclure dans l'image Docker si vous déployez via conteneur.
 
 ### Frontend (Vercel)
 
 - **Root directory** : `front/vitalio`
 - **Build** : `npm run build`
-- **Output** : `dist`
-- Configurer `VITE_AUTH0_*` et `VITE_API_URL` (URL Render) dans les variables Vercel.
+- Variables : `VITE_AUTH0_*`, `VITE_API_URL` (URL Render).
 
 ### Auth0
 
-Configurer les URLs de callback, logout et web origins pour inclure :
+URLs de callback, logout et web origins :
 
 - `http://localhost:5173` (développement)
-- L'URL de production Vercel
+- URL de production Vercel
 
 Guide détaillé : `docs/auth0.md`
-
----
-
-## Broker MQTT (développement)
-
-Le broker Mosquitto tourne en local via Docker. Il n'est pas requis pour consulter des mesures déjà stockées dans MongoDB.
-
-```bash
-cd back
-docker compose up -d
-```
-
-Configuration TLS et certificats : `docs/mqtt-quick-start.md`
-
-Simuler un capteur :
-
-```bash
-cd back
-python scripts/simulate_sensor.py
-```
 
 ---
 
@@ -308,41 +328,34 @@ python scripts/simulate_sensor.py
 | Patient | `/patient` | Mesures, profil, alerte manuelle, module ML |
 | Médecin | `/doctor` | Liste patients, alertes, validation clinique |
 | Aidant | `/caregiver`, `/caregiver/alertes` | Suivi du proche, page alertes dédiée |
-| Admin | `/admin` | Associations, gestion des devices |
+| Admin | `/admin` | Associations, gestion des devices, audit |
 
 Les rôles sont portés par le JWT Auth0 et confirmés en base (`Vitalio_Identity.users`).
 
 ---
 
-## Taxonomie des alertes (Info / Warning / Critical / Urgency)
+## Alertes (Info / Warning / Critical / Urgency)
 
-Chaque alerte persistée dans `Vitalio_Medical.alerts` expose un champ **`severity_level`** :
+Chaque alerte dans `Vitalio_Medical.alerts` expose un champ **`severity_level`** :
 
 | Niveau grille | `severity_level` | Déclencheur VitalIO |
 |---------------|------------------|---------------------|
-| Info | `INFO` | Mesure dans les normes (`ml_level: normal`) — affiché sur la timeline patient |
-| Warning | `WARNING` | Valeur proche du seuil clinique ou `ml_level: warning` |
-| Critical | `CRITICAL` | Seuil dépassé (FC, SpO2, température) ou anomalie ML critique |
-| Urgency | `URGENCY` | Alerte manuelle patient, `ml_urgency: immediate`, ou escalade SAMU (15) |
+| Info | `INFO` | Mesure dans les normes (`ml_level: normal`) |
+| Warning | `WARNING` | Valeur proche du seuil ou `ml_level: warning` |
+| Critical | `CRITICAL` | Seuil dépassé ou anomalie ML critique |
+| Urgency | `URGENCY` | Alerte manuelle patient ou escalade SAMU |
 
-Les niveaux sont visibles côté médecin (`/doctor/alertes`), aidant (`/caregiver/alertes`) et patient (historique des mesures).
+Visible côté médecin (`/doctor/alertes`), aidant (`/caregiver/alertes`) et patient.
 
-### Simulateur de démo (`back/simulate_alert.py`)
-
-Depuis `back/` avec le venv activé et MongoDB accessible :
+### Simulateur de démo
 
 ```bash
+cd back
 python simulate_alert.py --list-devices
-python simulate_alert.py --metric near_spo2       # WARNING (SpO2 proche du seuil)
-python simulate_alert.py --metric spo2            # CRITICAL (hypoxémie)
-python simulate_alert.py --metric manual          # URGENCY (bouton patient)
-python simulate_alert.py --metric heart_rate_high # CRITICAL (tachycardie)
-```
-
-Backfill des alertes existantes après déploiement :
-
-```bash
-python scripts/backfill_alert_severity.py
+python simulate_alert.py --metric near_spo2       # WARNING
+python simulate_alert.py --metric spo2            # CRITICAL
+python simulate_alert.py --metric manual          # URGENCY
+python simulate_alert.py --metric heart_rate_high # CRITICAL
 ```
 
 ---
@@ -354,13 +367,7 @@ cd back
 python -m pytest tests/ -v
 ```
 
-Suites disponibles :
-
-- `test_linking_security.py` : sécurité des liens médecin/patient
-- `test_ml_workflow.py` : pipeline ML
-- `test_alert_ml_audit.py` : audit des alertes ML
-- `test_severity_level.py` : taxonomie Info / Warning / Critical / Urgency
-- `test_audit_log.py` : journal de sécurité global (`audit_log`)
+Suites : `test_linking_security`, `test_ml_workflow`, `test_alert_ml_audit`, `test_severity_level`, `test_audit_log`, `test_patient_display_name`, `test_doctor_patient_unlink`.
 
 ---
 
@@ -368,14 +375,12 @@ Suites disponibles :
 
 - **Authentification** : JWT Auth0 (RS256), validation côté API
 - **Autorisation** : RBAC strict par endpoint (`@requires_role`)
-- **Données** : séparation Identity / Medical, TLS MQTT et HTTPS
-- **Audit global** : collection `Vitalio_Identity.audit_log` (append-only), consultation admin via `GET /api/admin/audit-log` et interface `/admin`
-- **Audit métier** : `alert_events` (cycle de vie des alertes), `audit_links` (opérations de liaison)
-- **Pseudonymisation** : `patient_pseudo_id` (UUID) en Identity, propagé dans les documents Medical
-- **Chiffrement applicatif** : Fernet sur téléphone, adresse, historique médical et contacts d'urgence (`app/services/field_encryption.py`)
-- **Chiffrement en transit** : HTTPS (front, API), TLS MongoDB Atlas, MQTTS (broker local)
-- **RGPD** : export JSON et suppression des données via l'API patient (actions tracées dans `audit_log`)
-- **Secrets** : `.env` exclu du dépôt (`.gitignore`), modèles sans secrets (`.env.example`). Les fichiers `.env` n'apparaissent pas dans l'historique Git du dépôt.
+- **Données** : séparation Identity / Medical, pseudonymisation `patient_pseudo_id`
+- **Chiffrement en transit** : HTTPS, TLS MongoDB Atlas, **MQTTS HiveMQ Cloud**
+- **Chiffrement au repos** : Fernet sur téléphone, adresse, historique (`field_encryption.py`)
+- **Audit** : `audit_log` (append-only), `alert_events`, `audit_links`
+- **RGPD** : export JSON et suppression patient (actions tracées)
+- **Secrets** : `.env` exclu du dépôt ; modèles sans secrets (`.env.example`)
 
 ---
 
@@ -383,14 +388,7 @@ Suites disponibles :
 
 | Document | Contenu |
 |----------|---------|
-| `docs/auth0.md` | Configuration Auth0 pas à pas |
-| `docs/mqtt-quick-start.md` | Broker MQTT et certificats TLS |
-| `docs/mqtt-tls.md` | Résumé TLS Mosquitto |
-| `docs/association-e2e-test-plan.md` | Plan de tests association patient/device |
-| `back/.env.example` | Référence complète des variables backend |
-
----
-
-## Licence
-
-Projet académique VitalIO. Contacter l'équipe projet pour toute réutilisation.
+| `docs/auth0.md` | Configuration Auth0 |
+| `docs/mqtt-quick-start.md` | Mosquitto local (legacy / dev) |
+| `docs/mqtt-tls.md` | TLS Mosquitto local |
+| `docs/association-migration-notes.md` | Liens médecin–patient |

@@ -15,6 +15,50 @@ from app.services.field_encryption import decrypt_profile_fields
 
 # ObjectId hex string: 24 hexadecimal characters
 OBJECTID_PATTERN = re.compile(r"^[a-fA-F0-9]{24}$")
+_AUTH0_ID_RE = re.compile(r"^(auth0|google-oauth2|windowslive|github)\|")
+
+
+def is_auth_provider_id(value: Optional[str]) -> bool:
+    """True when value looks like a raw Auth0/OAuth subject (e.g. auth0|abc123)."""
+    if not value or not isinstance(value, str):
+        return False
+    val = str(value).strip()
+    return bool(val and _AUTH0_ID_RE.match(val) and " " not in val)
+
+
+def normalize_patient_email(profile: Optional[Dict[str, Any]]) -> Optional[str]:
+    """Return trimmed patient email or None when missing/invalid."""
+    if not profile:
+        return None
+    email = str(profile.get("email") or "").strip()
+    return email if email and "@" in email else None
+
+
+def resolve_patient_display_name(profile: Optional[Dict[str, Any]]) -> Optional[str]:
+    """
+    UI label for a patient: name when available, otherwise email.
+    Never returns an Auth0 subject. Returns None when the patient has no email
+    (caller should exclude the patient from listings).
+    """
+    email = normalize_patient_email(profile)
+    if not email:
+        return None
+
+    first_name = str((profile or {}).get("first_name") or "").strip()
+    last_name = str((profile or {}).get("last_name") or "").strip()
+    if is_auth_provider_id(first_name):
+        first_name = ""
+    if is_auth_provider_id(last_name):
+        last_name = ""
+    full_name = f"{first_name} {last_name}".strip()
+    if full_name:
+        return full_name
+
+    display_name = str((profile or {}).get("display_name") or "").strip()
+    if display_name and not is_auth_provider_id(display_name) and "@" not in display_name:
+        return display_name
+
+    return email
 
 
 def get_device_ids(user_id_auth: str) -> List[str]:

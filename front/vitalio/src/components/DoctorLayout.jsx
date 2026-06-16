@@ -66,7 +66,11 @@ export default function DoctorLayout({ children }) {
         <div className="sidebar-header">
           {!collapsed && (
             <span className="sidebar-brand">
-              <Stethoscope size={18} /> VitalIO
+              <Stethoscope size={18} />
+              <span className="sidebar-brand-copy">
+                <span>VitalIO</span>
+                <span className="sidebar-brand-tagline">Espace professionnel</span>
+              </span>
             </span>
           )}
           <button
@@ -137,7 +141,7 @@ export default function DoctorLayout({ children }) {
         </div>
       </aside>
 
-      <main className="doctor-layout-main">
+      <main className="doctor-layout-main doctor-theme">
         <PushPermissionBanner getAccessTokenSilently={getAccessTokenSilently} />
         {children}
       </main>

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { ArrowLeft, Heart, TriangleAlert, Users } from 'lucide-react'
 import { getCaregiverPatients, getCaregiverAlerts } from '../services/api'
+import { resolvePatientListDisplayName } from '../utils/displayName'
 
 function formatLastTime(timestamp) {
   if (!timestamp) return 'Aucune mesure'
@@ -192,7 +193,7 @@ export default function FamilyView() {
                           onClick={() => navigate(`${base}/patient/${encodeURIComponent(patient.id || patient.patient_id)}`)}
                         >
                           <td>
-                            <span className="caregiver-table-name">{patient.display_name}</span>
+                            <span className="caregiver-table-name">{resolvePatientListDisplayName(patient)}</span>
                             {hasAlert && (
                               <span className="caregiver-alert-badge" title="Alerte sur les constantes vitales">
                                 <TriangleAlert size={14} /> Alerte

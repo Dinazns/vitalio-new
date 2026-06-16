@@ -14,9 +14,9 @@ from bson import ObjectId
 from app.ml import engine as ml_module
 from app.config import (
     FRONTEND_URL, INVITE_TTL_HOURS, CABINET_CODE_TTL_MINUTES_DEFAULT,
-    SMTP_HOST, SMTP_USER, SMTP_PASSWORD,
     ALERT_DEFAULT_CONSECUTIVE_BREACHES,
 )
+from app.services.mailjet_service import is_mailjet_configured
 from app.database import get_identity_db, get_medical_db
 from app.exceptions import AuthError, DatabaseError
 from app.auth import (
@@ -29,13 +29,17 @@ from app.services.user_service import (
     get_assigned_patient_ids_for_doctor, get_assigned_patient_ids_for_caregiver,
     get_assigned_doctor_ids_for_patient, get_assigned_caregiver_ids_for_patient,
     ensure_patient_access_or_403, resolve_patient_id_to_user_id_auth, get_user_db_id,
+    relationship_exists,
     parse_iso_datetime, normalize_user_id_auth, get_user_profile, _split_display_name,
-    datetime_to_iso_utc, get_address_dict_from_profile,
+    datetime_to_iso_utc, get_address_dict_from_profile, resolve_patient_display_name,
+    is_auth_provider_id,
 )
 from app.services.invitation_service import (
     hash_secret_token, generate_invite_token, generate_cabinet_code,
-    log_link_audit_event, create_doctor_patient_link, get_invite_document_or_404,
-    send_invitation_email, invite_emergency_contact_if_needed, log_caregiver_audit_event,
+    log_link_audit_event, create_doctor_patient_link, remove_doctor_patient_link,
+    get_invite_document_or_404,
+    send_invitation_email, send_doctor_patient_unlink_email,
+    invite_emergency_contact_if_needed, log_caregiver_audit_event,
 )
 from app.services.auth0_service import create_auth0_user_if_not_exists
 from app.services.terms_service import CURRENT_TERMS_VERSION, get_terms_status, accept_terms
@@ -145,6 +149,8 @@ def create_doctor_invitation():
             patient_email = normalize_email(profile.get("email") or "")
         if not patient_email:
             return jsonify({"code": "invalid_payload", "message": "patient_email is required when send_email is true"}), 400
+        if not is_mailjet_configured():
+            return jsonify({"code": "email_config_error", "message": "Mailjet non configuré"}), 503
 
     invite_device_id = str(payload.get("device_id") or "").strip() or None
     if invite_device_id:
@@ -179,35 +185,41 @@ def create_doctor_invitation():
     doctor_profile = get_user_profile(g.user_id_auth)
     doctor_display_name = doctor_profile.get("display_name") or doctor_profile.get("email") or "Votre médecin"
 
+    email_queued = False
     if send_email and patient_email:
-        if not SMTP_HOST or not SMTP_USER or not SMTP_PASSWORD:
-            return jsonify({"code": "email_config_error", "message": "SMTP non configuré"}), 503
-        password_setup_url = None
-        try:
-            created, ticket_or_id = create_auth0_user_if_not_exists(
-                patient_email,
-                name=doctor_display_name,
-                invite_return_url=web_invite_url,
-            )
-            if created and ticket_or_id and ticket_or_id.startswith("http"):
-                password_setup_url = ticket_or_id
-        except Exception as e:
-            logger.warning("Auth0 user creation skipped: %s", e)
-        # Envoi synchrone : un thread daemon peut être coupé avant la fin du SMTP (Render, etc.).
-        try:
-            send_invitation_email(
-                patient_email, invite_token, web_invite_url, expires_at,
-                doctor_display_name,
-                password_setup_url=password_setup_url,
-            )
-        except Exception as e:
-            logger.exception("Envoi email invitation échoué: %s", e)
+        email_queued = True
+
+        def _send_invitation_email_background() -> None:
+            password_setup_url = None
+            try:
+                created, ticket_or_id = create_auth0_user_if_not_exists(
+                    patient_email,
+                    name=doctor_display_name,
+                    invite_return_url=web_invite_url,
+                )
+                if created and ticket_or_id and ticket_or_id.startswith("http"):
+                    password_setup_url = ticket_or_id
+            except Exception as e:
+                logger.warning("Auth0 user creation skipped: %s", e)
+            try:
+                send_invitation_email(
+                    patient_email, invite_token, web_invite_url, expires_at,
+                    doctor_display_name,
+                    password_setup_url=password_setup_url,
+                )
+            except Exception as e:
+                logger.exception("Envoi email invitation échoué: %s", e)
+
+        # Réponse HTTP immédiate : Auth0 + SMTP peuvent dépasser le timeout Render (~30 s).
+        threading.Thread(target=_send_invitation_email_background, daemon=True).start()
 
     return jsonify({
         "invite_token": invite_token, "expires_at": datetime_to_iso_utc(expires_at),
         "deep_link": f"vitalio://invite?token={invite_token}", "web_invite_url": web_invite_url,
         "qr_payload": web_invite_url, "mode": "invite_link",
-        "target_patient_user_id_auth": patient_user_id_auth, "email_sent": bool(send_email and patient_email),
+        "target_patient_user_id_auth": patient_user_id_auth,
+        "email_sent": False,
+        "email_queued": email_queued,
         "pending_device_id": invite_device_id,
     }), 201
 
@@ -249,6 +261,85 @@ def get_doctor_patients():
     patient_ids = get_assigned_patient_ids_for_doctor(g.user_id_auth)
     patients = build_assigned_patients_payload(patient_ids, doctor_queue_alert_badge=True)
     return jsonify({"doctor_id": g.user_id_auth, "count": len(patients), "patients": patients}), 200
+
+
+@doctor_bp.route("/api/doctor/patients/<patient_id>", methods=["DELETE"])
+@requires_auth
+@requires_role("doctor", "medecin")
+def remove_assigned_patient(patient_id: str):
+    """Remove the authenticated doctor's link to a patient and notify the patient by email."""
+    patient_id = resolve_patient_id(patient_id)
+    doctor_id = g.user_id_auth
+    if not relationship_exists("doctor", doctor_id, patient_id):
+        return jsonify({
+            "code": "patient_not_assigned",
+            "message": "Ce patient n'est pas associé à votre compte médecin",
+        }), 404
+
+    patient_profile = get_user_profile(patient_id)
+    patient_email = normalize_email(patient_profile.get("email") or "")
+    patient_display_name = resolve_patient_display_name(patient_profile) or "Patient"
+    doctor_profile = get_user_profile(doctor_id)
+    doctor_display_name = doctor_profile.get("display_name") or doctor_profile.get("email") or "Votre médecin"
+
+    try:
+        removed = remove_doctor_patient_link(doctor_id, patient_id)
+    except PyMongoError as e:
+        raise DatabaseError({
+            "code": "doctor_patient_unlink_error",
+            "message": f"Failed to remove doctor-patient link: {str(e)}",
+        }, 500)
+
+    if not removed:
+        return jsonify({
+            "code": "patient_not_assigned",
+            "message": "Ce patient n'est pas associé à votre compte médecin",
+        }), 404
+
+    log_link_audit_event(
+        "doctor_patient_unlinked",
+        doctor_id,
+        doctor_id,
+        patient_id,
+        "doctor",
+        {"endpoint": request.path},
+    )
+    log_audit_event(
+        event_type="doctor_patient_unlinked",
+        actor_user_id_auth=doctor_id,
+        actor_role=audit_actor_role(),
+        resource_type="association",
+        resource_id=f"{doctor_id}:{patient_id}",
+        action="delete",
+        details={
+            "doctor_user_id_auth": doctor_id,
+            "patient_user_id_auth": patient_id,
+            "endpoint": request.path,
+        },
+        request=request,
+    )
+
+    email_queued = False
+    if patient_email:
+        email_queued = True
+
+        def _send_unlink_email_background() -> None:
+            try:
+                send_doctor_patient_unlink_email(
+                    patient_email,
+                    patient_display_name,
+                    doctor_display_name,
+                )
+            except Exception as e:
+                logger.exception("Envoi email retrait patient échoué: %s", e)
+
+        threading.Thread(target=_send_unlink_email_background, daemon=True).start()
+
+    return jsonify({
+        "message": "Patient retiré de votre liste de suivi",
+        "patient_id": patient_id,
+        "email_queued": email_queued,
+    }), 200
 
 
 @doctor_bp.route("/api/caregiver/patients", methods=["GET"])
@@ -623,11 +714,24 @@ def get_patient_profile_for_doctor(patient_id: str):
     patient_id = resolve_patient_id(patient_id)
     ensure_patient_access_or_403(patient_id)
     profile = get_user_profile(patient_id)
-    display_name = profile.get("display_name") or profile.get("email") or patient_id
-    first_name = profile.get("first_name") or ""
-    last_name = profile.get("last_name") or ""
-    if not first_name and not last_name:
-        first_name, last_name = _split_display_name(display_name) if display_name else ("", "")
+    display_name = resolve_patient_display_name(profile)
+    if not display_name:
+        return jsonify({
+            "code": "patient_profile_incomplete",
+            "message": "Profil patient incomplet (email requis)",
+        }), 404
+    first_name = str(profile.get("first_name") or "").strip()
+    last_name = str(profile.get("last_name") or "").strip()
+    if is_auth_provider_id(first_name):
+        first_name = ""
+    if is_auth_provider_id(last_name):
+        last_name = ""
+    if not first_name and not last_name and display_name and "@" not in display_name:
+        fn, ln = _split_display_name(display_name)
+        if not is_auth_provider_id(fn):
+            first_name = fn
+        if not is_auth_provider_id(ln):
+            last_name = ln
     log_audit_event(
         event_type="patient_profile_read",
         actor_user_id_auth=g.user_id_auth,
