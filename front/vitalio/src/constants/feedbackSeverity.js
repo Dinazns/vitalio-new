@@ -5,7 +5,7 @@ export const FEEDBACK_SEVERITY_LABELS = {
   high: 'Haute',
 }
 
-export function getFeedbackSeverityLabel(severity, fallback = '—') {
+export function getFeedbackSeverityLabel(severity, fallback = '-') {
   const key = String(severity || '').trim().toLowerCase()
   if (!key) return fallback
   return FEEDBACK_SEVERITY_LABELS[key] || fallback

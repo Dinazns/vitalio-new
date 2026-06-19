@@ -14,7 +14,7 @@ export function markPatientWelcomeDone(userId) {
     try {
       localStorage.removeItem(VITALIO_PATIENT_WELCOME_DONE_KEY)
     } catch {
-      /* ignore — removes legacy global key only; per-user keys use ":sub" suffix */
+      /* ignore - removes legacy global key only; per-user keys use ":sub" suffix */
     }
   } catch {
     /* ignore */

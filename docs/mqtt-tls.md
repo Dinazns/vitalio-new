@@ -1,6 +1,6 @@
 # Résumé de la Configuration TLS MQTT
 
-## ✅ Statut: Configuration TLS Complète
+## Statut: Configuration TLS Complète
 
 Votre broker MQTT est correctement configuré avec TLS et certificats X.509 pour garantir la **confidentialité**, l'**authenticité** et l'**intégrité** des communications.
 
@@ -8,7 +8,7 @@ Votre broker MQTT est correctement configuré avec TLS et certificats X.509 pour
 
 ## Certificats X.509
 
-### ✅ Certificats Présents
+### Certificats Présents
 
 - **`ca.crt`** (1538 bytes) - Certificat d'autorité (CA)
 - **`server.crt`** (1670 bytes) - Certificat serveur
@@ -28,13 +28,13 @@ icacls mosquitto\certs\server.key /inheritance:r /grant:r "${env:USERNAME}:F"
 
 ## Configuration Mosquitto
 
-### ✅ Paramètres de Sécurité
+### Paramètres de Sécurité
 
-- **Port TLS 8883** → Configuré ✅
-- **Port non sécurisé 1883** → Désactivé ✅
-- **TLS 1.2+** → Configuré ✅
-- **Accès anonyme** → Désactivé ✅
-- **Certificats X.509** → Configurés ✅
+- **Port TLS 8883** → Configuré 
+- **Port non sécurisé 1883** → Désactivé 
+- **TLS 1.2+** → Configuré 
+- **Accès anonyme** → Désactivé 
+- **Certificats X.509** → Configurés 
 
 **Fichier:** `mosquitto/mosquitto.conf`
 
@@ -42,11 +42,11 @@ icacls mosquitto\certs\server.key /inheritance:r /grant:r "${env:USERNAME}:F"
 
 ## Configuration Docker
 
-### ✅ Ports et Volumes
+###  Ports et Volumes
 
-- **Port 8883 (TLS)** → Exposé ✅
-- **Port 1883** → Non exposé ✅
-- **Volume certificats** → Monté ✅
+- **Port 8883 (TLS)** → Exposé 
+- **Port 1883** → Non exposé 
+- **Volume certificats** → Monté 
 
 **Fichier:** `docker-compose.yml`
 
@@ -65,7 +65,7 @@ icacls mosquitto\certs\server.key /inheritance:r /grant:r "${env:USERNAME}:F"
 - Username/password pour l'authentification des clients
 - Accès anonyme désactivé
 
-### ✅ Intégrité
+###  Intégrité
 - TLS garantit l'intégrité des messages
 - Certificats valides et signés
 - Détection de modification des données
@@ -158,13 +158,13 @@ cd mosquitto
 
 ## Conformité
 
-✅ **Confidentialité** - TLS 1.2+ chiffre toutes les communications  
-✅ **Authenticité** - Certificats X.509 + username/password  
-✅ **Intégrité** - TLS garantit l'intégrité des messages  
-✅ **Production-ready** - Configuration auditable et sécurisée
+ **Confidentialité** - TLS 1.2+ chiffre toutes les communications  
+ **Authenticité** - Certificats X.509 + username/password  
+ **Intégrité** - TLS garantit l'intégrité des messages  
+ **Production-ready** - Configuration auditable et sécurisée
 
 ---
 
 **Configuration validée le:** 2024  
 **Niveau de sécurité:** Production / Healthcare IoT  
-**Statut:** ✅ **SÉCURISÉ**
+**Statut:**  **SÉCURISÉ**

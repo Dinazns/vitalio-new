@@ -1,4 +1,4 @@
-"""HTTP routes — alert_routes."""
+"""HTTP routes - alert_routes."""
 import json
 import logging
 import os

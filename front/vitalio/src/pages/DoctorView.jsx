@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { Cpu, Mail, QrCode, Search, Send, TriangleAlert, Users } from 'lucide-react'
+import { ChevronDown, Cpu, Mail, QrCode, Search, Send, TriangleAlert, Users } from 'lucide-react'
 import { createDoctorInvitation, getDoctorPatients, getDoctorAlerts } from '../services/api'
 import { resolvePatientListDisplayName } from '../utils/displayName'
 import { DEVICE_ID_PREFIX, isDeviceIdPrefixOnly, normalizeDeviceIdInput } from '../utils/parseDeviceId'
@@ -27,6 +27,7 @@ export default function DoctorView() {
   const [sendEmail, setSendEmail] = useState(false)
   const [actionError, setActionError] = useState('')
   const [criticalCount, setCriticalCount] = useState(0)
+  const [inviteExpanded, setInviteExpanded] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -124,15 +125,29 @@ export default function DoctorView() {
           </header>
 
           <main className="doctor-main">
+          <div className="doctor-workspace">
           <section className="doctor-invite-section">
-            <div className="doctor-invite-card">
-              <div className="doctor-invite-header">
+            <div className={`doctor-invite-card ${inviteExpanded ? 'doctor-invite-card--open' : 'doctor-invite-card--collapsed'}`}>
+              <button
+                type="button"
+                className="doctor-invite-toggle"
+                onClick={() => setInviteExpanded((open) => !open)}
+                aria-expanded={inviteExpanded}
+                aria-controls="doctor-invite-panel"
+              >
                 <div className="doctor-invite-title-wrap">
                   <Mail size={22} />
                   <h3>Inviter un patient</h3>
                 </div>
-                <p className="doctor-invite-desc">Générez une invitation par lien ou QR code, envoyée par email au patient.</p>
-              </div>
+                <ChevronDown
+                  size={20}
+                  className={`doctor-invite-chevron ${inviteExpanded ? 'doctor-invite-chevron--open' : ''}`}
+                  aria-hidden
+                />
+              </button>
+              {inviteExpanded && (
+              <div id="doctor-invite-panel" className="doctor-invite-body">
+              <p className="doctor-invite-desc">Générez une invitation par lien ou QR code, envoyée par email au patient.</p>
               <div
                 className="doctor-invite-device-panel"
                 style={{
@@ -241,6 +256,8 @@ export default function DoctorView() {
                   )}
                 </div>
               )}
+              </div>
+              )}
             </div>
           </section>
 
@@ -298,7 +315,7 @@ export default function DoctorView() {
                             <div className="doctor-empty">
                               <Users size={48} />
                               <p>Aucun patient assigné pour ce médecin.</p>
-                              <span>Utilisez les invitations ci-dessus pour associer des patients.</span>
+                              <span>Utilisez le panneau d&apos;invitation pour associer des patients.</span>
                             </div>
                           </td>
                         </tr>
@@ -309,6 +326,7 @@ export default function DoctorView() {
               )}
             </div>
           </section>
+          </div>
           </main>
         </div>
       </div>

@@ -22,6 +22,7 @@ import {
   Activity,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from 'lucide-react'
 import { getMLModelInfo, getMLAnomalies, getDoctorAlerts, getDoctorPatients, getPatientMLAnalysis, patchDoctorAlert, apiRequest } from '../services/api'
 import { resolvePatientListDisplayName } from '../utils/displayName'
@@ -124,7 +125,7 @@ function VitalEmergencyActions({ alert, patientName, tokenGetter, onEscalated, o
         <span className="ml-emergency-address ml-emergency-address--empty">Adresse non renseignée</span>
       )}
       <button type="button" className="ml-retrain-btn" style={{ fontSize: '0.8rem', padding: '0.35rem 0.6rem' }} onClick={logSamu}>
-        <Ambulance size={14} /> Journaliser appel urgences
+        <Ambulance size={14} /> Escalade appel d'urgence
       </button>
     </div>
   )
@@ -182,6 +183,7 @@ export default function DoctorMLView() {
   const { getAccessTokenSilently } = useAuth0()
   const [activeTab, setActiveTab] = useState('vital') // 'vital' | 'ml'
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
   const [modelInfo, setModelInfo] = useState(null)
   const [anomalies, setAnomalies] = useState([])
@@ -230,10 +232,15 @@ export default function DoctorMLView() {
     return rows
   }, [vitalAlerts, vitalStatusFilter, vitalSeverityFilter])
 
+  const narrativePatientIdsKey = React.useMemo(
+    () => [...new Set(displayedVitalAlerts.map((a) => a.patient_id).filter(Boolean))].sort().join(','),
+    [displayedVitalAlerts],
+  )
+
   useEffect(() => {
     let cancelled = false
     if (activeTab !== 'vital') return undefined
-    const ids = [...new Set(displayedVitalAlerts.map((a) => a.patient_id).filter(Boolean))]
+    const ids = narrativePatientIdsKey ? narrativePatientIdsKey.split(',') : []
     for (const pid of ids) {
       if (narrativeCacheRef.current[pid] !== undefined) {
         const cached = narrativeCacheRef.current[pid]
@@ -274,11 +281,17 @@ export default function DoctorMLView() {
     return () => {
       cancelled = true
     }
-  }, [activeTab, displayedVitalAlerts, getAccessTokenSilently])
+  }, [activeTab, narrativePatientIdsKey, getAccessTokenSilently])
 
-  const loadData = useCallback(async () => {
+  const isInitialLoadRef = useRef(true)
+
+  const loadData = useCallback(async ({ silent = false } = {}) => {
     try {
-      setLoading(true)
+      if (silent) {
+        setRefreshing(true)
+      } else {
+        setLoading(true)
+      }
       setError('')
       const token = await getAccessTokenSilently()
       const anomalyParams = { limit: 100 }
@@ -302,19 +315,22 @@ export default function DoctorMLView() {
       setVitalAlerts(Array.isArray(vitalRes.alerts) ? vitalRes.alerts : [])
       setPatients(Array.isArray(patientsRes.patients) ? patientsRes.patients : [])
     } catch (e) {
-      setError(e.message || 'Erreur de chargement')
+      if (!silent) setError(e.message || 'Erreur de chargement')
     } finally {
-      setLoading(false)
+      if (silent) {
+        setRefreshing(false)
+      } else {
+        setLoading(false)
+      }
     }
   }, [getAccessTokenSilently, statusFilter, severityFilter, dateFrom, dateTo, vitalStatusFilter, vitalSeverityFilter])
 
-  useEffect(() => { loadData() }, [loadData])
-
-  // Rafraîchissement périodique pour afficher les nouvelles alertes (web push, MQTT, etc.)
   useEffect(() => {
-    const interval = setInterval(loadData, 30000)
-    return () => clearInterval(interval)
+    loadData({ silent: !isInitialLoadRef.current })
+    isInitialLoadRef.current = false
   }, [loadData])
+
+  const handleRefresh = () => loadData({ silent: true })
 
   // Notification navigateur au chargement si des alertes ouvertes (une fois par montage)
   const hasNotifiedRef = React.useRef(false)
@@ -369,7 +385,7 @@ export default function DoctorMLView() {
         type: 'success',
       })
       if (newStatus === 'validated' && res?.audit_alert_id) {
-        loadData()
+        loadData({ silent: true })
       }
     } catch (e) {
       setToast({ message: e.message || 'Erreur lors du traitement', type: 'error' })
@@ -417,6 +433,17 @@ export default function DoctorMLView() {
             <p>Alertes vitales et détection automatique. Validez ou rejetez les alertes, prenez contact avec l&apos;aidant ou le patient.</p>
           </div>
           <div className="ml-header-actions">
+            <button
+              type="button"
+              className="ml-filter-btn"
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
+              aria-busy={refreshing}
+              title="Actualiser la liste (les notifications push restent actives)"
+            >
+              <RefreshCw size={14} className={refreshing ? 'ml-refresh-icon--spin' : undefined} aria-hidden />
+              {refreshing ? 'Actualisation…' : 'Actualiser'}
+            </button>
             {modelInfo && (
               <div className="ml-model-badge">
                 <Info size={14} />
@@ -599,7 +626,7 @@ export default function DoctorMLView() {
                                           className="ml-action-btn ml-action-btn--validate"
                                           onClick={() => handleValidateVital(a.alert_id, 'VALIDATED')}
                                           disabled={validatingVitalId === a.alert_id}
-                                          aria-label="Valider l'alerte — cliniquement retenue"
+                                          aria-label="Valider l'alerte - cliniquement retenue"
                                           title="Valider - alerte cliniquement retenue"
                                         >
                                           <ThumbsUp size={15} aria-hidden />
@@ -609,7 +636,7 @@ export default function DoctorMLView() {
                                           className="ml-action-btn ml-action-btn--reject"
                                           onClick={() => handleValidateVital(a.alert_id, 'REJECTED')}
                                           disabled={validatingVitalId === a.alert_id}
-                                          aria-label="Rejeter l'alerte — faux positif ou artefact"
+                                          aria-label="Rejeter l'alerte - faux positif ou artefact"
                                           title="Rejeter - faux positif / artefact"
                                         >
                                           <ThumbsDown size={15} aria-hidden />
@@ -660,7 +687,7 @@ export default function DoctorMLView() {
                                       alert={a}
                                       patientName={patientName}
                                       tokenGetter={getAccessTokenSilently}
-                                      onEscalated={loadData}
+                                      onEscalated={() => loadData({ silent: true })}
                                       onNotify={setToast}
                                     />
                                     {Array.isArray(a.emergency_escalations) && a.emergency_escalations.length > 0 && (
@@ -687,7 +714,7 @@ export default function DoctorMLView() {
                                         {a.medical_label && (
                                           <p style={{ fontWeight: 600, marginBottom: '0.35rem', color: '#0f172a' }}>{a.medical_label}</p>
                                         )}
-                                        <p>{a.medical_description || '—'}</p>
+                                        <p>{a.medical_description || '-'}</p>
                                         {a.alert_source === 'manual' && a.patient_message && (
                                           <p style={{ marginTop: '0.5rem', fontStyle: 'italic', color: '#475569' }}>
                                             Message patient : « {a.patient_message} »

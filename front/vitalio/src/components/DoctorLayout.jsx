@@ -107,7 +107,7 @@ export default function DoctorLayout({ children }) {
               aria-label={
                 collapsed && to === '/doctor/alertes'
                   ? criticalCount > 0
-                    ? `${label} — ${criticalCount} ouverte${criticalCount > 1 ? 's' : ''}`
+                    ? `${label} - ${criticalCount} ouverte${criticalCount > 1 ? 's' : ''}`
                     : label
                   : collapsed
                     ? label

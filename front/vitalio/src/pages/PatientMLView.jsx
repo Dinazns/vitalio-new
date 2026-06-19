@@ -11,6 +11,7 @@ import {
   Info,
   Sparkles,
   History,
+  ChevronDown,
 } from 'lucide-react'
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, Cell, LabelList,
@@ -52,6 +53,7 @@ export default function PatientMLView() {
   const [modelInfo, setModelInfo] = useState(null)
   const [weeklyData, setWeeklyData] = useState(null)
   const [weeklyError, setWeeklyError] = useState('')
+  const [historyExpanded, setHistoryExpanded] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -263,7 +265,7 @@ export default function PatientMLView() {
               <section className="ml-panel ml-panel--ai-summary">
                 <h2><Sparkles size={18} /> Résumé automatique de vos mesures cette semaine</h2>
                 <p className="ml-panel-sub">
-                  Synthèse générée côté serveur à partir de vos constantes (statistiques, tendances, corrélations) — pas d&apos;appel à un LLM externe.
+                  Un aperçu simple de vos constantes vitales sur les 7 derniers jours.
                 </p>
                 {weeklyError && (
                   <div className="ml-panel ml-panel--error" style={{ marginBottom: '12px' }}>
@@ -292,63 +294,65 @@ export default function PatientMLView() {
             )}
 
             {mlData.measurementHistory.length > 0 && (
-              <section className="ml-panel">
-                <h2><History size={18} /> Historique des mesures</h2>
-                <p className="ml-panel-sub">
-                  Vos enregistrements les plus récents (jusqu&apos;à 100). Les scores IA correspondent aux mesures des 7 derniers jours lorsqu&apos;ils sont disponibles.
-                </p>
-                <div className="ml-anomaly-table-wrap">
-                  <table className="ml-anomaly-table">
-                    <thead>
-                      <tr>
-                        <th>Date et heure</th>
-                        <th>FC (bpm)</th>
-                        <th>SpO2 (%)</th>
-                        <th>Temp. (°C)</th>
-                        {mlData.historyHasMl && (
-                          <>
-                            <th>Score IA</th>
-                            <th>Niveau</th>
-                          </>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mlData.measurementHistory.map((m, i) => {
-                        const gridLevel = m.severity_level || mlLevelToSeverityLevel(m.ml_level)
-                        const sevCfg = getSeverityConfig(gridLevel)
-                        const lvl = m.ml_level || 'normal'
-                        const cfg = mlData.historyHasMl && m.ml_score != null
-                          ? (LEVEL_CONFIG[lvl] || LEVEL_CONFIG.normal)
-                          : null
-                        return (
-                          <tr key={`${m.ts}-${i}`}>
-                            <td>{formatTime(m.ts)}</td>
-                            <td>{m.heart_rate ?? '-'}</td>
-                            <td>{m.spo2 ?? '-'}</td>
-                            <td>{m.temperature != null ? Number(m.temperature).toFixed(1) : '-'}</td>
-                            {mlData.historyHasMl && (
-                              <>
-                                <td>{m.ml_score != null ? Number(m.ml_score).toFixed(3) : '-'}</td>
-                                <td>
-                                  {m.ml_score != null ? (
-                                    <span className="ml-level-badge" style={{ background: sevCfg.bg, color: sevCfg.color, border: `1px solid ${sevCfg.border}` }}>
-                                      {sevCfg.label}
-                                    </span>
-                                  ) : (
-                                    <span className="ml-level-badge" style={{ background: sevCfg.bg, color: sevCfg.color, border: `1px solid ${sevCfg.border}` }}>
-                                      {sevCfg.label}
-                                    </span>
-                                  )}
-                                </td>
-                              </>
-                            )}
+              <section className={`ml-panel ml-panel--collapsible ${historyExpanded ? 'ml-panel--open' : 'ml-panel--collapsed'}`}>
+                <button
+                  type="button"
+                  className="ml-panel-collapsible-toggle"
+                  onClick={() => setHistoryExpanded((open) => !open)}
+                  aria-expanded={historyExpanded}
+                  aria-controls="patient-ml-measurements-history"
+                >
+                  <span className="ml-panel-collapsible-heading">
+                    <h2><History size={18} aria-hidden /> Historique des mesures</h2>
+                    <span className="ml-panel-collapsible-count">{mlData.measurementHistory.length} mesure(s)</span>
+                  </span>
+                  <ChevronDown
+                    size={20}
+                    className={`ml-panel-collapsible-chevron ${historyExpanded ? 'ml-panel-collapsible-chevron--open' : ''}`}
+                    aria-hidden
+                  />
+                </button>
+                {historyExpanded && (
+                  <div id="patient-ml-measurements-history" className="ml-panel-collapsible-body">
+                    <p className="ml-panel-sub">
+                      Vos enregistrements les plus récents (jusqu&apos;à 100).
+                    </p>
+                    <div className="ml-anomaly-table-wrap">
+                      <table className="ml-anomaly-table">
+                        <thead>
+                          <tr>
+                            <th>Date et heure</th>
+                            <th>FC (bpm)</th>
+                            <th>SpO2 (%)</th>
+                            <th>Temp. (°C)</th>
+                            {mlData.historyHasMl && <th>Niveau</th>}
                           </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                        </thead>
+                        <tbody>
+                          {mlData.measurementHistory.map((m, i) => {
+                            const gridLevel = m.severity_level || mlLevelToSeverityLevel(m.ml_level)
+                            const sevCfg = getSeverityConfig(gridLevel)
+                            return (
+                              <tr key={`${m.ts}-${i}`}>
+                                <td>{formatTime(m.ts)}</td>
+                                <td>{m.heart_rate ?? '-'}</td>
+                                <td>{m.spo2 ?? '-'}</td>
+                                <td>{m.temperature != null ? Number(m.temperature).toFixed(1) : '-'}</td>
+                                {mlData.historyHasMl && (
+                                  <td>
+                                    <span className="ml-level-badge" style={{ background: sevCfg.bg, color: sevCfg.color, border: `1px solid ${sevCfg.border}` }}>
+                                      {sevCfg.label}
+                                    </span>
+                                  </td>
+                                )}
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </section>
             )}
 

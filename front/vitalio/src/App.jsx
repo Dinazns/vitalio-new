@@ -8,7 +8,6 @@ import InviteAccept from './pages/InviteAccept';
 import CaregiverInviteAccept from './pages/CaregiverInviteAccept';
 import PatientView from './pages/PatientView';
 import PatientProfileView from './pages/PatientProfileView';
-import PatientMeasurement from './pages/PatientMeasurement';
 import PatientMLView from './pages/PatientMLView';
 import EnrollDevice from './pages/EnrollDevice';
 import DeviceConfirm from './pages/DeviceConfirm';
@@ -76,16 +75,6 @@ function AppRoutes() {
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['patient']}>
               <PatientProfileView />
-            </RoleProtectedRoute>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/patient/measure"
-        element={
-          <ProtectedRoute>
-            <RoleProtectedRoute allowedRoles={['patient']}>
-              <PatientMeasurement />
             </RoleProtectedRoute>
           </ProtectedRoute>
         }

@@ -150,7 +150,7 @@ def send_device_enrollment_code_email(
 """
     send_html_email(
         patient_email,
-        f"VitalIO — Code d'enregistrement du boîtier {device_id}",
+        f"VitalIO - Code d'enregistrement du boîtier {device_id}",
         html_body,
     )
     logger.info("Email code enrollment envoyé vers %s (device %s)", patient_email, device_id)

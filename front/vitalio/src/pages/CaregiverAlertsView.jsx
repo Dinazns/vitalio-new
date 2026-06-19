@@ -152,7 +152,7 @@ export default function CaregiverAlertsView() {
                 Alertes
               </h1>
               <p className="caregiver-subtitle">
-                Signalements à surveiller pour votre proche — le médecin est informé automatiquement.
+                Signalements à surveiller pour votre proche - le médecin est informé automatiquement.
               </p>
             </div>
           </div>

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient, InsertOne
 
 load_dotenv(".env")
-from app import config  # noqa: F401 — résolution DNS MongoDB si configurée
+from app import config  # noqa: F401 - résolution DNS MongoDB si configurée
 
 DEVICE_ID = "VITALIO-D8D096C4"
 WEEKS = 3

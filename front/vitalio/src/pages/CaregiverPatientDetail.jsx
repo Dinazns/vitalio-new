@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
@@ -10,6 +10,11 @@ import {
   Stethoscope,
   PhoneCall,
   TriangleAlert,
+  Wind,
+  Thermometer,
+  HeartPulse,
+  ChevronDown,
+  History,
 } from 'lucide-react'
 import {
   getLatestPatientFeedback,
@@ -17,10 +22,16 @@ import {
   getPatientDoctorInfo,
   getCaregiverAlerts,
   getCaregiverPatients,
+  getPatientProfileForDoctor,
   patchCaregiverAlert,
 } from '../services/api'
 import { getFeedbackSeverityLabel } from '../constants/feedbackSeverity'
 import { formatMeasurementQualityHint, formatMeasurementQualityLabel } from '../utils/measurementStatus'
+import { resolvePatientFullName, resolvePatientListDisplayName } from '../utils/displayName'
+import { formatRelativeMeasurementTime, getVitalStatus } from '../utils/vitalStatus'
+import VitalSignCard from '../components/patient/VitalSignCard'
+import VitalTrendChart from '../components/patient/VitalTrendChart'
+import OverallStatusBanner from '../components/patient/OverallStatusBanner'
 
 export default function CaregiverPatientDetail() {
   const { patientId } = useParams()
@@ -34,9 +45,11 @@ export default function CaregiverPatientDetail() {
   const [feedback, setFeedback] = useState([])
   const [doctors, setDoctors] = useState([])
   const [alerts, setAlerts] = useState([])
+  const [patientProfile, setPatientProfile] = useState(null)
   const [resolvingAlertId, setResolvingAlertId] = useState(null)
   const [resolutionComment, setResolutionComment] = useState('')
   const [resolutionError, setResolutionError] = useState('')
+  const [historyExpanded, setHistoryExpanded] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -45,18 +58,20 @@ export default function CaregiverPatientDetail() {
         setLoading(true)
         setError('')
         const token = await getAccessTokenSilently()
-        const [measurementsRes, feedbackRes, doctorRes, alertsRes, patientsRes] = await Promise.all([
+        const [measurementsRes, feedbackRes, doctorRes, alertsRes, patientsRes, profileRes] = await Promise.all([
           getPatientMeasurementsById(token, patientId, { limit: 200 }),
           getLatestPatientFeedback(token, patientId, 10),
           getPatientDoctorInfo(token, patientId),
           getCaregiverAlerts(token, { status: 'OPEN', limit: 100 }).catch(() => ({ alerts: [] })),
           getCaregiverPatients(token).catch(() => ({ patients: [] })),
+          getPatientProfileForDoctor(token, patientId).catch(() => ({ profile: null })),
         ])
 
         if (mounted) {
           setMeasurements(Array.isArray(measurementsRes.measurements) ? measurementsRes.measurements : [])
           setFeedback(Array.isArray(feedbackRes.feedback) ? feedbackRes.feedback : [])
           setDoctors(Array.isArray(doctorRes.doctors) ? doctorRes.doctors : [])
+          setPatientProfile(profileRes?.profile || null)
           const patients = patientsRes.patients || []
           const currentPatientIds = new Set([String(patientId)])
           patients.forEach((p) => {
@@ -66,7 +81,7 @@ export default function CaregiverPatientDetail() {
             }
           })
           const patientAlerts = (alertsRes.alerts || []).filter(
-            (a) => a.alert_id && currentPatientIds.has(String(a.patient_id))
+            (a) => a.alert_id && currentPatientIds.has(String(a.patient_id)),
           )
           setAlerts(patientAlerts)
         }
@@ -86,7 +101,7 @@ export default function CaregiverPatientDetail() {
   }, [getAccessTokenSilently, patientId])
 
   const handleResolveAlert = async (alertId) => {
-    const id = alertId || (alerts.find((a) => a.alert_id)?.alert_id)
+    const id = alertId || alerts.find((a) => a.alert_id)?.alert_id
     if (!id) {
       setResolutionError('Identifiant d\'alerte manquant. Veuillez rafraîchir la page.')
       return
@@ -104,8 +119,8 @@ export default function CaregiverPatientDetail() {
         prev.map((a) =>
           ((a.alert_id || a._id) === id)
             ? { ...a, caregiver_resolution_comment: res.caregiver_resolution_comment }
-            : a
-        )
+            : a,
+        ),
       )
       setResolvingAlertId(null)
       setResolutionComment('')
@@ -123,14 +138,31 @@ export default function CaregiverPatientDetail() {
     return null
   }
 
+  const latest = measurements[0]
+  const previous = measurements[1]
+  const patientName = resolvePatientFullName({ profile: patientProfile })
+    || resolvePatientListDisplayName({ display_name: patientProfile?.display_name, first_name: patientProfile?.first_name, last_name: patientProfile?.last_name })
+    || 'Votre proche'
+
+  const vitalStatuses = useMemo(
+    () => [
+      getVitalStatus('spo2', latest?.spo2),
+      getVitalStatus('heart_rate', latest?.heart_rate),
+      getVitalStatus('temperature', latest?.temperature),
+    ],
+    [latest],
+  )
+
+  const lastMeasurementLabel = formatRelativeMeasurementTime(latest?.timestamp)
+
   return (
     <div className="caregiver-dashboard family-theme">
-      <div className="main-content">
+      <div className="main-content caregiver-detail-page">
         <header className="caregiver-header">
           <div className="caregiver-header-left">
             <div>
-              <h1 className="caregiver-title">Mon proche</h1>
-              <p className="caregiver-subtitle">Constantes vitales et informations du médecin</p>
+              <h1 className="caregiver-title">{patientName}</h1>
+              <p className="caregiver-subtitle">Constantes vitales et informations utiles</p>
             </div>
           </div>
           <div className="caregiver-header-actions">
@@ -139,26 +171,28 @@ export default function CaregiverPatientDetail() {
               className="caregiver-btn-analyses"
               onClick={() => navigate(`${base}/patient/${encodeURIComponent(patientId)}/ml`)}
             >
-              <BrainCircuit size={18} />
-              Voir les analyses
+              <BrainCircuit size={18} aria-hidden />
+              Suivi avancé
             </button>
           </div>
         </header>
 
-        <main className="caregiver-main">
+        <main className="caregiver-main caregiver-detail-main">
           {loading && (
             <div className="caregiver-loading" role="status" aria-live="polite">
               <div className="caregiver-loading-spinner" aria-hidden />
-              <p>Chargement en cours...</p>
+              <p>Chargement en cours…</p>
             </div>
           )}
+
           {!loading && error && <p className="caregiver-error" role="alert">{error}</p>}
+
           {!loading && !error && (
             <>
               {alerts.length > 0 && (
                 <section className="caregiver-alerts-section" aria-labelledby="patient-alerts-heading">
                   <h3 id="patient-alerts-heading"><TriangleAlert size={20} aria-hidden /> Alertes à traiter</h3>
-                  <p className="caregiver-alerts-intro">Prenez connaissance de l&apos;alerte et indiquez si l&apos;urgence est résolue.</p>
+                  <p className="caregiver-alerts-intro">Lisez l&apos;alerte et indiquez si la situation est résolue.</p>
                   <div className="caregiver-alerts-list" role="list" aria-label="Alertes ouvertes pour ce patient">
                     {alerts.map((a, i) => (
                       <article key={a.alert_id || a._id || i} className="caregiver-alert-card" role="listitem">
@@ -166,7 +200,7 @@ export default function CaregiverPatientDetail() {
                         <p className="caregiver-alert-description">{a.lay_description}</p>
                         {a.caregiver_resolution_comment && (
                           <p className="caregiver-alert-resolution">
-                            <CheckCircle2 size={14} /> {a.caregiver_resolution_comment}
+                            <CheckCircle2 size={14} aria-hidden /> {a.caregiver_resolution_comment}
                           </p>
                         )}
                         <div className="caregiver-alert-actions">
@@ -177,20 +211,20 @@ export default function CaregiverPatientDetail() {
                               aria-expanded={resolvingAlertId === (a.alert_id || a._id)}
                               onClick={() => setResolvingAlertId(resolvingAlertId === (a.alert_id || a._id) ? null : (a.alert_id || a._id))}
                             >
-                              <CheckCircle2 size={14} aria-hidden /> J&apos;ai pris connaissance - Urgence résolue
+                              <CheckCircle2 size={14} aria-hidden /> Situation résolue
                             </button>
                           )}
                         </div>
                         {resolvingAlertId === (a.alert_id || a._id) && (
                           <div className="caregiver-alert-resolve-form" role="group" aria-label="Résolution de l'alerte">
                             <p className="caregiver-alert-resolve-hint" id={`resolve-hint-${a.alert_id || a._id}`}>
-                              Indiquez ce que vous avez fait (ex. : vérification sur place, appel au médecin).
+                              Décrivez ce que vous avez fait (ex. : visite, appel au médecin).
                             </p>
                             <textarea
                               className="caregiver-alert-resolve-input"
                               value={resolutionComment}
                               onChange={(e) => setResolutionComment(e.target.value)}
-                              placeholder="Ex. : Vérification sur place, la personne va bien. J'ai appelé le médecin."
+                              placeholder="Ex. : Je suis passé voir Marie, elle va bien. J'ai prévenu le médecin."
                               rows={3}
                               aria-labelledby={`resolve-hint-${a.alert_id || a._id}`}
                               aria-required="true"
@@ -220,9 +254,28 @@ export default function CaregiverPatientDetail() {
                 </section>
               )}
 
+              <OverallStatusBanner statuses={vitalStatuses} />
+
+              <section className="vital-cards" aria-label="Constantes vitales actuelles">
+                <VitalSignCard vitalKey="spo2" label="SpO₂" value={latest?.spo2} previousValue={previous?.spo2} Icon={Wind} />
+                <VitalSignCard vitalKey="heart_rate" label="Fréquence cardiaque" value={latest?.heart_rate} previousValue={previous?.heart_rate} Icon={HeartPulse} />
+                <VitalSignCard vitalKey="temperature" label="Température" value={latest?.temperature} previousValue={previous?.temperature} Icon={Thermometer} />
+              </section>
+
+              {lastMeasurementLabel && (
+                <p className="vital-last-measurement" role="status">
+                  Dernière mesure : {lastMeasurementLabel}
+                </p>
+              )}
+
+              <section className="caregiver-panel">
+                <h2 className="caregiver-panel__title">Tendances - 7 derniers jours</h2>
+                <VitalTrendChart measurements={measurements} showDisclaimer />
+              </section>
+
               {doctors.length > 0 && (
                 <section className="caregiver-doctor-section">
-                  <h3><Stethoscope size={20} /> Médecin du patient</h3>
+                  <h3><Stethoscope size={20} aria-hidden /> Médecin</h3>
                   <div className="caregiver-doctor-cards">
                     {doctors.map((doc) => (
                       <article key={doc.id} className="caregiver-doctor-card">
@@ -238,40 +291,22 @@ export default function CaregiverPatientDetail() {
                               <div className="caregiver-doctor-contact">
                                 {doc.email && (
                                   <a href={`mailto:${doc.email}`} className="caregiver-contact-link">
-                                    <Mail size={14} /> {doc.email}
+                                    <Mail size={14} aria-hidden /> {doc.email}
                                   </a>
                                 )}
                                 {doc.phone && (
                                   <a href={`tel:${doc.phone.replace(/\s/g, '')}`} className="caregiver-contact-link">
-                                    <Phone size={14} /> {doc.phone}
+                                    <Phone size={14} aria-hidden /> {doc.phone}
                                   </a>
-                                )}
-                                {!doc.email && !doc.phone && doc.contact && (
-                                  <span className="caregiver-contact-text">
-                                    {doc.contact.includes('@') ? (
-                                      <a href={`mailto:${doc.contact}`} className="caregiver-contact-link">
-                                        <Mail size={14} /> {doc.contact}
-                                      </a>
-                                    ) : (
-                                      <a href={`tel:${doc.contact.replace(/\s/g, '')}`} className="caregiver-contact-link">
-                                        <Phone size={14} /> {doc.contact}
-                                      </a>
-                                    )}
-                                  </span>
                                 )}
                               </div>
                             )}
                           </div>
                         </div>
                         {getContactLink(doc) && (
-                          <a
-                            href={getContactLink(doc)}
-                            className="caregiver-contact-emergency-btn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <PhoneCall size={18} />
-                            Contacter en cas d'urgence
+                          <a href={getContactLink(doc)} className="caregiver-contact-emergency-btn" rel="noopener noreferrer">
+                            <PhoneCall size={18} aria-hidden />
+                            Contacter en cas d&apos;urgence
                           </a>
                         )}
                       </article>
@@ -282,7 +317,7 @@ export default function CaregiverPatientDetail() {
 
               {feedback.length > 0 && (
                 <section className="caregiver-feedback-section">
-                  <h3><MessageSquare size={20} /> Commentaires du médecin</h3>
+                  <h3><MessageSquare size={20} aria-hidden /> Messages du médecin</h3>
                   <div className="caregiver-feedback-list">
                     {feedback.map((item, index) => (
                       <article key={`${item.created_at || index}-${index}`} className="caregiver-feedback-card">
@@ -303,41 +338,53 @@ export default function CaregiverPatientDetail() {
                 </section>
               )}
 
-              <section className="caregiver-patients-section">
-                <div className="section-header">
-                  <h3>Historique des mesures</h3>
-                </div>
-                <div className="caregiver-table-wrap">
-                  <table className="caregiver-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>SpO2</th>
-                        <th>FC</th>
-                        <th>Température</th>
-                        <th>Qualité</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {measurements.map((measurement, index) => (
-                        <tr key={`${measurement.timestamp}-${index}`}>
-                          <td>{new Date(measurement.timestamp).toLocaleString('fr-FR')}</td>
-                          <td>{measurement.spo2 ?? '-'}</td>
-                          <td>{measurement.heart_rate ?? '-'}</td>
-                          <td>{measurement.temperature ?? '-'}</td>
-                          <td title={formatMeasurementQualityHint(measurement)}>
-                            {formatMeasurementQualityLabel(measurement.status)}
-                          </td>
-                        </tr>
-                      ))}
-                      {!measurements.length && (
-                        <tr>
-                          <td colSpan="5">Aucune mesure disponible.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+              <section className={`caregiver-panel caregiver-panel--collapsible ${historyExpanded ? 'caregiver-panel--open' : ''}`}>
+                <button
+                  type="button"
+                  className="caregiver-panel__toggle"
+                  onClick={() => setHistoryExpanded((open) => !open)}
+                  aria-expanded={historyExpanded}
+                  aria-controls="caregiver-measurements-history"
+                >
+                  <span className="caregiver-panel__toggle-title">
+                    <History size={18} aria-hidden /> Historique des mesures
+                  </span>
+                  <span className="caregiver-panel__toggle-meta">{measurements.length} mesure(s)</span>
+                  <ChevronDown size={20} className={`caregiver-panel__chevron ${historyExpanded ? 'caregiver-panel__chevron--open' : ''}`} aria-hidden />
+                </button>
+                {historyExpanded && (
+                  <div id="caregiver-measurements-history" className="caregiver-panel__body">
+                    <div className="caregiver-table-wrap">
+                      <table className="caregiver-table">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>SpO₂</th>
+                            <th>FC</th>
+                            <th>Température</th>
+                            <th>Qualité</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {measurements.map((measurement, index) => (
+                            <tr key={`${measurement.timestamp}-${index}`}>
+                              <td>{new Date(measurement.timestamp).toLocaleString('fr-FR')}</td>
+                              <td>{measurement.spo2 ?? '-'}</td>
+                              <td>{measurement.heart_rate ?? '-'}</td>
+                              <td>{measurement.temperature ?? '-'}</td>
+                              <td title={formatMeasurementQualityHint(measurement)}>
+                                {formatMeasurementQualityLabel(measurement.status)}
+                              </td>
+                            </tr>
+                          ))}
+                          {!measurements.length && (
+                            <tr><td colSpan="5">Aucune mesure disponible.</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </section>
             </>
           )}

@@ -31,7 +31,7 @@ def escape_href(url: str) -> str:
 
 
 def email_cta_button(url: str, label: str, *, bg_color: str = "#2563eb") -> str:
-    """Bulletproof CTA button (table layout) — clickable in Gmail, Outlook, mobile."""
+    """Bulletproof CTA button (table layout) - clickable in Gmail, Outlook, mobile."""
     safe_url = escape_href(url)
     safe_label = html_module.escape(label)
     return f"""<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;">

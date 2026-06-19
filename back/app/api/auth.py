@@ -1,4 +1,4 @@
-"""HTTP routes — auth_routes."""
+"""HTTP routes - auth_routes."""
 import json
 import logging
 import os

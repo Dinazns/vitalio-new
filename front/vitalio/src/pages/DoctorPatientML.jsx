@@ -35,6 +35,7 @@ import {
 } from 'recharts'
 import { getPatientMLAnalysis, getMLForecast, patchDoctorAlert, getPatientProfileForDoctor } from '../services/api'
 import DoctorLayout from '../components/DoctorLayout'
+import ChartDisclaimer from '../components/ChartDisclaimer'
 import { resolvePatientFullName } from '../utils/displayName'
 
 const VITAL_CONFIG = {
@@ -590,6 +591,7 @@ export default function DoctorPatientML() {
               <section className="pml-panel">
                 <h2><Clock size={18} /> Répartition horaire des mesures (jour × heure)</h2>
                 <div className="pml-chart-wrap">
+                  <ChartDisclaimer />
                   <div className="pml-heatmap-wrap">
                     <table className="pml-heatmap">
                       <thead>
@@ -654,6 +656,7 @@ export default function DoctorPatientML() {
                   </div>
                 </div>
                 <div className="pml-chart-wrap">
+                  <ChartDisclaimer />
                   <ResponsiveContainer width="100%" height={220}>
                     <AreaChart data={variabilityData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
                       <defs>
@@ -723,6 +726,7 @@ export default function DoctorPatientML() {
                       <Info size={12} /> Affichage de {CHART_DOWNSAMPLE_THRESHOLD} points pour une meilleure lisibilité ({analysis?.vitals?.[activeVital]?.series?.length ?? 0} mesures au total)
                     </p>
                   )}
+                  <ChartDisclaimer />
                   <ResponsiveContainer width="100%" height={320}>
                     <ComposedChart data={vitalData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                       <defs>
@@ -836,6 +840,7 @@ export default function DoctorPatientML() {
               <section className="pml-panel">
                 <h2><ShieldAlert size={18} /> Évolution de l'indice de risque</h2>
                 <div className="pml-chart-wrap">
+                  <ChartDisclaimer />
                   <ResponsiveContainer width="100%" height={240}>
                     <AreaChart data={mlScoreData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                       <defs>
@@ -901,6 +906,7 @@ export default function DoctorPatientML() {
               <section className="pml-panel">
                 <h2><BarChart3 size={18} /> Profil journalier - {cfg.label}</h2>
                 <div className="pml-chart-wrap">
+                  <ChartDisclaimer />
                   <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={dailyData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -967,6 +973,7 @@ export default function DoctorPatientML() {
                           {fInfo.confidence_score}/100
                         </span>
                       </div>
+                      <ChartDisclaimer />
                       <ResponsiveContainer width="100%" height={220}>
                         <LineChart data={forecastData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />

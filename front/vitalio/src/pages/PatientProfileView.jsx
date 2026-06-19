@@ -29,6 +29,7 @@ import {
   updatePatientProfile,
 } from '../services/api'
 import PatientLayout from '../components/PatientLayout'
+import { birthdateToISO, computeAgeFromBirthdate, formatBirthdateFR } from '../utils/birthdate'
 
 const SEX_OPTIONS = [
   { value: 'F', label: 'Féminin' },
@@ -44,24 +45,6 @@ function mapSexFromProfile(sex) {
   const u = String(sex || '').toUpperCase()
   if (u === 'F' || u === 'M' || u === 'O') return u
   return ''
-}
-
-function computeAgeFromBirthdate(bd) {
-  const s = String(bd || '').trim().slice(0, 10)
-  if (s.length < 10) return null
-  const parts = s.split('-')
-  if (parts.length < 3) return null
-  const y = parseInt(parts[0], 10)
-  const m = parseInt(parts[1], 10) - 1
-  const d = parseInt(parts[2], 10)
-  if (Number.isNaN(y) || Number.isNaN(m) || Number.isNaN(d)) return null
-  const birth = new Date(y, m, d)
-  if (Number.isNaN(birth.getTime())) return null
-  const today = new Date()
-  let age = today.getFullYear() - birth.getFullYear()
-  const md = today.getMonth() - birth.getMonth()
-  if (md < 0 || (md === 0 && today.getDate() < birth.getDate())) age -= 1
-  return age >= 0 && age <= 150 ? age : null
 }
 
 function emptyQuestionnaire() {
@@ -172,7 +155,7 @@ export default function PatientProfileView() {
       last_name: profile.last_name || '',
       email: profile.email || user?.email || '',
       phone: profile.phone || '',
-      birthdate: profile.birthdate || '',
+      birthdate: formatBirthdateFR(profile.birthdate || ''),
       sex: mapSexFromProfile(profile.sex),
       aidant_first_name: profile.emergency_contact?.first_name || '',
       aidant_last_name: profile.emergency_contact?.last_name || '',
@@ -238,7 +221,7 @@ export default function PatientProfileView() {
         last_name: q.last_name.trim() || null,
         email: q.email.trim() || null,
         phone: q.phone.trim() || null,
-        birthdate: q.birthdate.trim() || null,
+        birthdate: birthdateToISO(q.birthdate.trim()) || null,
         medical_history: q.medical_history.trim() || null,
         address_line1: q.address_line1.trim() || null,
         address_line2: q.address_line2.trim() || null,
@@ -274,7 +257,7 @@ export default function PatientProfileView() {
       const givenName = q.first_name.trim()
       const familyName = q.last_name.trim()
       const patientEmail = q.email.trim()
-      const birthdate = q.birthdate.trim()
+      const birthdate = birthdateToISO(q.birthdate.trim())
       const history = q.medical_history.trim()
       const canCompleteOnboarding = Boolean(
         givenName
@@ -305,7 +288,7 @@ export default function PatientProfileView() {
         } catch (obErr) {
           setQuestionnaireError(
             obErr.message
-            || 'Les informations ont été enregistrées, mais la validation complète du dossier a échoué (vérifiez la date de naissance AAAA-MM-JJ).',
+            || 'Les informations ont été enregistrées, mais la validation complète du dossier a échoué (vérifiez la date de naissance JJ/MM/AA).',
           )
           await refreshProfile()
           return
@@ -697,7 +680,7 @@ export default function PatientProfileView() {
                             />
                           </div>
                           <div className="pq-field">
-                            <label className="pq-label" htmlFor="pq_birthdate">Naissance (AAAA-MM-JJ)</label>
+                            <label className="pq-label" htmlFor="pq_birthdate">Naissance (JJ/MM/AA)</label>
                             <input
                               id="pq_birthdate"
                               className="pq-input"
@@ -705,7 +688,7 @@ export default function PatientProfileView() {
                               inputMode="numeric"
                               value={q.birthdate}
                               onChange={(e) => handleQChange('birthdate', e.target.value)}
-                              placeholder="1990-01-15"
+                              placeholder="15/01/90"
                               autoComplete="bday"
                             />
                           </div>
@@ -856,6 +839,9 @@ export default function PatientProfileView() {
                           />
                         </div>
                         <div className="pq-invite">
+                          <p className="pq-invite__consent" role="note">
+                            En ajoutant un proche, vous acceptez que ce dernier ait accès à vos mesures personnelles et aux comptes rendus de votre médecin sur la vue patient.
+                          </p>
                           <button
                             type="button"
                             className="pq-btn pq-btn--secondary"

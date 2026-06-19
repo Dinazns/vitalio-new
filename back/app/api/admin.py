@@ -1,4 +1,4 @@
-"""HTTP routes — admin_routes."""
+"""HTTP routes - admin_routes."""
 import json
 import logging
 import os

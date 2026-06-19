@@ -354,7 +354,7 @@ def get_user_profile(user_id_auth: str) -> Dict[str, Any]:
                 "contact": 1, "picture": 1, "emergency_contact": 1,
                 "medical_history": 1, "onboarding_completed": 1,
                 "address_line1": 1, "address_line2": 1, "postal_code": 1, "city": 1, "country": 1,
-                "pathology": 1, "patient_pseudo_id": 1,
+                "pathology": 1, "patient_pseudo_id": 1, "updated_at": 1,
             }
         )
         return decrypt_profile_fields(profile or {})

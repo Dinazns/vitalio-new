@@ -17,12 +17,12 @@ cd mosquitto
 ```
 
 Le script vérifie automatiquement:
-- ✅ Présence des certificats (ca.crt, server.crt, server.key)
-- ✅ Validité des certificats
-- ✅ Signature du certificat serveur par le CA
-- ✅ Configuration Mosquitto (port 8883, TLS, accès anonyme désactivé)
-- ✅ Configuration Docker (ports exposés, volumes)
-- ✅ Fichier de mots de passe
+-  Présence des certificats (ca.crt, server.crt, server.key)
+-  Validité des certificats
+-  Signature du certificat serveur par le CA
+-  Configuration Mosquitto (port 8883, TLS, accès anonyme désactivé)
+-  Configuration Docker (ports exposés, volumes)
+-  Fichier de mots de passe
 
 ---
 
@@ -160,9 +160,9 @@ python data.py
 
 **Résultat attendu:**
 ```
-✅ TLS configured (CA: ./mosquitto/certs/ca.crt)
-✅ Authentication configured (Username: votre_username)
-✅ Connection successful! (TLS-encrypted)
+ TLS configured (CA: ./mosquitto/certs/ca.crt)
+ Authentication configured (Username: votre_username)
+ Connection successful! (TLS-encrypted)
 ```
 
 ---
@@ -207,18 +207,18 @@ python data.py
 
 ## Garanties de Sécurité
 
-### Confidentialité ✅
+### Confidentialité 
 - **TLS 1.2+** chiffre toutes les communications MQTT
 - **Aucun trafic en clair** sur le réseau
 - **Certificats X.509** pour l'authentification mutuelle
 
-### Authenticité ✅
+### Authenticité 
 - **Certificat serveur** signé par le CA (broker authentifié)
 - **Certificat CA** utilisé par les clients pour vérifier le broker
 - **Username/password** pour l'authentification des clients
 - **Accès anonyme désactivé**
 
-### Intégrité ✅
+### Intégrité 
 - **TLS** garantit l'intégrité des messages (détection de modification)
 - **Certificats valides** et non expirés
 - **Signature du certificat serveur** vérifiée par le CA
@@ -290,4 +290,4 @@ Pour plus d'informations, consultez:
 
 **Dernière mise à jour:** 2024  
 **Niveau de sécurité:** Production / Healthcare IoT  
-**Statut:** ✅ Configuration TLS complète
+**Statut:**  Configuration TLS complète

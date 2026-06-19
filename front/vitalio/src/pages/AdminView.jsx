@@ -69,9 +69,9 @@ const EnrolledBadge = ({ enrolled }) => (
 );
 
 const personLabel = (person) => {
-    if (!person) return '—';
+    if (!person) return '-';
     const fullName = [person.first_name, person.last_name].filter(Boolean).join(' ').trim();
-    return person.display_name || fullName || person.email || person.user_id_auth || '—';
+    return person.display_name || fullName || person.email || person.user_id_auth || '-';
 };
 
 const ROLE_LABELS = {
@@ -84,7 +84,7 @@ const ROLE_LABELS = {
     admin: 'Administrateur',
 };
 
-const roleLabel = (role) => ROLE_LABELS[String(role || '').toLowerCase()] || role || '—';
+const roleLabel = (role) => ROLE_LABELS[String(role || '').toLowerCase()] || role || '-';
 
 function AdminCollapsibleSection({ id, title, icon: Icon, count, expanded, onToggle, children }) {
     return (
@@ -467,13 +467,13 @@ export default function AdminView() {
                                         return (
                                             <tr key={user.user_id_auth}>
                                                 <td>{personLabel(user)}</td>
-                                                <td>{user.email || '—'}</td>
+                                                <td>{user.email || '-'}</td>
                                                 <td>{roleLabel(user.role)}</td>
                                                 <td
                                                     style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}
                                                     title={user.user_id_auth}
                                                 >
-                                                    {user.user_id_auth || '—'}
+                                                    {user.user_id_auth || '-'}
                                                 </td>
                                                 <td>
                                                     {!isAdminAccount ? (
@@ -487,7 +487,7 @@ export default function AdminView() {
                                                             <Trash2 size={15} />
                                                         </button>
                                                     ) : (
-                                                        <span className="admin-empty" style={{ fontSize: '0.75rem' }}>—</span>
+                                                        <span className="admin-empty" style={{ fontSize: '0.75rem' }}>-</span>
                                                     )}
                                                 </td>
                                             </tr>
@@ -677,14 +677,14 @@ export default function AdminView() {
                                     <div className="info-list">
                                         <div className="info-row border-b">
                                             <span className="label">Email</span>
-                                            <span className="val">{device.patient?.email || '—'}</span>
+                                            <span className="val">{device.patient?.email || '-'}</span>
                                         </div>
                                         <div className="info-row">
                                             <span className="label">Médecins liés</span>
                                             <span className="val">
                                                 {device.doctors && device.doctors.length > 0
                                                     ? device.doctors.map((d) => personLabel(d)).join(', ')
-                                                    : '—'}
+                                                    : '-'}
                                             </span>
                                         </div>
                                         <div className="info-row">
@@ -769,13 +769,13 @@ export default function AdminView() {
                                             <td style={{ whiteSpace: 'nowrap' }}>{formatAuditDate(ev.created_at)}</td>
                                             <td>{AUDIT_EVENT_LABELS[ev.event_type] || ev.event_type}</td>
                                             <td style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.actor_user_id_auth}>
-                                                {ev.actor_user_id_auth ? String(ev.actor_user_id_auth).slice(-12) : '—'}
+                                                {ev.actor_user_id_auth ? String(ev.actor_user_id_auth).slice(-12) : '-'}
                                             </td>
-                                            <td>{ev.actor_role || '—'}</td>
+                                            <td>{ev.actor_role || '-'}</td>
                                             <td style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={ev.resource_id}>
-                                                {ev.resource_id || '—'}
+                                                {ev.resource_id || '-'}
                                             </td>
-                                            <td>{ev.action || '—'}</td>
+                                            <td>{ev.action || '-'}</td>
                                         </tr>
                                     ))}
                                 </tbody>

@@ -6,8 +6,8 @@ import {
   BrainCircuit,
   User,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
+  PanelLeft,
   Home,
   Cpu,
 } from 'lucide-react'
@@ -33,19 +33,12 @@ export default function PatientLayout({ children }) {
 
   return (
     <div className={`patient-layout ${collapsed ? 'patient-layout--collapsed' : ''}`}>
-      <aside className="patient-sidebar">
+      <aside className="patient-sidebar" aria-hidden={collapsed}>
         <div className="sidebar-header">
-          {!collapsed && <span className="sidebar-brand">VitalIO</span>}
-          <button
-            className="sidebar-toggle"
-            onClick={() => setCollapsed((c) => !c)}
-            aria-label={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </button>
+          <span className="sidebar-brand">VitalIO</span>
         </div>
 
-        {!collapsed && user && (
+        {user && (
           <div className="sidebar-user">
             <div className="sidebar-user-avatar">
               {sidebarName.charAt(0).toUpperCase()}
@@ -54,7 +47,7 @@ export default function PatientLayout({ children }) {
           </div>
         )}
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Navigation principale">
           {NAV_ITEMS.map(({ to, icon: Icon, label, end }) => (
             <NavLink
               key={to}
@@ -63,25 +56,34 @@ export default function PatientLayout({ children }) {
               className={({ isActive }) =>
                 `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
               }
-              title={collapsed ? label : undefined}
             >
               <Icon size={20} />
-              {!collapsed && <span>{label}</span>}
+              <span>{label}</span>
             </NavLink>
           ))}
         </nav>
 
         <div className="sidebar-footer">
-          <button className="sidebar-link" onClick={() => navigate('/home')} title="Accueil">
+          <button type="button" className="sidebar-link" onClick={() => navigate('/home')}>
             <Home size={20} />
-            {!collapsed && <span>Accueil</span>}
+            <span>Accueil</span>
           </button>
-          <button className="sidebar-link sidebar-link--danger" onClick={handleLogout} title="Déconnexion">
+          <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout}>
             <LogOut size={20} />
-            {!collapsed && <span>Déconnexion</span>}
+            <span>Déconnexion</span>
           </button>
         </div>
       </aside>
+
+      <button
+        type="button"
+        className="patient-sidebar-fab"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-label={collapsed ? 'Ouvrir le menu' : 'Fermer le menu'}
+        aria-expanded={!collapsed}
+      >
+        {collapsed ? <PanelLeft size={22} aria-hidden /> : <PanelLeftClose size={22} aria-hidden />}
+      </button>
 
       <main className="patient-main">{children}</main>
     </div>

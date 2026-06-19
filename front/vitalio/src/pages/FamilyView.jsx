@@ -123,7 +123,7 @@ export default function FamilyView() {
               className="caregiver-stat-card caregiver-stat-alerts"
               role="button"
               tabIndex={0}
-              aria-label={`${alertCount} alerte${alertCount !== 1 ? 's' : ''} ouverte${alertCount !== 1 ? 's' : ''} — voir la liste des alertes`}
+              aria-label={`${alertCount} alerte${alertCount !== 1 ? 's' : ''} ouverte${alertCount !== 1 ? 's' : ''} - voir la liste des alertes`}
               onClick={() => navigate(`${base}/alertes`)}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(`${base}/alertes`)}
               style={{ cursor: 'pointer' }}
@@ -143,7 +143,7 @@ export default function FamilyView() {
               <button
                 type="button"
                 className="caregiver-alert-view-btn"
-                aria-label={`Voir toutes les alertes — ${alertCount} ouverte${alertCount > 1 ? 's' : ''}`}
+                aria-label={`Voir toutes les alertes - ${alertCount} ouverte${alertCount > 1 ? 's' : ''}`}
                 onClick={() => navigate(`${base}/alertes`)}
                 style={{ width: '100%', justifyContent: 'center', padding: '0.75rem 1rem' }}
               >
@@ -172,8 +172,41 @@ export default function FamilyView() {
               </div>
             )}
             {!loading && !error && filteredPatients.length > 0 && (
-              <div className="caregiver-table-wrap">
-                <table className="caregiver-table">
+              <>
+                <div className="caregiver-patient-cards" aria-label="Liste des proches">
+                  {filteredPatients.map((patient) => {
+                    const hasAlert = patient.alert
+                    const pid = patient.id || patient.patient_id
+                    const lm = patient.last_measurement
+                    return (
+                      <button
+                        key={pid}
+                        type="button"
+                        className={`caregiver-patient-card ${hasAlert ? 'caregiver-patient-card--alert' : ''}`}
+                        onClick={() => navigate(`${base}/patient/${encodeURIComponent(pid)}`)}
+                      >
+                        <div className="caregiver-patient-card__head">
+                          <strong>{resolvePatientListDisplayName(patient)}</strong>
+                          {hasAlert && (
+                            <span className="caregiver-alert-badge">
+                              <TriangleAlert size={14} aria-hidden /> Alerte
+                            </span>
+                          )}
+                        </div>
+                        <p className="caregiver-patient-card__time">
+                          {formatLastTime(lm?.timestamp)}
+                        </p>
+                        <div className="caregiver-patient-card__vitals">
+                          <span>SpO₂ {lm?.spo2 ?? '-'}%</span>
+                          <span>FC {lm?.heart_rate ?? '-'}</span>
+                          <span>{lm?.temperature != null ? `${Number(lm.temperature).toFixed(1)} °C` : '-'}</span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+                <div className="caregiver-table-wrap caregiver-table-wrap--desktop">
+                  <table className="caregiver-table">
                   <thead>
                     <tr>
                       <th>Patient</th>
@@ -209,7 +242,8 @@ export default function FamilyView() {
                     })}
                   </tbody>
                 </table>
-              </div>
+                </div>
+              </>
             )}
           </section>
         </main>

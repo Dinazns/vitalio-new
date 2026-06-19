@@ -17,7 +17,7 @@ if not os.path.exists(env_path):
 load_dotenv(env_path)
 
 # Même logique DNS que l’API (MONGODB_DNS_SERVERS dans config) pour mongodb+srv
-from app import config  # noqa: E402, F401 — exécute apply_mongodb_dns_resolver()
+from app import config  # noqa: E402, F401 - exécute apply_mongodb_dns_resolver()
 from app.mqtt_tls import resolve_mqtt_ca_cert  # noqa: E402
 
 BROKER_ADDRESS=os.getenv("MQTT_BROKER","localhost")

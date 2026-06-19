@@ -1,4 +1,4 @@
-"""HTTP routes — ml_routes."""
+"""HTTP routes - ml_routes."""
 import json
 import logging
 import os
@@ -68,7 +68,12 @@ from app.api.helpers.alert_helpers import sanitize_alert_dict, finalize_alert_ap
 from app.api.helpers.weekly_analysis import (
     weekly_summary_max_severity,
     build_lay_patient_weekly_summary,
+    build_lay_caregiver_weekly_summary,
     build_clinical_weekly_narrative,
+)
+from app.api.helpers.patient_clinical_context import (
+    load_patient_clinical_context,
+    enrich_narrative_summary,
 )
 from app.api.helpers.doctor_helpers import (
     normalize_email,
@@ -454,6 +459,40 @@ def _apply_patient_identity_to_ml_payload(payload: Dict[str, Any], user_doc: Opt
     payload["patient_last_name"] = ln or None
 
 
+def _load_clinical_context_safe(patient_id: str) -> Optional[Dict[str, Any]]:
+    try:
+        return load_patient_clinical_context(patient_id)
+    except Exception as exc:
+        logger.warning("Clinical context load failed for %s: %s", patient_id, exc)
+        return None
+
+
+def _attach_contextual_summaries(
+    payload: Dict[str, Any],
+    analysis: Dict[str, Any],
+    max_severity: int,
+    clinical_context: Optional[Dict[str, Any]],
+) -> None:
+    payload["clinical_narrative_summary"] = build_clinical_weekly_narrative(
+        analysis, max_severity, clinical_context=clinical_context,
+    )
+    payload["lay_narrative_summary"] = build_lay_caregiver_weekly_summary(
+        analysis, max_severity, clinical_context=clinical_context,
+    )
+    if clinical_context:
+        payload["patient_clinical_context"] = {
+            "condition_labels": clinical_context.get("condition_labels") or [],
+            "pathology": clinical_context.get("pathology"),
+            "has_medical_history": bool(clinical_context.get("medical_history_excerpt")),
+            "doctor_feedback_count": len(clinical_context.get("recent_doctor_feedback") or []),
+            "context_recently_updated": bool(
+                clinical_context.get("profile_recently_updated")
+                or clinical_context.get("has_recent_doctor_feedback")
+                or clinical_context.get("doctor_only_labels")
+            ),
+        }
+
+
 @ml_bp.route("/api/ml/decisions", methods=["GET"])
 @requires_auth
 @requires_role("doctor", "superuser")
@@ -532,7 +571,14 @@ def get_patient_ml_analysis(patient_id: str):
     suggested_days = suggest_analysis_days_for_measurement_span(measurement_span)
     if len(measurements) < 3:
         # Pas une « mauvaise requête » : le client doit pouvoir afficher un message sans erreur HTTP 400.
-        narrative = build_clinical_weekly_narrative({"status": "insufficient_data"}, 0)
+        clinical_context = _load_clinical_context_safe(patient_id)
+        insuff_analysis = {"status": "insufficient_data"}
+        narrative = build_clinical_weekly_narrative(
+            insuff_analysis, 0, clinical_context=clinical_context,
+        )
+        lay_narrative = build_lay_caregiver_weekly_summary(
+            insuff_analysis, 0, clinical_context=clinical_context,
+        )
         message = (
             f"Moins de 3 mesures sur les {days} derniers jours ({len(measurements)} reçue(s)). "
             "L'analyse détaillée nécessite au moins 3 points."
@@ -553,6 +599,7 @@ def get_patient_ml_analysis(patient_id: str):
             "n_total_measurements": count_patient_measurements_total(device_ids),
             "status": "insufficient_data",
             "clinical_narrative_summary": narrative,
+            "lay_narrative_summary": lay_narrative,
             "anomaly_summary": {"total": 0, "by_status": {}, "recent": []},
             "vitals": {},
             "timeline": [],
@@ -563,6 +610,18 @@ def get_patient_ml_analysis(patient_id: str):
             insuff_body["measurement_span"] = measurement_span
         if suggested_days:
             insuff_body["suggested_days"] = suggested_days
+        if clinical_context:
+            insuff_body["patient_clinical_context"] = {
+                "condition_labels": clinical_context.get("condition_labels") or [],
+                "pathology": clinical_context.get("pathology"),
+                "has_medical_history": bool(clinical_context.get("medical_history_excerpt")),
+                "doctor_feedback_count": len(clinical_context.get("recent_doctor_feedback") or []),
+                "context_recently_updated": bool(
+                    clinical_context.get("profile_recently_updated")
+                    or clinical_context.get("has_recent_doctor_feedback")
+                    or clinical_context.get("doctor_only_labels")
+                ),
+            }
         try:
             user_doc = get_identity_db().users.find_one({"user_id_auth": patient_id}, _PATIENT_IDENTITY_PROJECTION)
             if user_doc:
@@ -597,9 +656,10 @@ def get_patient_ml_analysis(patient_id: str):
             if isinstance(val, datetime):
                 doc[key] = datetime_to_iso_utc(val)
     try:
+        clinical_context = _load_clinical_context_safe(patient_id)
         result = ml_module.analyze_patient_vitals(measurements, ml_scores=ml_decisions_list, anomaly_records=anomaly_records)
         _max_sev = weekly_summary_max_severity(result)
-        result["clinical_narrative_summary"] = build_clinical_weekly_narrative(result, _max_sev)
+        _attach_contextual_summaries(result, result, _max_sev, clinical_context)
         result["anomaly_summary"] = build_combined_anomaly_summary_for_analysis(
             anomaly_records, threshold_alert_docs
         )
@@ -610,6 +670,10 @@ def get_patient_ml_analysis(patient_id: str):
                     horizon=forecast_horizon,
                     history_window_hours=48,
                 )
+                if isinstance(result.get("forecast"), dict) and isinstance(result["forecast"].get("summary"), dict):
+                    result["forecast"]["summary"] = enrich_narrative_summary(
+                        result["forecast"]["summary"], result, clinical_context, audience="clinical",
+                    )
             except Exception as e:
                 logger.warning("Forecast skipped for patient %s (days=%s): %s", patient_id, days, e)
                 result["forecast"] = {"error": str(e)}

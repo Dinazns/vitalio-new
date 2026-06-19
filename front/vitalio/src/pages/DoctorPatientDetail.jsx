@@ -20,6 +20,7 @@ import DoctorLayout from '../components/DoctorLayout'
 import { getFeedbackSeverityLabel } from '../constants/feedbackSeverity'
 import { resolvePatientDisplayName, resolvePatientListDisplayName } from '../utils/displayName'
 import { formatMeasurementQualityHint, formatMeasurementQualityLabel } from '../utils/measurementStatus'
+import { computeAgeFromBirthdate, formatBirthdateFR } from '../utils/birthdate'
 
 /** Message API quand aucun enregistrement users_devices n’expose encore de device_id mesurable. */
 const NO_PATIENT_DEVICE_MESSAGE = 'No device record found for patient'
@@ -41,17 +42,7 @@ function formatPatientAddressLines(p) {
 
 function computeAge(birthdate, ageFromProfile) {
   if (ageFromProfile != null && ageFromProfile !== '') return ageFromProfile
-  if (!birthdate) return null
-  try {
-    const birth = new Date(birthdate)
-    const today = new Date()
-    let a = today.getFullYear() - birth.getFullYear()
-    const m = today.getMonth() - birth.getMonth()
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) a--
-    return a >= 0 ? a : null
-  } catch {
-    return null
-  }
+  return computeAgeFromBirthdate(birthdate)
 }
 
 const CLINICAL_RISK_BADGE = {
@@ -59,7 +50,7 @@ const CLINICAL_RISK_BADGE = {
   low: { bg: '#eff6ff', color: '#1d4ed8', label: 'Risque faible' },
   moderate: { bg: '#fffbeb', color: '#b45309', label: 'Risque modéré' },
   high: { bg: '#fef2f2', color: '#b91c1c', label: 'Risque élevé' },
-  unknown: { bg: '#f1f5f9', color: '#64748b', label: '—' },
+  unknown: { bg: '#f1f5f9', color: '#64748b', label: '-' },
 }
 
 function ProfileField({ label, value, link }) {
@@ -351,7 +342,7 @@ export default function DoctorPatientDetail() {
                         <div className="doctor-profile-grid">
                           <ProfileField label="Prénom" value={patientProfile.first_name} />
                           <ProfileField label="Nom" value={patientProfile.last_name} />
-                          <ProfileField label="Date de naissance" value={patientProfile.birthdate ? new Date(patientProfile.birthdate).toLocaleDateString('fr-FR') : null} />
+                          <ProfileField label="Date de naissance" value={patientProfile.birthdate ? formatBirthdateFR(patientProfile.birthdate) : null} />
                           <ProfileField label="Âge" value={computeAge(patientProfile.birthdate, patientProfile.age) != null ? `${computeAge(patientProfile.birthdate, patientProfile.age)} ans` : null} />
                           <ProfileField label="Sexe" value={patientProfile.sex === 'm' ? 'Homme' : patientProfile.sex === 'f' ? 'Femme' : patientProfile.sex === 'o' ? 'Autre' : patientProfile.sex} />
                         </div>
@@ -364,7 +355,7 @@ export default function DoctorPatientDetail() {
                         </div>
                       </div>
                       <div>
-                        <h4 className="doctor-profile-block__title">Urgences — adresse &amp; SAMU</h4>
+                        <h4 className="doctor-profile-block__title">Urgences - adresse &amp; SAMU</h4>
                         <p className="doctor-profile-note">
                           À utiliser si vous devez orienter les secours vers le domicile du patient.
                         </p>

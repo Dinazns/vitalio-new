@@ -13,6 +13,7 @@
 
 // Component styles
 @use 'components/push-banner';
+@use 'components/chart-disclaimer';
 
 // Page-specific styles
 @use 'pages/login';
@@ -27,3 +28,4 @@
 @use 'pages/doctor-layout';
 @use 'pages/doctor-ml';
 @use 'pages/doctor-patient-ml';
+@use 'pages/doctor-workspace';

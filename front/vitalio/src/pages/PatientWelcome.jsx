@@ -89,7 +89,7 @@ export default function PatientWelcome() {
             <ol style={{ margin: '0.75rem 0 0', paddingLeft: '1.25rem', lineHeight: 1.55, color: '#334155' }}>
               <li>Le boîtier démarre et se connecte au Wi-Fi.</li>
               <li>Il génère un code à 6 chiffres (écran du boîtier ou e-mail sur demande).</li>
-              <li>Configurez le Wi-Fi en scannant le QR de votre box depuis <strong>Mon boîtier</strong>, ou via le portail 192.168.4.1.</li>
+              <li>Configurez le Wi-Fi depuis <strong>Mon boîtier</strong> en cliquant sur « Configurer votre boîtier ».</li>
               <li>Saisissez le code dans VitalIO pour lier le dispositif à votre compte.</li>
               <li>Le boîtier confirme l&apos;enregistrement puis peut envoyer vos mesures.</li>
             </ol>

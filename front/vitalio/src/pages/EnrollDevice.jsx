@@ -5,29 +5,18 @@ import {
   CheckCircle2,
   Cpu,
   Mail,
-  Download,
-  Camera,
   Wifi,
   ChevronRight,
   KeyRound,
   Monitor,
 } from 'lucide-react'
-import { Html5Qrcode } from 'html5-qrcode'
 import {
   enrollPatientDevice,
   getPatientDevice,
-  downloadDeviceQrcode,
   requestEnrollmentCodeEmail,
 } from '../services/api'
 import { DEVICE_WIFI_PORTAL_URL, DEVICE_WIFI_AP_SSID } from '../constants/deviceSetup'
-import { isWifiPortalQr } from '../utils/parseDeviceId'
-import {
-  buildEspWifiConnectUrl,
-  parseWifiCredentialsFromQr,
-} from '../utils/parseWifiQr'
 import PatientLayout from '../components/PatientLayout'
-
-const SCANNER_ID = 'vitalio-qr-reader'
 
 const CODE_SOURCE = {
   DEVICE: 'device',
@@ -63,7 +52,6 @@ function CodeSourceOption({ active, onClick, icon: Icon, title, description }) {
 export default function EnrollDevice() {
   const navigate = useNavigate()
   const { getAccessTokenSilently } = useAuth0()
-  const scannerRef = useRef(null)
   const enrollingRef = useRef(false)
 
   const [step, setStep] = useState(1)
@@ -77,13 +65,6 @@ export default function EnrollDevice() {
   const [doctorAssignedDevice, setDoctorAssignedDevice] = useState(false)
   const [deviceEnrolled, setDeviceEnrolled] = useState(false)
   const [deviceInfoLoading, setDeviceInfoLoading] = useState(true)
-  const [scannerActive, setScannerActive] = useState(false)
-  const [scannerError, setScannerError] = useState(null)
-  const [downloadingQr, setDownloadingQr] = useState(false)
-  const [wifiSsid, setWifiSsid] = useState('')
-  const [wifiPassword, setWifiPassword] = useState('')
-  const [wifiFromScan, setWifiFromScan] = useState(false)
-  const [showWifiForm, setShowWifiForm] = useState(false)
 
   const loadDeviceInfo = useCallback(async () => {
     const token = await getAccessTokenSilently()
@@ -111,68 +92,10 @@ export default function EnrollDevice() {
     }
   }, [loadDeviceInfo])
 
-  const stopScanner = useCallback(async () => {
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop()
-        scannerRef.current.clear()
-      } catch {
-        /* déjà arrêté */
-      }
-      scannerRef.current = null
-    }
-    setScannerActive(false)
-  }, [])
-
-  useEffect(() => () => {
-    stopScanner()
-  }, [stopScanner])
-
   const openWifiPortal = useCallback(() => {
     window.open(DEVICE_WIFI_PORTAL_URL, '_blank', 'noopener,noreferrer')
     setStep(2)
   }, [])
-
-  const sendWifiToDevice = useCallback((ssid, password) => {
-    const normalizedSsid = String(ssid || '').trim()
-    if (!normalizedSsid) {
-      setStatus('Indiquez le nom du réseau Wi-Fi.')
-      return
-    }
-    setStatus(null)
-    const connectUrl = buildEspWifiConnectUrl(normalizedSsid, password)
-    // Navigation directe vers l'ESP (téléphone connecté au Wi-Fi Dispositif-Medical).
-    window.location.assign(connectUrl)
-  }, [])
-
-  const handleQrScan = useCallback(
-    async (raw) => {
-      if (isWifiPortalQr(raw)) {
-        await stopScanner()
-        openWifiPortal()
-        setStatus(null)
-        return
-      }
-
-      const wifi = parseWifiCredentialsFromQr(raw)
-      if (wifi) {
-        await stopScanner()
-        setWifiSsid(wifi.ssid)
-        setWifiPassword(wifi.password)
-        setWifiFromScan(true)
-        setShowWifiForm(true)
-        setStatus(
-          `Réseau détecté : ${wifi.ssid}. Connectez-vous au Wi-Fi ${DEVICE_WIFI_AP_SSID}, puis envoyez la configuration au boîtier.`,
-        )
-        return
-      }
-
-      setStatus(
-        'Scannez le QR Wi-Fi de votre box (réseau domestique) ou le QR du portail boîtier (192.168.4.1).',
-      )
-    },
-    [openWifiPortal, stopScanner],
-  )
 
   const submitEnrollmentCode = useCallback(async () => {
     const code = enrollmentCode.replace(/\D/g, '').slice(0, 6)
@@ -211,49 +134,6 @@ export default function EnrollDevice() {
       setEmailSending(false)
     }
   }, [getAccessTokenSilently])
-
-  const startScanner = async () => {
-    setScannerError(null)
-    setStatus(null)
-    try {
-      if (scannerRef.current) await stopScanner()
-      const scanner = new Html5Qrcode(SCANNER_ID)
-      scannerRef.current = scanner
-      await scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        (decoded) => handleQrScan(decoded),
-        () => {},
-      )
-      setScannerActive(true)
-    } catch (e) {
-      setScannerError(
-        String(e.message || e).includes('NotAllowed')
-          ? "Autorisez l'accès à la caméra pour scanner le QR code."
-          : "Impossible d'accéder à la caméra.",
-      )
-      setScannerActive(false)
-    }
-  }
-
-  const handleDownloadWifiQr = async () => {
-    setDownloadingQr(true)
-    setStatus(null)
-    try {
-      const token = await getAccessTokenSilently()
-      const { blob, filename } = await downloadDeviceQrcode(token, { type: 'wifi' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch (e) {
-      setStatus(e.message || 'Téléchargement impossible')
-    } finally {
-      setDownloadingQr(false)
-    }
-  }
 
   const showPaired = deviceEnrolled
   const showFlow = doctorAssignedDevice && !deviceEnrolled
@@ -305,8 +185,8 @@ export default function EnrollDevice() {
             </h1>
             {showFlow ? (
               <p>
-                Connectez-vous au Wi-Fi du boîtier, scannez le QR de votre réseau domestique pour le configurer
-                automatiquement, puis saisissez le code à 6 chiffres.
+                Connectez-vous au Wi-Fi du boîtier, configurez votre réseau domestique, puis saisissez le code à 6
+                chiffres.
               </p>
             ) : (
               <p>
@@ -357,11 +237,8 @@ export default function EnrollDevice() {
                     Connectez votre téléphone au Wi-Fi <strong>{DEVICE_WIFI_AP_SSID}</strong> (émis par le boîtier).
                   </li>
                   <li>
-                    Scannez le <strong>QR Wi-Fi de votre box</strong> (réseau domestique) : VitalIO transmet le nom
-                    et le mot de passe au boîtier.
-                  </li>
-                  <li>
-                    Ou ouvrez le portail <strong>{DEVICE_WIFI_PORTAL_URL}</strong> pour saisir le réseau manuellement.
+                    Cliquez sur <strong>Configurer votre boîtier</strong> et suivez les instructions pour connecter le
+                    boîtier à votre réseau domestique.
                   </li>
                 </ol>
                 <p
@@ -376,112 +253,12 @@ export default function EnrollDevice() {
                     borderRadius: 8,
                   }}
                 >
-                  Important : votre téléphone doit être connecté à <strong>{DEVICE_WIFI_AP_SSID}</strong> pour que
-                  l&apos;envoi au boîtier fonctionne.
+                  Important : votre téléphone doit être connecté à <strong>{DEVICE_WIFI_AP_SSID}</strong> pour
+                  configurer le boîtier.
                 </p>
-                <div
-                  id={SCANNER_ID}
-                  style={{
-                    width: '100%',
-                    minHeight: scannerActive ? 260 : 0,
-                    overflow: 'hidden',
-                    borderRadius: 12,
-                    background: '#0f172a',
-                  }}
-                />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: scannerActive ? 12 : 0 }}>
-                  {!scannerActive && (
-                    <button type="button" className="primary-button" onClick={startScanner} disabled={loading}>
-                      <Camera size={18} aria-hidden />
-                      Scanner le QR Wi-Fi (box / routeur)
-                    </button>
-                  )}
-                  {scannerActive && (
-                    <button type="button" className="secondary-button" onClick={stopScanner}>
-                      Arrêter le scan
-                    </button>
-                  )}
-                  <button type="button" className="secondary-button" onClick={openWifiPortal}>
-                    Ouvrir le portail {DEVICE_WIFI_PORTAL_URL}
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-button"
-                    onClick={() => setShowWifiForm(true)}
-                  >
-                    Saisir le Wi-Fi manuellement
-                  </button>
-                  {showWifiForm && (
-                    <div
-                      style={{
-                        marginTop: 4,
-                        padding: '1rem',
-                        borderRadius: 10,
-                        border: '1px solid #bfdbfe',
-                        background: '#f8fafc',
-                      }}
-                    >
-                      <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>
-                        {wifiFromScan ? 'Réseau détecté par scan' : 'Saisie manuelle'}
-                      </p>
-                      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Nom du réseau (SSID)</span>
-                        <input
-                          type="text"
-                          value={wifiSsid}
-                          onChange={(e) => {
-                            setWifiSsid(e.target.value)
-                            setWifiFromScan(false)
-                            if (status) setStatus(null)
-                          }}
-                          style={{
-                            width: '100%',
-                            marginTop: 4,
-                            padding: '0.65rem 0.75rem',
-                            borderRadius: 8,
-                            border: '1px solid #e2e8f0',
-                          }}
-                          autoComplete="off"
-                        />
-                      </label>
-                      <label style={{ display: 'block', marginBottom: '0.75rem' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Mot de passe Wi-Fi</span>
-                        <input
-                          type="password"
-                          value={wifiPassword}
-                          onChange={(e) => {
-                            setWifiPassword(e.target.value)
-                            if (status) setStatus(null)
-                          }}
-                          style={{
-                            width: '100%',
-                            marginTop: 4,
-                            padding: '0.65rem 0.75rem',
-                            borderRadius: 8,
-                            border: '1px solid #e2e8f0',
-                          }}
-                          autoComplete="off"
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        className="primary-button"
-                        style={{ width: '100%' }}
-                        onClick={() => sendWifiToDevice(wifiSsid, wifiPassword)}
-                      >
-                        Envoyer au boîtier et configurer le Wi-Fi
-                      </button>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="secondary-button"
-                    onClick={handleDownloadWifiQr}
-                    disabled={downloadingQr}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}
-                  >
-                    <Download size={16} aria-hidden />
-                    {downloadingQr ? 'Téléchargement…' : 'Télécharger le QR Wi-Fi'}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <button type="button" className="primary-button" onClick={openWifiPortal}>
+                    Configurer votre boîtier
                   </button>
                   <button
                     type="button"
@@ -493,8 +270,6 @@ export default function EnrollDevice() {
                     <ChevronRight size={16} aria-hidden />
                   </button>
                 </div>
-                {scannerError && <p className="error-text" style={{ marginTop: '0.75rem' }}>{scannerError}</p>}
-                {status && <p className={status.includes('Réseau détecté') ? undefined : 'error-text'} style={{ marginTop: '0.75rem', color: status.includes('Réseau détecté') ? '#1d4ed8' : undefined }}>{status}</p>}
               </section>
 
               {step >= 2 && (

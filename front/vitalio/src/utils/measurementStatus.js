@@ -23,7 +23,7 @@ export function formatMeasurementQualityLabel(status) {
   const normalized = normalizeMeasurementStatus(status)
   if (normalized === 'VALID') return 'Exploitable'
   if (normalized === 'INVALID') return 'Non exploitable'
-  return '—'
+  return '-'
 }
 
 /**

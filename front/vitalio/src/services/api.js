@@ -157,7 +157,7 @@ export async function validateDeviceEnrollment(accessToken, deviceId) {
   })
 }
 
-/** Confirmation via lien email — sans authentification. */
+/** Confirmation via lien email - sans authentification. */
 export async function confirmDeviceEnrollment(token, deviceId) {
   const url = `${API_URL}/api/device/confirm`
   const response = await fetch(url, {
@@ -174,7 +174,7 @@ export async function confirmDeviceEnrollment(token, deviceId) {
 
 /**
  * Télécharge un QR code PNG.
- * @param {'wifi'|'device'} type — wifi = portail 192.168.4.1, device = device_id
+ * @param {'wifi'|'device'} type - wifi = portail 192.168.4.1, device = device_id
  */
 export async function downloadDeviceQrcode(accessToken, { type = 'wifi', deviceId } = {}) {
   const params = new URLSearchParams({ type })

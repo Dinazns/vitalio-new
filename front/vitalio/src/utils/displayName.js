@@ -54,7 +54,7 @@ export function resolvePatientListDisplayName(patient) {
 }
 
 /**
- * Prénom + nom pour l’UI (suivi avancé, en-têtes) — jamais d’identifiant technique.
+ * Prénom + nom pour l’UI (suivi avancé, en-têtes) - jamais d’identifiant technique.
  */
 export function resolvePatientFullName({ profile, analysis } = {}) {
   const firstCandidates = [

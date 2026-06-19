@@ -4,7 +4,7 @@ Script ponctuel : retire un niveau d'indentation sur un bloc de api.py.
 Usage (depuis back/) :
   python scripts/unindent_module.py
 
-Ne pas exécuter sur api.py actuel — conservé à titre d'archive pour référence.
+Ne pas exécuter sur api.py actuel - conservé à titre d'archive pour référence.
 """
 
 from pathlib import Path

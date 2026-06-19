@@ -426,7 +426,7 @@ def upsert_ml_warning_alert(
         "updated_at": now,
         "ml_severity": "warning",
         "ml_urgency": ml_result.get("ml_urgency", "routine"),
-        "dossier_summary": ml_result.get("ml_recommended_action") or "Anomalie ML — surveillance recommandée",
+        "dossier_summary": ml_result.get("ml_recommended_action") or "Anomalie ML - surveillance recommandée",
         "doctor_status": "PENDING",
     }
     if measurement_id is not None:

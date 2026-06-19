@@ -1,4 +1,4 @@
-"""HTTP routes — device_routes."""
+"""HTTP routes - device_routes."""
 import json
 import logging
 import os

@@ -110,7 +110,7 @@ export default function CaregiverLayout({ children }) {
             aria-label={
               collapsed
                 ? criticalCount > 0
-                  ? `Alertes — ${criticalCount} ouverte${criticalCount > 1 ? 's' : ''}`
+                  ? `Alertes - ${criticalCount} ouverte${criticalCount > 1 ? 's' : ''}`
                   : 'Alertes'
                 : undefined
             }

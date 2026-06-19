@@ -533,6 +533,7 @@ def generate_clinical_suggestion(
             if rule["condition"](measurement):
                 triggered.append({
                     "reasoning":rule["reasoning"],
+                    "action":rule["action"],
                     "urgency":rule["urgency"],
                 })
                 if URGENCY_ORDER.get(rule["urgency"],0)>URGENCY_ORDER.get(max_urgency,0):
@@ -573,15 +574,18 @@ def generate_clinical_suggestion(
 
     if not unique_reasoning:
         if ml_level=="critical":
-            unique_reasoning=["Score d'anomalie ML élevé - combinaison de paramètres atypique"]
+            unique_reasoning=["Combinaison atypique de constantes - score d'anomalie élevé"]
             max_urgency="priority"
         else:
             unique_reasoning=["Déviation légère détectée par le modèle ML"]
 
+    action=None
     if triggered:
-        action=triggered[0].get("action") if hasattr(triggered[0],"get") and "action" in triggered[0] else None
-    else:
-        action=None
+        best=max(
+            triggered,
+            key=lambda t: URGENCY_ORDER.get(t.get("urgency","routine"),0),
+        )
+        action=best.get("action")
 
     if not action:
         for rule in CLINICAL_RULES:
@@ -596,8 +600,20 @@ def generate_clinical_suggestion(
         action=("Évaluation clinique recommandée" if ml_level=="critical"
                 else "Surveillance renforcée conseillée")
 
+    secondary=[
+        t["reasoning"] for t in sorted(
+            triggered,
+            key=lambda t: URGENCY_ORDER.get(t.get("urgency","routine"),0),
+            reverse=True,
+        )
+        if t.get("reasoning") and t["reasoning"] not in unique_reasoning
+    ]
+    recommended_action=action
+    if secondary:
+        recommended_action=f"{action} · {secondary[0]}"
+
     return{
-        "recommended_action":action,
+        "recommended_action":recommended_action,
         "clinical_reasoning":unique_reasoning[:3],
         "urgency":max_urgency,
     }
@@ -653,6 +669,26 @@ def build_threshold_anomaly_document(
     now=datetime.now(timezone.utc)
     metric=str(breach.get("metric")or"")
     label=FEATURE_LABELS.get(metric,metric)
+    meas={
+        "heart_rate":measurement.get("heart_rate"),
+        "spo2":measurement.get("spo2"),
+        "temperature":measurement.get("temperature"),
+    }
+    breach_val=breach.get("value")
+    if metric and breach_val is not None:
+        meas[metric]=breach_val
+    ml_level="critical" if str(breach.get("severity_level")or"").upper() in ("CRITICAL","HIGH") else "warning"
+    suggestion=generate_clinical_suggestion(
+        meas,
+        [{"variable":metric,"contribution_weight":1.0,"observed_value":breach_val}],
+        ml_level,
+    )
+    if not suggestion.get("recommended_action"):
+        suggestion={
+            "recommended_action":f"Validation clinique du dépassement de seuil ({label}).",
+            "clinical_reasoning":[f"{label} hors seuil configuré"],
+            "urgency":"priority" if ml_level=="critical" else "routine",
+        }
     return{
         "device_id":device_id,
         "user_id_auth":user_id_auth,
@@ -670,9 +706,9 @@ def build_threshold_anomaly_document(
             "value":breach.get("value"),
             "rule_scope":rule_scope,
         },
-        "recommended_action":f"Validation clinique du dépassement de seuil ({label}).",
-        "clinical_reasoning":[],
-        "urgency":"routine",
+        "recommended_action":suggestion["recommended_action"],
+        "clinical_reasoning":suggestion.get("clinical_reasoning") or [],
+        "urgency":suggestion.get("urgency","routine"),
         "status":"pending",
         "validated_by":None,
         "validated_at":None,
@@ -1127,41 +1163,71 @@ def _build_feature_description(
     return txt
 
 def _generate_summary(vitals:Dict[str,Dict])->Dict[str,Any]:
-    """Aggregate per-vital analysis into a global summary for the doctor."""
+    """Aggregate per-vital analysis into a concise global summary for the doctor."""
     sev_order={"normal":0,"negligible":0,"mild":1,"moderate":2,
                "warning":3,"strong":4,"critical":5}
-    texts:List[str]=[]
+    findings:List[str]=[]
+    actions:List[str]=[]
     max_sev="normal"
 
     for feat, info in vitals.items():
         if info.get("status")!="ok":
             continue
-        desc=info.get("description","")
-        if desc:
-            texts.append(desc)
 
         for a in info.get("clinical_alerts",[]):
             sev=a.get("severity","warning")
             if sev_order.get(sev,0)>sev_order.get(max_sev,0):
                 max_sev=sev
+            msg=a.get("message")
+            if msg:
+                findings.append(str(msg).rstrip("."))
 
         strength=info.get("trend",{}).get("strength","negligible")
         if sev_order.get(strength,0)>sev_order.get(max_sev,0):
             max_sev=strength
 
+        stats=info.get("statistics") or {}
+        mn=stats.get("min")
+        mx=stats.get("max")
+        fl=FEATURE_LABELS.get(feat,feat)
+        unit=FEATURE_UNITS.get(feat,"")
+        try:
+            if feat=="spo2" and mn is not None and float(mn)<92:
+                findings.append(f"{fl} basse (min. {float(mn):.0f}{unit})")
+            elif feat=="heart_rate" and mx is not None and float(mx)>120:
+                findings.append(f"{fl} élevée (max. {float(mx):.0f} {unit})")
+            elif feat=="heart_rate" and mn is not None and float(mn)<50:
+                findings.append(f"{fl} basse (min. {float(mn):.0f} {unit})")
+            elif feat=="temperature" and mx is not None and float(mx)>38.0:
+                findings.append(f"{fl} élevée (max. {float(mx):.1f}{unit})")
+            elif feat=="temperature" and mn is not None and float(mn)<35.5:
+                findings.append(f"{fl} basse (min. {float(mn):.1f}{unit})")
+        except (TypeError,ValueError):
+            pass
+
     if max_sev in ("critical","strong"):
-        risk,action="high","Consultation médicale recommandée"
+        risk="high"
+        actions.append("Évaluation clinique urgente ; 15 si détresse aiguë")
     elif max_sev in ("warning","moderate"):
-        risk,action="moderate","Surveillance renforcée recommandée"
+        risk="moderate"
+        actions.append("Surveillance renforcée sur 24–48 h")
     elif max_sev=="mild":
-        risk,action="low","Surveillance standard"
+        risk="low"
+        actions.append("Surveillance habituelle")
     else:
-        risk,action="minimal","Pas d'action nécessaire"
+        risk="minimal"
+        actions.append("Pas d'action immédiate")
+
+    if findings:
+        unique=list(dict.fromkeys(findings))[:4]
+        text="Synthèse : "+(" ; ".join(unique))+"."
+    else:
+        text="Synthèse : constantes stables sur la période analysée."
 
     return{
-        "text":". ".join(texts)+"." if texts else "Données insuffisantes.",
+        "text":text,
         "risk_level":risk,
-        "recommended_action":action,
+        "recommended_action":actions[0],
     }
 
 def forecast_vitals(

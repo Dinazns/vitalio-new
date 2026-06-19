@@ -1,4 +1,4 @@
-# Stack VitalIO — API + front + Mosquitto
+# Stack VitalIO - API + front + Mosquitto
 # Usage :
 #   copy .env.docker.example .env          (variables VITE_* pour le build front)
 #   renseigner back/.env                   (MongoDB, Auth0, MQTT, SMTP…)

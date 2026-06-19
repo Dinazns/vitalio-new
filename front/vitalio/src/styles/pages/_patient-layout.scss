@@ -2,7 +2,6 @@
 @use '../mixins' as *;
 
 $sidebar-width: 240px;
-$sidebar-collapsed: 64px;
 $sidebar-bg: #0f172a;
 $sidebar-text: #cbd5e1;
 $sidebar-active: #1d4ed8;
@@ -16,11 +15,13 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   background: #f6f9fc;
 
   &--collapsed .patient-sidebar {
-    width: $sidebar-collapsed;
+    width: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   &--collapsed .patient-main {
-    margin-left: $sidebar-collapsed;
+    margin-left: 0;
   }
 }
 
@@ -34,11 +35,49 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width $sidebar-transition;
+  transition:
+    width $sidebar-transition,
+    visibility $sidebar-transition;
   overflow: hidden;
   padding-top: env(safe-area-inset-top, 0);
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0));
   padding-left: env(safe-area-inset-left, 0);
+}
+
+.patient-sidebar-fab {
+  position: fixed;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+  left: calc(1rem + env(safe-area-inset-left, 0));
+  z-index: 110;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: $sidebar-bg;
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.28);
+  transition:
+    background 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
+
+  &:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.32);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $sidebar-active;
+    outline-offset: 2px;
+  }
 }
 
 .patient-main {
@@ -54,7 +93,6 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 1.25rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   min-height: 64px;
@@ -66,25 +104,6 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: #fff;
   letter-spacing: -0.02em;
   white-space: nowrap;
-}
-
-.sidebar-toggle {
-  background: none;
-  border: none;
-  color: $sidebar-text;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  transition: background 0.15s;
-  flex-shrink: 0;
-
-  &:hover {
-    background: $sidebar-hover-bg;
-    color: #fff;
-  }
 }
 
 .sidebar-user {
@@ -122,6 +141,7 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   flex-direction: column;
   gap: 2px;
   padding: 0.75rem 0.5rem;
+  overflow-y: auto;
 }
 
 .sidebar-link {
@@ -201,49 +221,15 @@ $sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-@media (max-width: $bp-md) {
-  .patient-sidebar {
-    width: $sidebar-collapsed;
-  }
-
-  .patient-main {
-    margin-left: $sidebar-collapsed;
-  }
-
-  .sidebar-brand,
-  .sidebar-user,
-  .sidebar-link span {
-    display: none;
-  }
-
-  .sidebar-link {
-    justify-content: center;
-    padding: 0.65rem;
-    min-height: 2.75rem;
-  }
-
-  .sidebar-footer .sidebar-link {
-    justify-content: center;
-  }
-}
-
 @media (max-width: $bp-sm) {
-  .patient-sidebar {
-    width: $sidebar-collapsed;
-  }
-
-  .patient-main {
-    margin-left: $sidebar-collapsed;
-  }
-
   .sidebar-header {
-    padding: 0.75rem 0.5rem;
+    padding: 0.75rem 1rem;
     min-height: 56px;
-    justify-content: center;
   }
 
-  .sidebar-toggle {
+  .patient-sidebar-fab {
     width: 2.75rem;
     height: 2.75rem;
+    border-radius: 10px;
   }
 }
