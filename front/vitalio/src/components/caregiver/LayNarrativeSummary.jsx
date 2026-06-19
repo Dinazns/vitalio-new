@@ -2,7 +2,7 @@ import React from 'react'
 import { BookOpen, ArrowRight } from 'lucide-react'
 import { LAY_RISK_CONFIG } from '../../constants/layRiskLabels'
 
-export default function LayNarrativeSummary({ summary, title = 'Synthèse en mots simples' }) {
+export default function LayNarrativeSummary({ summary, title = 'Synthèse' }) {
   if (!summary?.text) return null
   const risk = LAY_RISK_CONFIG[summary.risk_level] || LAY_RISK_CONFIG.unknown
 

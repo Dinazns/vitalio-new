@@ -99,7 +99,7 @@ export default function CaregiverPatientML() {
                 <BrainCircuit size={24} aria-hidden />
                 Suivi avancé{patientName ? ` - ${patientName}` : ''}
               </h1>
-              <p className="caregiver-subtitle">Tendances et résumé en langage simple</p>
+              <p className="caregiver-subtitle">Tendances et résumé</p>
             </div>
           </div>
         </header>

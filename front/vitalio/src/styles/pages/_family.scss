@@ -4,6 +4,9 @@
 // ── Caregiver Dashboard (Espace aidant) ──
 .caregiver-dashboard {
     min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    min-width: 0;
     background: var(--bg-gradient);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     color: #1e293b;
@@ -14,7 +17,9 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
+        min-width: 0;
+        width: 100%;
+        overflow-x: hidden;
     }
 }
 
@@ -38,6 +43,8 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        min-width: 0;
+        flex: 1 1 auto;
 
         .caregiver-back-btn {
             padding: 0.5rem;
@@ -61,12 +68,22 @@
             color: #0f172a;
             margin: 0;
             letter-spacing: -0.02em;
+            word-break: break-word;
+
+            @media (max-width: $bp-md) {
+                font-size: 1.125rem;
+            }
         }
 
         .caregiver-subtitle {
             font-size: 0.875rem;
             color: #64748b;
             margin: 0.25rem 0 0;
+            word-break: break-word;
+
+            @media (max-width: $bp-md) {
+                font-size: 0.8125rem;
+            }
         }
     }
 
@@ -74,6 +91,19 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        flex-shrink: 0;
+
+        @media (max-width: $bp-md) {
+            width: 100%;
+            flex-basis: 100%;
+        }
+    }
+
+    @media (max-width: $bp-md) {
+        .caregiver-btn-analyses {
+            width: 100%;
+            justify-content: center;
+        }
     }
 
     .caregiver-search {
@@ -97,6 +127,11 @@
             min-width: 12rem;
             max-width: 14rem;
             transition: border-color 0.2s, box-shadow 0.2s;
+
+            @media (max-width: $bp-md) {
+                min-width: 0;
+                max-width: none;
+            }
 
             &::placeholder {
                 color: #94a3b8;
@@ -128,7 +163,7 @@
 
 .caregiver-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -565,6 +600,16 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     padding: 1.5rem;
     overflow: hidden;
+    min-width: 0;
+
+    @media (max-width: $bp-md) {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    @media (max-width: $bp-sm) {
+        padding: 0.875rem;
+    }
 
     .section-header {
         display: flex;
@@ -1446,5 +1491,43 @@
     .caregiver-btn-analyses {
         min-height: 2.75rem;
         font-size: 0.95rem;
+    }
+
+    // Alertes page - ml-panel used outside .doctor-ml
+    .ml-panel {
+        min-width: 0;
+    }
+
+    .ml-anomaly-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+
+        @media (min-width: $bp-md) {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #0f172a;
+        }
+    }
+
+    .ml-anomaly-filters {
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .ml-filter-group {
+        flex-wrap: wrap;
+    }
+
+    .ml-anomaly-table-wrap {
+        -webkit-overflow-scrolling: touch;
     }
 }

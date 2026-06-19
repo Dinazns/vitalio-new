@@ -1,7 +1,6 @@
 @use '../variables' as *;
 
 $cg-sidebar-width: 240px;
-$cg-sidebar-collapsed: 64px;
 $cg-sidebar-bg: #0c1929;
 $cg-sidebar-text: #94a3b8;
 $cg-sidebar-active: #0f766e;
@@ -11,13 +10,16 @@ $cg-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .caregiver-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
 
   &--collapsed .caregiver-sidebar {
-    width: $cg-sidebar-collapsed;
+    width: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   &--collapsed .caregiver-layout-main {
-    margin-left: $cg-sidebar-collapsed;
+    margin-left: 0;
   }
 }
 
@@ -31,13 +33,17 @@ $cg-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width $cg-sidebar-transition;
+  transition:
+    width $cg-sidebar-transition,
+    visibility $cg-sidebar-transition;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-left: env(safe-area-inset-left, 0);
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0));
 
   .sidebar-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 1.25rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     min-height: 64px;
@@ -49,28 +55,6 @@ $cg-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     color: #fff;
     letter-spacing: -0.02em;
     white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .sidebar-toggle {
-    background: none;
-    border: none;
-    color: $cg-sidebar-text;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    transition: background 0.15s;
-    flex-shrink: 0;
-
-    &:hover {
-      background: $cg-sidebar-hover-bg;
-      color: #fff;
-    }
   }
 
   .sidebar-user {
@@ -123,13 +107,16 @@ $cg-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     flex-direction: column;
     gap: 2px;
     padding: 0.75rem 0.5rem;
+    overflow-y: auto;
   }
 
   .sidebar-link {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     padding: 0.65rem 0.75rem;
+    min-height: 2.75rem;
     border-radius: 10px;
     color: $cg-sidebar-text;
     text-decoration: none;
@@ -195,35 +182,82 @@ $cg-sidebar-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  border: none;
+  padding: 0;
+  background: rgba(12, 25, 41, 0.45);
+  cursor: default;
+}
+
+.caregiver-sidebar-fab {
+  position: fixed;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+  left: calc(1rem + env(safe-area-inset-left, 0));
+  z-index: 110;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: $cg-sidebar-bg;
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 16px rgba(12, 25, 41, 0.28);
+  transition:
+    background 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
+
+  &:hover {
+    background: #132337;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(12, 25, 41, 0.32);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $cg-sidebar-active;
+    outline-offset: 2px;
+  }
+}
+
 .caregiver-layout-main {
   flex: 1;
   margin-left: $cg-sidebar-width;
   transition: margin-left $cg-sidebar-transition;
   min-height: 100vh;
+  min-height: 100dvh;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  padding-right: env(safe-area-inset-right, 0);
 }
 
-@media (max-width: 768px) {
-  .caregiver-sidebar {
-    width: $cg-sidebar-collapsed;
+.caregiver-layout .caregiver-dashboard {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: $bp-sm) {
+  .caregiver-sidebar .sidebar-header {
+    padding: 0.75rem 1rem;
+    min-height: 56px;
   }
 
-  .caregiver-layout-main {
-    margin-left: $cg-sidebar-collapsed;
-  }
-
-  .caregiver-sidebar .sidebar-brand,
-  .caregiver-sidebar .sidebar-user,
-  .caregiver-sidebar .sidebar-link span,
-  .caregiver-sidebar .sidebar-badge {
-    display: none;
-  }
-
-  .caregiver-sidebar .sidebar-link {
-    justify-content: center;
-    padding: 0.65rem;
-  }
-
-  .caregiver-sidebar .sidebar-footer .sidebar-link {
-    justify-content: center;
+  .caregiver-sidebar-fab {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 10px;
   }
 }

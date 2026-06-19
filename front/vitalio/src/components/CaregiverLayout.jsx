@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { NavLink, useNavigate, useParams, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, useParams, Outlet, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
-  Heart,
+  LayoutDashboard,
   BrainCircuit,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
-  Home,
+  PanelLeftClose,
+  PanelLeft,
   TriangleAlert,
+  UserRound,
 } from 'lucide-react'
-import { getCaregiverAlerts } from '../services/api'
+import { getCaregiverAlerts, getCaregiverPatients } from '../services/api'
 import PushPermissionBanner from './PushPermissionBanner'
 
 const ROLE_DISPLAY = { caregiver: 'Aidant', aidant: 'Aidant' }
@@ -24,25 +24,52 @@ function getDisplayRole() {
   return 'Aidant'
 }
 
+function resolvePatientId(patient) {
+  if (!patient) return null
+  const id = patient.id ?? patient.patient_id
+  return id != null ? String(id) : null
+}
+
 export default function CaregiverLayout({ children }) {
-  const navigate = useNavigate()
   const { patientId } = useParams()
   const { pathname } = useLocation()
   const base = pathname.startsWith('/family') ? '/family' : '/caregiver'
   const { logout, user, getAccessTokenSilently } = useAuth0()
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const [criticalCount, setCriticalCount] = useState(0)
+  const [linkedPatientId, setLinkedPatientId] = useState(null)
+
+  const navPatientId = patientId ?? linkedPatientId
+
+  const closeSidebar = () => setCollapsed(true)
+
+  useEffect(() => {
+    if (collapsed) return
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') closeSidebar()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [collapsed])
 
   useEffect(() => {
     let mounted = true
     const load = async () => {
       try {
         const token = await getAccessTokenSilently()
-        const res = await getCaregiverAlerts(token, { status: 'OPEN', limit: 500 })
-        const count = Array.isArray(res.alerts) ? res.alerts.length : 0
-        if (mounted) setCriticalCount(count)
+        const [alertsRes, patientsRes] = await Promise.all([
+          getCaregiverAlerts(token, { status: 'OPEN', limit: 500 }),
+          getCaregiverPatients(token),
+        ])
+        if (!mounted) return
+        setCriticalCount(Array.isArray(alertsRes.alerts) ? alertsRes.alerts.length : 0)
+        const pts = Array.isArray(patientsRes.patients) ? patientsRes.patients : []
+        setLinkedPatientId(resolvePatientId(pts[0]))
       } catch {
-        if (mounted) setCriticalCount(0)
+        if (mounted) {
+          setCriticalCount(0)
+          setLinkedPatientId(null)
+        }
       }
     }
     load()
@@ -60,23 +87,12 @@ export default function CaregiverLayout({ children }) {
 
   return (
     <div className={`caregiver-layout ${collapsed ? 'caregiver-layout--collapsed' : ''}`}>
-      <aside className="caregiver-sidebar">
+      <aside className="caregiver-sidebar" aria-hidden={collapsed}>
         <div className="sidebar-header">
-          {!collapsed && (
-            <span className="sidebar-brand">
-              <Heart size={18} /> VitalIO
-            </span>
-          )}
-          <button
-            className="sidebar-toggle"
-            onClick={() => setCollapsed((c) => !c)}
-            aria-label={collapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </button>
+          <span className="sidebar-brand">VitalIO</span>
         </div>
 
-        {!collapsed && user && (
+        {user && (
           <div className="sidebar-user">
             <div className="sidebar-user-avatar sidebar-user-avatar--caregiver">
               {(user.given_name || user.name || 'A').charAt(0).toUpperCase()}
@@ -95,78 +111,79 @@ export default function CaregiverLayout({ children }) {
             className={({ isActive }) =>
               `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
             }
-            title={collapsed ? 'Tableau de bord' : undefined}
-            aria-label={collapsed ? 'Tableau de bord' : undefined}
+            onClick={closeSidebar}
           >
-            <Heart size={20} aria-hidden />
-            {!collapsed && <span>Tableau de bord</span>}
+            <LayoutDashboard size={20} aria-hidden />
+            <span>Tableau de bord</span>
           </NavLink>
           <NavLink
             to={`${base}/alertes`}
             className={({ isActive }) =>
               `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
             }
-            title={collapsed ? 'Alertes' : undefined}
-            aria-label={
-              collapsed
-                ? criticalCount > 0
-                  ? `Alertes - ${criticalCount} ouverte${criticalCount > 1 ? 's' : ''}`
-                  : 'Alertes'
-                : undefined
-            }
+            onClick={closeSidebar}
           >
             <TriangleAlert size={20} aria-hidden />
-            {!collapsed && <span>Alertes</span>}
+            <span>Alertes</span>
             {criticalCount > 0 && (
-              collapsed ? (
-                <span className="sidebar-badge-dot" aria-hidden />
-              ) : (
-                <span className="sidebar-badge sidebar-badge--critical" aria-hidden>
-                  {criticalCount}
-                </span>
-              )
+              <span className="sidebar-badge sidebar-badge--critical" aria-hidden>
+                {criticalCount}
+              </span>
             )}
           </NavLink>
-          {patientId && (
+          {navPatientId && (
             <NavLink
-              to={`${base}/patient/${encodeURIComponent(patientId)}`}
+              to={`${base}/patient/${encodeURIComponent(navPatientId)}`}
               end
               className={({ isActive }) =>
                 `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
               }
-              title={collapsed ? 'Mon proche' : undefined}
-              aria-label={collapsed ? 'Mon proche' : undefined}
+              onClick={closeSidebar}
             >
-              <Heart size={20} aria-hidden />
-              {!collapsed && <span>Mon proche</span>}
+              <UserRound size={20} aria-hidden />
+              <span>Mon proche</span>
             </NavLink>
           )}
-          {patientId && (
+          {navPatientId && (
             <NavLink
-              to={`${base}/patient/${encodeURIComponent(patientId)}/ml`}
+              to={`${base}/patient/${encodeURIComponent(navPatientId)}/ml`}
               className={({ isActive }) =>
                 `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
               }
-              title={collapsed ? 'Analyses' : undefined}
-              aria-label={collapsed ? 'Analyses' : undefined}
+              onClick={closeSidebar}
             >
               <BrainCircuit size={20} aria-hidden />
-              {!collapsed && <span>Analyses</span>}
+              <span>Suivi avancé</span>
             </NavLink>
           )}
         </nav>
 
         <div className="sidebar-footer">
-          <button type="button" className="sidebar-link" onClick={() => navigate('/home')} title="Retour à l'accueil" aria-label={collapsed ? 'Retour à l\'accueil' : undefined}>
-            <Home size={20} aria-hidden />
-            {!collapsed && <span>Accueil</span>}
-          </button>
-          <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout} title="Déconnexion" aria-label={collapsed ? 'Déconnexion' : undefined}>
+          <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout}>
             <LogOut size={20} aria-hidden />
-            {!collapsed && <span>Déconnexion</span>}
+            <span>Déconnexion</span>
           </button>
         </div>
       </aside>
+
+      {!collapsed && (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label="Fermer le menu"
+          onClick={closeSidebar}
+        />
+      )}
+
+      <button
+        type="button"
+        className="caregiver-sidebar-fab"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-label={collapsed ? 'Ouvrir le menu' : 'Fermer le menu'}
+        aria-expanded={!collapsed}
+      >
+        {collapsed ? <PanelLeft size={22} aria-hidden /> : <PanelLeftClose size={22} aria-hidden />}
+      </button>
 
       <main className="caregiver-layout-main">
         <PushPermissionBanner getAccessTokenSilently={getAccessTokenSilently} />

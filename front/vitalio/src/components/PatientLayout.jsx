@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { NavLink } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
   LayoutDashboard,
@@ -8,7 +8,6 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeft,
-  Home,
   Cpu,
 } from 'lucide-react'
 import { resolvePatientDisplayName } from '../utils/displayName'
@@ -21,10 +20,20 @@ const NAV_ITEMS = [
 ]
 
 export default function PatientLayout({ children }) {
-  const navigate = useNavigate()
   const { logout, user } = useAuth0()
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const sidebarName = resolvePatientDisplayName({ user }) || 'Patient'
+
+  const closeSidebar = () => setCollapsed(true)
+
+  useEffect(() => {
+    if (collapsed) return
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') closeSidebar()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [collapsed])
 
   const handleLogout = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
@@ -56,6 +65,7 @@ export default function PatientLayout({ children }) {
               className={({ isActive }) =>
                 `sidebar-link${isActive ? ' sidebar-link--active' : ''}`
               }
+              onClick={closeSidebar}
             >
               <Icon size={20} />
               <span>{label}</span>
@@ -64,16 +74,21 @@ export default function PatientLayout({ children }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button type="button" className="sidebar-link" onClick={() => navigate('/home')}>
-            <Home size={20} />
-            <span>Accueil</span>
-          </button>
           <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout}>
             <LogOut size={20} />
             <span>Déconnexion</span>
           </button>
         </div>
       </aside>
+
+      {!collapsed && (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label="Fermer le menu"
+          onClick={closeSidebar}
+        />
+      )}
 
       <button
         type="button"

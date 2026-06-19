@@ -158,7 +158,8 @@ export default function CaregiverAlertsView() {
           </div>
         </header>
 
-        <section className="ml-panel" style={{ marginTop: '1rem' }} aria-labelledby="caregiver-alerts-title">
+        <main className="caregiver-main">
+        <section className="ml-panel" aria-labelledby="caregiver-alerts-title">
           <div className="ml-anomaly-header">
             <h2 id="caregiver-alerts-filters">Filtres</h2>
             <div className="ml-anomaly-filters">
@@ -385,6 +386,7 @@ export default function CaregiverAlertsView() {
             </div>
           )}
         </section>
+        </main>
       </div>
     </div>
   )
